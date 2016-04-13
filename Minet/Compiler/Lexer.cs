@@ -6,8 +6,8 @@ namespace Minet.Compiler
 	{
 		const char eof = '\0';
 		const string operatorChars = "()[]{}<>!=+-*/%,.:&|^";
-		const string commentStart = "/;";
-		const string commentEnd = ";/";
+		const string commentStart = "<;";
+		const string commentEnd = ";>";
 
 		delegate stateFn stateFn();
 
@@ -76,6 +76,11 @@ namespace Minet.Compiler
 			}
 			widths.Push(1);
 			return input[pos++];
+		}
+
+		private void next(int count)
+		{
+			for (int i = 0; i < count; i++) { next(); }
 		}
 
 		private char peek
@@ -237,22 +242,26 @@ namespace Minet.Compiler
 
 		private stateFn lexMLComment()
 		{
-			next();
-			next();
-			discard(); // eat /;
+			next(commentStart.Length);
+			discard(); // eat start
+			int depth = 1;
 			while (peek != eof)
 			{
 				if (currentPosStartsWith(commentEnd))
 				{
-					emit(TokenType.Comment);
-					next();
-					next();
-					discard(); // eat ;/
-					return lexStatement;
+					depth--;
+					if (depth == 0)
+					{
+						emit(TokenType.Comment);
+						next(commentEnd.Length);
+						discard(); // eat end
+						return lexStatement;
+					}
 				}
+				else if (currentPosStartsWith(commentStart)) { depth++; }
 				next();
 			}
-			return error("Unclosed /;");
+			return error("Unclosed " + commentStart);
 		}
 
 		private stateFn lexIdentifier()

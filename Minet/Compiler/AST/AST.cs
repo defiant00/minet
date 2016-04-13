@@ -60,9 +60,7 @@ namespace Minet.Compiler.AST
 
 	public partial class Class : IStatement
 	{
-		public string Name;
-		public bool Public;
-		public List<string> TypeParams = new List<string>();
+		public IStatement Name;
 		public List<IStatement> Statements = new List<IStatement>();
 	}
 
@@ -109,26 +107,13 @@ namespace Minet.Compiler.AST
 	{
 		public bool Static;
 		public string Name;
-		public List<Variable> Params = new List<Variable>();
-		public List<IStatement> Returns = new List<IStatement>();
+		public List<string> Params = new List<string>();
 		public List<IStatement> Statements = new List<IStatement>();
-	}
-
-	public partial class FunctionSig : IExpression, IStatement
-	{
-		public List<IStatement> Params = new List<IStatement>();
-		public List<IStatement> Returns = new List<IStatement>();
 	}
 
 	public partial class Identifier : IExpression, IStatement
 	{
-		public List<IdentPart> Idents = new List<IdentPart>();
-	}
-
-	public partial class IdentPart
-	{
-		public string Name;
-		public List<IStatement> TypeParams = new List<IStatement>();
+		public List<string> Idents = new List<string>();
 	}
 
 	public partial class If : IStatement
@@ -159,8 +144,6 @@ namespace Minet.Compiler.AST
 	{
 		public bool Static;
 		public string Name;
-		public IStatement Type;
-		public Type SystemType;
 	}
 
 	public partial class PropertySet : IStatement
@@ -188,8 +171,6 @@ namespace Minet.Compiler.AST
 	public partial class Variable : IStatement
 	{
 		public string Name;
-		public IStatement Type;
-		public Type SystemType;
 	}
 
 	public partial class VarSet : IStatement

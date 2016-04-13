@@ -1,7 +1,6 @@
-﻿# Minet Language Specification
-## General
-Minet is a web scripting language with a focus on readability and conciseness without resorting to a a large number of operators and special characters.
-Minet is compiled to Javascript.
+﻿# Minet Language Overview
+### General
+Minet is a web scripting language with a focus on readability and conciseness without resorting to a a large number of operators and special characters. Minet is compiled to Javascript.
 
 The core tenets guiding the syntax are as follows:
 * There should be a single, clear way to do a task.
@@ -13,90 +12,115 @@ The core tenets guiding the syntax are as follows:
 * Any place where you have to repeat a leading keyword should also allow an indented block.
 * When switching a single statement to an indented block, you shouldn't have to rewrite the command itself.
 
-### Characters
-```
-newline           = ? the Unicode code point U+000A ?
-unicode_char      = ? any Unicode code point except newline ?
-unicode_letter    = ? a Unicode code point classified as "Letter" ?
-unicode_digit     = ? a Unicode code point classified as "Decimal Digit" ?
-identifier_letter = unicode_letter | "_"
-```
 ### Indentation
 Minet lexes input following the off-side rule. Any increase in indentation generates an *IDENT* token, and a decrease generates a *DEDENT* as long as the new indentation lines up with a previous indentation level.
-```
-IDENT  = ? an increase in indentation ?
-DEDENT = ? a decrease in indentation ?
-```
+
 Both spaces and tabs are supported; during lexing, tabs are treated as four spaces. Tabs are recommended, but this is not enforced by the compiler.
-## Lexical Elements
-### Comments
-```
-line_comment  = ";" { unicode_char } newline
-block_comment = "/;" { unicode_char | newline } ";/"
-```
-```
-; A single-line comment
-/; This is
-a block
-comment ;/
-```
-### Identifiers
-```
-identifier = identifier_letter { identifier_letter | unicode_digit }
-```
-```
-a
-_b12
-another_ident2
-αβ
-```
-### Keywords
-```
-```
-### Operators
-```
-binary_op     = add_op | multiply_op | boolean_op
-boolean_op    = "==" | "!=" | "<" | "<=" | ">" | ">="
-add_op        = "+" | "-" | "|" | "^"
-multiply_op   = "*" | "/" | "%" | "&"
-assignment_op = [ add_op | multiply_op] ":"
-```
-### Expressions
-```
-expression      = boolean_expr | identifier_expr | binary_expr
-boolean_expr    = "true" | "false"
-identifier_expr = identifier { "." identifier }
-binary_expr     = expression binary_op expression
-assignment_expr = identifier_expr assignment_op expression
-```
-## Statements
-### Conditionals
-```
-if_stmt    = "if" expression [ "with" expression ] newline INDENT statement { statement } DEDENT
-if_is_stmt = "if" [ expression ] [ "with" expression ] newline INDENT is_stmt { is_stmt } DEDENT
-is_stmt    = "is" expression { "," expression } newline INDENT statement { statement } DEDENT
-```
-```
-if 2 > x
-    print("yes")
 
-if 2 > y with y = calc(3)
-    print("yes")
-
-if b
-    is 1, 2
-        print("one or two")
-    is _
-        print("not 1 or 2")
-
-if with x = calc(7)
-    is x > 3
-        print("greater than 3")
-    is x < 1
-        print("less than 1")
-    is _
-        print("in between")
+### Overview
 ```
-### Loops
+<; Welcome to Minet, this is a multi-line comment.
+   Comments can be nested, so telling you that <; and ;> begin and end a multi-line
+   comment does not break parsing. ;>
+
+; This is a single-line comment.
+; The only valid top-level statement in Minet is a class name.
+; Class names can be chained together, resulting in classes containing other classes.
+; In this example, MyClass is a child class of MyProject, which is also a class.
+MyProject.MyClass
+    Counter = 0                         ; Instance variables and methods start with a "." and static
+                                        ; variables and methods do not. This is a static counter.
+
+    .InstCounter = 0                    ; This is an instance variable.
+
+    Main()                              ; A project should contain a single static Main method
+        alert("Hello from Minet!")      ; which will be used to run the project.
 ```
+
+### Syntax Guide
+```javascript
+Minet                                           Javascript
+
+v: myArr[3]                                     v = myArr[3];
+
+fn(a, b)                                        function(a, b);
+
+a: b                                            a = b;
+a, b: 3, 'hello'                                a = 3; c = 'hello';
+a, _, c: 1, 2, 3                                a = 1; c = 3;
+
+arr: [1, 2, 3]                                  arr = [1, 2, 3];
+
+break                                           break;
+break myLoop                                    break myLoop;
+
+MyClass                                         // TODO - Some JS
+
+// constructor
+
+for i in 0 to 10 by 2                           for (var i = 0; i < 10; i += 2) {
+myLoop for i in 0 to 10                         myLoop: for (var i = 0; i < 10; i++) {
+
+for i in myItems                                for (var __i = 0; i < myItems.length; i++) {
+                                                    var i = myItems[i];
+
+myObj.doThing(1, 2, 3)                          myObj.doThing(1, 2, 3);
+
+MyFunc(a, b)                                    var MyFunc = function(a, b) {
+
+if x < 3                                        if (x < 3) {
+
+if                                              if (x < 3) {
+    is x < 3                                        alert("< 3");
+        alert("< 3")                            } else {
+    is _                                            alert(">= 3");
+        alert(">= 3")                           }
+
+if x < 3 with x: calc(y)                        var __x = calc(y);
+                                                if (__x < 3) {
+
+if with x: calc(y)                              var __x = calc(y);
+    is x < 3                                    if (__x < 3) {
+        alert("< 3")                                alert("< 3");
+    is _                                        } else {
+        alert(">= 3")                               alert(">= 3");
+                                                }
+
+if x = 2, 3, 4                                  if (x === 2 || x === 3 || x === 4) {
+
+if x                                            if (x === 2 || x === 3) {
+    is 2, 3                                         alert("2 or 3");
+        alert("2 or 3")                         } else if (x === 4) {
+    is 4                                            alert("4");
+        alert("4")                              }
+
+if x, y = 2, 3                                  if (x === 2 && y === 3) {
+
+loop                                            while(true) {
+myLoop loop                                     myLoop: while(true) {
+
+ret 3                                           return 3;
+ret result, "hello", true                       return [result, "hello", true];
+
+var x, y                                        var x, y;
+    a, b                                        var a, b;
+
+var x, y: 1, 2                                  var x = 1, y = 2;
+    a, b: "hello", "world"                      var a = "hello", b = "world"
+
+x: 3                                            x = 3;
+x +: 3                                          x += 3;
+x, y -: 1, 2                                    x -= 1; y -= 2;
+x: true or false                                x = true || false;
+y: x and true                                   y = x && true;
+
+x: doSomething(3)                               x = doSomething(3);
+
+x, y: doSomething(3)                            var __m = doSomething(3);
+                                                x = __m[0];
+                                                y = __m[1];
+
+x, _, z: doSomething(3)                         var __m = doSomething(3);
+                                                x = __m[0];
+                                                z = __m[2];
 ```

@@ -31,10 +31,10 @@ namespace Minet.Compiler
 		False,              // 'false'
 		bool_op_start,
 		Is,                 // 'is'
-		Equal,              // '=='
+		Equal,              // '='
 		NotEqual,           // '!='
-		LeftCaret,          // '<'
-		RightCaret,         // '>'
+		LessThan,           // '<'
+		GreaterThan,        // '>'
 		LtEqual,            // '<='
 		GtEqual,            // '>='
 		And,                // 'and'
@@ -129,10 +129,10 @@ namespace Minet.Compiler
 			{"true",    TokenType.True},
 			{"false",   TokenType.False},
 			{"is",      TokenType.Is},
-			{"==",      TokenType.Equal},
+			{"=",       TokenType.Equal},
 			{"!=",      TokenType.NotEqual},
-			{"<",       TokenType.LeftCaret},
-			{">",       TokenType.RightCaret},
+			{"<",       TokenType.LessThan},
+			{">",       TokenType.GreaterThan},
 			{"<=",      TokenType.LtEqual},
 			{">=",      TokenType.GtEqual},
 			{"and",     TokenType.And},
@@ -204,9 +204,9 @@ namespace Minet.Compiler
 					return 4;
 				case TokenType.Equal:
 				case TokenType.NotEqual:
-				case TokenType.LeftCaret:
+				case TokenType.LessThan:
 				case TokenType.LtEqual:
-				case TokenType.RightCaret:
+				case TokenType.GreaterThan:
 				case TokenType.GtEqual:
 					return 3;
 				case TokenType.And:

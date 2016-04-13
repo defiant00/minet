@@ -260,35 +260,14 @@ namespace Minet.Compiler
 			return new ParseResult<IStatement>(b, false);
 		}
 
-		private ParseResult<IStatement> parseClass(bool pub)
+		private ParseResult<IStatement> parseClass()
 		{
-			var res = accept(TokenType.Identifier);
-			if (!res.Success)
-			{
-				return error<IStatement>(true, "Invalid token in class declaration: " + res.LastToken);
-			}
-			var c = new Class { Name = res[0].Val, Public = pub };
+			var nameRes = parseIdentifier<IStatement>();
+			if (nameRes.Error) { return nameRes; }
 
-			if (accept(TokenType.LeftCaret).Success)
-			{
-				while (true)
-				{
-					res = accept(TokenType.Identifier);
-					if (!res.Success)
-					{
-						return error<IStatement>(true, "Invalid token in class " + c.Name + " type declaration: " + res.LastToken);
-					}
-					c.TypeParams.Add(res[0].Val);
-					if (!accept(TokenType.Comma).Success) { break; }
-				}
-				res = accept(TokenType.RightCaret);
-				if (!res.Success)
-				{
-					return error<IStatement>(true, "Invalid token in class " + c.Name + " type declaration: " + res.LastToken);
-				}
-			}
+			var c = new Class { Name = nameRes.Result };
 
-			res = accept(TokenType.EOL, TokenType.Indent);
+			var res = accept(TokenType.EOL, TokenType.Indent);
 			if (!res.Success)
 			{
 				return error<IStatement>(true, "Invalid token in class " + c.Name + " declaration: " + res.LastToken);
@@ -537,36 +516,6 @@ namespace Minet.Compiler
 			return new ParseResult<IStatement>(fn, false);
 		}
 
-		private ParseResult<IStatement> parseFunctionSig()
-		{
-			var func = new FunctionSig();
-
-			// fn(types)
-			var res = accept(TokenType.Function, TokenType.LeftParen);
-			if (!res.Success) { return error<IStatement>(true, "Invalid token in function type: " + res.LastToken); }
-			while (peek.Type != TokenType.RightParen)
-			{
-				var type = parseType();
-				if (type.Error) { return type; }
-				func.Params.Add(type.Result);
-				switch (peek.Type)
-				{
-					case TokenType.Comma:
-						next(); // eat ,
-						break;
-					case TokenType.RightParen: break;
-					default:
-						return error<IStatement>(true, "Invalid token in function type: " + peek);
-				}
-			}
-			next(); // eat )
-
-			// return value(s)
-			func.Returns = parseReturnValues().Result;
-
-			return new ParseResult<IStatement>(func, false);
-		}
-
 		private ParseResult<IStatement> parseFunctionStmt()
 		{
 			switch (peek.Type)
@@ -597,7 +546,7 @@ namespace Minet.Compiler
 				var res = accept(TokenType.Identifier);
 				if (!res.Success) { return error<T>(true, "Invalid token in identifier: " + res.LastToken); }
 				var ip = new IdentPart { Name = res[0].Val };
-				if (accept(TokenType.LeftCaret).Success)
+				if (accept(TokenType.LessThan).Success)
 				{
 					int resetPos = pos - 1; // store the position in case it isn't a generic
 					while (nextIsType)
@@ -607,7 +556,7 @@ namespace Minet.Compiler
 						if (st.Error) { break; }
 						if (!accept(TokenType.Comma).Success) { break; }
 					}
-					if (!accept(TokenType.RightCaret).Success)
+					if (!accept(TokenType.GreaterThan).Success)
 					{
 						pos = resetPos;
 						ip.TypeParams.Clear();
