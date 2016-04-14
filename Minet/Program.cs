@@ -5,11 +5,16 @@ using System.IO;
 
 namespace Minet
 {
+	public class Constants
+	{
+		public const string Program = "Minet Compiler 0.1";
+	}
+
 	public class Program
 	{
 		public static void Main(string[] args)
 		{
-			Console.WriteLine("Minet Compiler 0.1");
+			Console.WriteLine(Constants.Program);
 			if (args.Length > 0)
 			{
 				var config = new BuildConfig();

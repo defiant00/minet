@@ -41,7 +41,9 @@ namespace Minet.Compiler
 
 			if (config.IsSet("build") && errors.Count == 0)
 			{
-
+				var proj = new AST.F_Project(asts);
+				string build = proj.Build();
+				output.Write(build);
 			}
 
 			if (errors.Count > 0)

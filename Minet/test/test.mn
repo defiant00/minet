@@ -1,5 +1,7 @@
 ; Minet Test Project
 
-MyProj.MyClass
+<js alert('hi'); js>
+
+MyClass
 	Main()
 		alert("Hello from Minet!")
