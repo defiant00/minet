@@ -8,6 +8,8 @@ namespace Minet.Compiler
 		const string operatorChars = "()[]{}<>!=+-*/%,.:&|^";
 		const string commentStart = "<;";
 		const string commentEnd = ";>";
+		const string jsStart = "<js";
+		const string jsEnd = "js>";
 
 		delegate stateFn stateFn();
 
@@ -188,6 +190,11 @@ namespace Minet.Compiler
 			{
 				char c = peek;
 				if (currentPosStartsWith(commentStart)) { return lexMLComment; }
+				else if (currentPosStartsWith(jsStart))
+				{
+					inStmt = true;
+					return lexJSBlock;
+				}
 				else if (c == eof)
 				{
 					if (inStmt) { emit(TokenType.EOL); }
@@ -262,6 +269,24 @@ namespace Minet.Compiler
 				next();
 			}
 			return error("Unclosed " + commentStart);
+		}
+
+		private stateFn lexJSBlock()
+		{
+			next(jsStart.Length);
+			discard(); // eat start
+			while (peek != eof)
+			{
+				if (currentPosStartsWith(jsEnd))
+				{
+					emit(TokenType.JSBlock);
+					next(jsEnd.Length);
+					discard(); // eat end
+					return lexStatement;
+				}
+				next();
+			}
+			return error("Unclosed " + jsStart);
 		}
 
 		private stateFn lexIdentifier()

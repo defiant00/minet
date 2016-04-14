@@ -49,7 +49,6 @@ namespace Minet
 
 			}
 			else { Console.WriteLine("Usage: minet <files> [parameters]"); }
-			Console.ReadKey();
 		}
 	}
 }

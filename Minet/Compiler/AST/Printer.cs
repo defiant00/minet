@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
 namespace Minet.Compiler.AST
 {
@@ -24,29 +23,6 @@ namespace Minet.Compiler.AST
 			Helper.PrintIndent(indent + 1, buf);
 			buf.AppendLine("index");
 			Index.AppendPrint(indent + 2, buf);
-		}
-	}
-
-	public partial class Array
-	{
-		public override string ToString() { return "[" + Dimensions + "]" + Type; }
-
-		public void AppendPrint(int indent, StringBuilder buf)
-		{
-			Helper.PrintIndent(indent, buf);
-			buf.AppendLine(ToString());
-		}
-	}
-
-	public partial class ArrayCons
-	{
-		public override string ToString() { return "cons []" + Type; }
-
-		public void AppendPrint(int indent, StringBuilder buf)
-		{
-			Helper.PrintIndent(indent, buf);
-			buf.AppendLine(ToString());
-			Size.AppendPrint(indent + 1, buf);
 		}
 	}
 
@@ -114,10 +90,7 @@ namespace Minet.Compiler.AST
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
 			Helper.PrintIndent(indent, buf);
-			buf.Append(Public ? "public" : "private");
-			buf.Append(" class " + Name);
-			if (TypeParams.Count > 0) { buf.Append("<" + string.Join(", ", TypeParams) + ">"); }
-			buf.AppendLine();
+			buf.AppendLine("class " + Name);
 			foreach (var s in Statements) { s.AppendPrint(indent + 1, buf); }
 		}
 	}
@@ -214,59 +187,14 @@ namespace Minet.Compiler.AST
 			buf.Append("(");
 			buf.Append(string.Join(", ", Params));
 			buf.Append(")");
-			if (Returns.Count > 0)
-			{
-				buf.Append(" ");
-				if (Returns.Count > 1) { buf.Append("("); }
-				buf.Append(string.Join(", ", Returns));
-				if (Returns.Count > 1) { buf.Append(")"); }
-			}
 			buf.AppendLine();
 			foreach (var s in Statements) { s.AppendPrint(indent + 1, buf); }
-		}
-	}
-
-	public partial class FunctionSig
-	{
-		public override string ToString()
-		{
-			var sb = new StringBuilder("fn(");
-			sb.Append(string.Join(", ", Params));
-			sb.Append(")");
-			if (Returns.Count > 0)
-			{
-				sb.Append(" ");
-				if (Returns.Count > 1) { sb.Append("("); }
-				sb.Append(string.Join(", ", Returns));
-				if (Returns.Count > 1) { sb.Append(")"); }
-			}
-			return sb.ToString();
-		}
-
-		public void AppendPrint(int indent, StringBuilder buf)
-		{
-			Helper.PrintIndent(indent, buf);
-			buf.AppendLine(ToString());
 		}
 	}
 
 	public partial class Identifier
 	{
 		public override string ToString() { return string.Join(".", Idents); }
-
-		public void AppendPrint(int indent, StringBuilder buf)
-		{
-			Helper.PrintIndent(indent, buf);
-			buf.AppendLine(ToString());
-		}
-	}
-
-	public partial class IdentPart
-	{
-		public override string ToString()
-		{
-			return TypeParams.Count > 0 ? Name + "<" + string.Join(", ", TypeParams) + ">" : Name;
-		}
 
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
@@ -312,6 +240,15 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class JSBlock
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintIndent(indent, buf);
+			buf.AppendLine("JS: " + Val);
+		}
+	}
+
 	public partial class Loop
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
@@ -335,9 +272,7 @@ namespace Minet.Compiler.AST
 	{
 		public override string ToString()
 		{
-			string ret = Static ? "static " + Name : Name;
-			if (Type != null) { ret += " " + Type; }
-			return ret;
+			return Static ? "static " + Name : Name;
 		}
 
 		public void AppendPrint(int indent, StringBuilder buf)
@@ -388,7 +323,7 @@ namespace Minet.Compiler.AST
 
 	public partial class Variable
 	{
-		public override string ToString() { return Type != null ? Name + " " + Type : Name; }
+		public override string ToString() { return Name; }
 
 		public void AppendPrint(int indent, StringBuilder buf)
 		{

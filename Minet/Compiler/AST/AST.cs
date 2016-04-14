@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 
 namespace Minet.Compiler.AST
@@ -15,18 +14,6 @@ namespace Minet.Compiler.AST
 	public partial class Accessor : IExpression
 	{
 		public IExpression Object, Index;
-	}
-
-	public partial class Array : IStatement
-	{
-		public IStatement Type;
-		public int Dimensions;
-	}
-
-	public partial class ArrayCons : IExpression
-	{
-		public IStatement Type;
-		public IExpression Size;
 	}
 
 	public partial class ArrayValueList : IExpression
@@ -107,7 +94,7 @@ namespace Minet.Compiler.AST
 	{
 		public bool Static;
 		public string Name;
-		public List<string> Params = new List<string>();
+		public List<Variable> Params = new List<Variable>();
 		public List<IStatement> Statements = new List<IStatement>();
 	}
 
@@ -127,6 +114,11 @@ namespace Minet.Compiler.AST
 	{
 		public IExpression Condition;
 		public List<IStatement> Statements = new List<IStatement>();
+	}
+
+	public partial class JSBlock : IStatement
+	{
+		public string Val;
 	}
 
 	public partial class Loop : IStatement

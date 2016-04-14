@@ -47,7 +47,13 @@ namespace Minet.Compiler
 			if (errors.Count > 0)
 			{
 				Console.WriteLine(Environment.NewLine + Environment.NewLine + "Errors:");
-				foreach (var e in errors) { Console.WriteLine(e); }
+				if (printAST) { output.WriteLine("/* Errors"); }
+				foreach (var e in errors)
+				{
+					Console.WriteLine(e);
+					if (printAST) { output.WriteLine(e); }
+				}
+				if (printAST) { output.WriteLine("*/"); }
 			}
 		}
 	}

@@ -1,6 +1,5 @@
+; Minet Test Project
 
 MyProj.MyClass
-	_
-
-MyProj.MyClass.SubClass
-	_
+	Main()
+		alert("Hello from Minet!")

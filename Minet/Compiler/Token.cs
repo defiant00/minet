@@ -11,12 +11,11 @@ namespace Minet.Compiler
 		EOL,                // the end of a line of code
 		EOF,                // the end of the file
 		Comment,            // comment
+		JSBlock,            // a block of Javascript
 		String,             // a literal string
 		Number,             // a literal number
 		Identifier,         // an identifier
 		keyword_start,
-		Use,                // 'use'
-		As,                 // 'as'
 		If,                 // 'if'
 		In,                 // 'in'
 		With,               // 'with'
@@ -114,8 +113,6 @@ namespace Minet.Compiler
 
 		public readonly static Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType>
 		{
-			{"use",     TokenType.Use},
-			{"as",      TokenType.As},
 			{"if",      TokenType.If},
 			{"in",      TokenType.In},
 			{"with",    TokenType.With},
@@ -172,6 +169,7 @@ namespace Minet.Compiler
 				case TokenType.EOL:
 					return Pos + " " + Type + Environment.NewLine;
 				case TokenType.Comment:
+				case TokenType.JSBlock:
 				case TokenType.Number:
 				case TokenType.Identifier:
 				case TokenType.Error:
@@ -189,7 +187,6 @@ namespace Minet.Compiler
 			{
 				case TokenType.Dot:
 					return 7;
-				case TokenType.As:
 				case TokenType.Is:
 					return 6;
 				case TokenType.Mul:
