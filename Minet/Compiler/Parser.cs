@@ -11,15 +11,13 @@ namespace Minet.Compiler
 		private int pos = 0;
 		private List<Token> tokens = new List<Token>();
 
-		public List<string> Errors = new List<string>();
-
 		public Parser(string filename, BuildConfig config)
 		{
 			this.filename = filename;
 			this.config = config;
 		}
 
-		public void AddError(string error) { Errors.Add(error); }
+		public void AddError(string error) { Compiler.Errors.Add(error); }
 
 		public ParseResult<IStatement> Parse(System.IO.StreamWriter output)
 		{

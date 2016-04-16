@@ -174,8 +174,6 @@ namespace Minet.Compiler
 			switch (Type)
 			{
 				case TokenType.Dot:
-					return 7;
-				case TokenType.Is:
 					return 6;
 				case TokenType.Mul:
 				case TokenType.Div:

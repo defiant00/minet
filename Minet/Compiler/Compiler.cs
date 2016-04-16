@@ -7,18 +7,20 @@ namespace Minet.Compiler
 {
 	public class Compiler
 	{
+		public static List<string> Errors = new List<string>();
+		public static string Main = string.Empty;
+
 		public static void Build(BuildConfig config, StreamWriter output)
 		{
 			bool printAST = config.IsSet("printAST");
 			var asts = new List<AST.File>();
-			var errors = new List<string>();
 
 			foreach (string file in config.Files)
 			{
 				var p = new Parser(file, config);
 				var ast = p.Parse(output);
 				if (!ast.Error) { asts.Add(ast.Result as AST.File); }
-				if (p.Errors.Count == 0)
+				if (Errors.Count == 0)
 				{
 					if (printAST)
 					{
@@ -36,21 +38,20 @@ namespace Minet.Compiler
 						}
 					}
 				}
-				else { foreach (var e in p.Errors) { errors.Add(e); } }
 			}
 
-			if (config.IsSet("build") && errors.Count == 0)
+			if (config.IsSet("build") && Errors.Count == 0)
 			{
 				var proj = new AST.F_Project(asts);
 				string build = proj.Build();
-				output.Write(build);
+				if (Errors.Count == 0) { output.Write(build); }
 			}
 
-			if (errors.Count > 0)
+			if (Errors.Count > 0)
 			{
 				Console.WriteLine(Environment.NewLine + Environment.NewLine + "Errors:");
 				if (printAST) { output.WriteLine("/* Errors"); }
-				foreach (var e in errors)
+				foreach (var e in Errors)
 				{
 					Console.WriteLine(e);
 					if (printAST) { output.WriteLine(e); }

@@ -4,14 +4,11 @@ MyClass
 	.prop, staticProp: 1, 2
 
 	MyClass(p)
-		this.prop: p
-		x, y: 1, 2
-		a, b +: 3, 4
-		a, b, c *: 5
-		alert("hi")
+		alert("hi" + (3 * 2))
+		x, y : calc()
 	
 	.Inc()
-		prop +: 1
+		prop +: 1 + 2 * 3
 
 	Main()
 		alert("Hello from Minet!")

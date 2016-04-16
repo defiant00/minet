@@ -131,6 +131,14 @@ namespace Minet.Compiler.AST
 				foreach (var c in Classes) { c.Build(0, Buffer); }
 			}
 
+			if (!string.IsNullOrEmpty(Compiler.Main))
+			{
+				Buffer.AppendLine("window.onload = function () {");
+				Helper.PrintIndented(Compiler.Main, 1, Buffer);
+				Buffer.AppendLine("();");
+				Buffer.AppendLine("};");
+			}
+
 			return Buffer.ToString();
 		}
 	}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Linq;
 
 namespace Minet.Compiler.AST
 {
@@ -53,7 +54,7 @@ namespace Minet.Compiler.AST
 					mulOp = " % ";
 					break;
 				default:
-					op = "/* Unknown assignment op " + Op + " */";
+					Compiler.Errors.Add("Unknown assignment operator " + Op);
 					break;
 			}
 			if (left != null && right != null)
@@ -82,9 +83,9 @@ namespace Minet.Compiler.AST
 						buf.AppendLine("__t;");
 					}
 				}
-				else
+				else if (left.Expressions.Count == right.Expressions.Count)
 				{
-					for (int i = 0; i < left.Expressions.Count && i < right.Expressions.Count; i++)
+					for (int i = 0; i < left.Expressions.Count; i++)
 					{
 						var l = left.Expressions[i];
 						var r = right.Expressions[i];
@@ -101,7 +102,7 @@ namespace Minet.Compiler.AST
 						buf.Append(r.ToJSExpr());
 						buf.AppendLine(";");
 					}
-					for (int i = 0; i < left.Expressions.Count && i < right.Expressions.Count; i++)
+					for (int i = 0; i < left.Expressions.Count; i++)
 					{
 						var l = left.Expressions[i];
 						Helper.PrintIndented(l.ToJSExpr(), indent, buf);
@@ -109,6 +110,10 @@ namespace Minet.Compiler.AST
 						buf.Append(i);
 						buf.AppendLine(";");
 					}
+				}
+				else
+				{
+					Compiler.Errors.Add("Mismatched expression count, " + left.Expressions.Count + " != " + right.Expressions.Count);
 				}
 			}
 		}
@@ -118,7 +123,65 @@ namespace Minet.Compiler.AST
 	{
 		public string ToJSExpr()
 		{
-			return "<Binary>";
+			string op = "/* No Op */";
+			switch (Op)
+			{
+				case TokenType.Dot:
+					op = ".";
+					break;
+				case TokenType.Mul:
+					op = " * ";
+					break;
+				case TokenType.Div:
+					op = " / ";
+					break;
+				case TokenType.Mod:
+					op = " % ";
+					break;
+				case TokenType.Add:
+					op = " + ";
+					break;
+				case TokenType.Sub:
+					op = " - ";
+					break;
+				case TokenType.Equal:
+					op = " === ";
+					break;
+				case TokenType.NotEqual:
+					op = " != ";
+					break;
+				case TokenType.LessThan:
+					op = " < ";
+					break;
+				case TokenType.LtEqual:
+					op = " <= ";
+					break;
+				case TokenType.GreaterThan:
+					op = " > ";
+					break;
+				case TokenType.GtEqual:
+					op = " >= ";
+					break;
+				case TokenType.And:
+					op = " && ";
+					break;
+				case TokenType.Or:
+					op = " || ";
+					break;
+				default:
+					Compiler.Errors.Add("Unknown binary operator " + Op);
+					break;
+			}
+
+			var sb = new StringBuilder();
+			if (Left is Binary) { sb.Append("("); }
+			sb.Append(Left.ToJSExpr());
+			if (Left is Binary) { sb.Append(")"); }
+			sb.Append(op);
+			if (Right is Binary) { sb.Append("("); }
+			sb.Append(Right.ToJSExpr());
+			if (Right is Binary) { sb.Append(")"); }
+			return sb.ToString();
 		}
 	}
 
@@ -171,7 +234,7 @@ namespace Minet.Compiler.AST
 
 		public void AppendJSStmt(int indent, StringBuilder buf)
 		{
-			Helper.PrintIndentedLine("/* Error: " + Val + " */", indent, buf);
+			Helper.PrintIndentedLine("// Error: " + Val, indent, buf);
 		}
 	}
 
@@ -187,7 +250,19 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(int indent, StringBuilder buf)
 		{
-			Helper.PrintIndentedLine("<expr stmt>", indent, buf);
+			var el = Expr as ExprList;
+			if (el != null)
+			{
+				if (el.Expressions.Count == 1)
+				{
+					Helper.PrintIndented(el.Expressions[0].ToJSExpr(), indent, buf);
+					buf.AppendLine(";");
+				}
+				else
+				{
+					Compiler.Errors.Add("Cannot have more than one expression in an expression statement.");
+				}
+			}
 		}
 	}
 
@@ -195,7 +270,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(int indent, StringBuilder buf)
 		{
-			Helper.PrintIndentedLine("<file>", indent, buf);
+			Compiler.Errors.Add("Tried to generate JS for a File object.");
 		}
 	}
 
@@ -211,7 +286,15 @@ namespace Minet.Compiler.AST
 	{
 		public string ToJSExpr()
 		{
-			return "<FunctionCall>";
+			var sb = new StringBuilder(Function.ToJSExpr());
+			var par = Params as ExprList;
+			sb.Append("(");
+			if (par != null)
+			{
+				sb.Append(string.Join(", ", par.Expressions.Select(p => p.ToJSExpr())));
+			}
+			sb.Append(")");
+			return sb.ToString();
 		}
 	}
 
@@ -333,6 +416,8 @@ namespace Minet.Compiler.AST
 			}
 			else
 			{
+				if (Static && Name == "Main") { Compiler.Main = cName + "." + Name; }
+
 				Helper.PrintIndented(cName, indent, funcBuf);
 				funcBuf.Append(".");
 				if (!Static) { funcBuf.Append("prototype."); }
@@ -352,7 +437,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJS(int indent, string cName, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
 		{
-
+			Helper.PrintIndentedLine(Val, indent, funcBuf);
 		}
 	}
 
@@ -363,27 +448,35 @@ namespace Minet.Compiler.AST
 			var vals = Vals as ExprList;
 			if (vals != null)
 			{
-				for (int i = 0; i < Props.Count && i < vals.Expressions.Count; i++)
+				if (Props.Count == vals.Expressions.Count)
 				{
-					var p = Props[i];
-					var v = vals.Expressions[i];
-
-					if (p.Static)
+					for (int i = 0; i < Props.Count; i++)
 					{
-						Helper.PrintIndented(cName, indent, sPropBuf);
-						sPropBuf.Append(".");
-						sPropBuf.Append(p.Name);
-						sPropBuf.Append(" = ");
-						sPropBuf.Append(v.ToJSExpr());
-						sPropBuf.AppendLine(";");
+						var p = Props[i];
+						var v = vals.Expressions[i];
+
+						if (p.Static)
+						{
+							Helper.PrintIndented(cName, indent, sPropBuf);
+							sPropBuf.Append(".");
+							sPropBuf.Append(p.Name);
+							sPropBuf.Append(" = ");
+							sPropBuf.Append(v.ToJSExpr());
+							sPropBuf.AppendLine(";");
+						}
+						else
+						{
+							Helper.PrintIndented("this.", indent + 1, cDefBuf);
+							cDefBuf.Append(p.Name);
+							cDefBuf.Append(" = ");
+							cDefBuf.Append(v.ToJSExpr());
+							cDefBuf.AppendLine(";");
+						}
 					}
-					else {
-						Helper.PrintIndented("this.", indent + 1, cDefBuf);
-						cDefBuf.Append(p.Name);
-						cDefBuf.Append(" = ");
-						cDefBuf.Append(v.ToJSExpr());
-						cDefBuf.AppendLine(";");
-					}
+				}
+				else
+				{
+					Compiler.Errors.Add("Mismatched property / value counts, " + Props.Count + " != " + vals.Expressions.Count);
 				}
 			}
 		}
