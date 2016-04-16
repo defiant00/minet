@@ -1,7 +1,17 @@
 ; Minet Test Project
 
-<js alert('hi'); js>
-
 MyClass
+	.prop, staticProp: 1, 2
+
+	MyClass(p)
+		this.prop: p
+		x, y: 1, 2
+		a, b +: 3, 4
+		a, b, c *: 5
+		alert("hi")
+	
+	.Inc()
+		prop +: 1
+
 	Main()
 		alert("Hello from Minet!")

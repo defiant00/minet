@@ -235,15 +235,18 @@ namespace Minet.Compiler
 			res = accept(TokenType.Dedent, TokenType.EOL);
 			if (!res.Success)
 			{
-				c.Statements.Add(error<IStatement>(true, "Invalid token in class " + c.Name + " declaration: " + res.LastToken).Result);
+				c.Statements.Add(error<IClassStatement>(true, "Invalid token in class " + c.Name + " declaration: " + res.LastToken).Result);
 			}
 
 			return new ParseResult<IStatement>(c, false);
 		}
 
-		private ParseResult<IStatement> parseClassStmt()
+		private ParseResult<IClassStatement> parseClassStmt()
 		{
-			if (peek.Type == TokenType.JSBlock) { return parseJSBlock(); }
+			if (peek.Type == TokenType.JSBlock) {
+				var js = parseJSBlock();
+				return new ParseResult<IClassStatement>(js.Result as IClassStatement, js.Error);
+			}
 
 			var ps = new PropertySet();
 
@@ -253,7 +256,7 @@ namespace Minet.Compiler
 				var r = accept(TokenType.Identifier);
 				if (!r.Success)
 				{
-					return error<IStatement>(true, "Invalid token in class statement: " + r.LastToken);
+					return error<IClassStatement>(true, "Invalid token in class statement: " + r.LastToken);
 				}
 				string name = r[0].Val;
 
@@ -271,10 +274,10 @@ namespace Minet.Compiler
 			var res = accept(TokenType.EOL);
 			if (!res.Success)
 			{
-				return error<IStatement>(true, "Invalid token in class statement: " + res.LastToken);
+				return error<IClassStatement>(true, "Invalid token in class statement: " + res.LastToken);
 			}
 
-			return new ParseResult<IStatement>(ps, false);
+			return new ParseResult<IClassStatement>(ps, false);
 		}
 
 		private ParseResult<IExpression> parseConstructor(IExpression lhs)
@@ -417,32 +420,32 @@ namespace Minet.Compiler
 			return new ParseResult<IExpression>(fc, false);
 		}
 
-		private ParseResult<IStatement> parseFunctionDef(bool dotted, string name)
+		private ParseResult<IClassStatement> parseFunctionDef(bool dotted, string name)
 		{
 			var res = accept(TokenType.LeftParen);
 			if (!res.Success)
 			{
-				return error<IStatement>(true, "Invalid token in function definition: " + res.LastToken);
+				return error<IClassStatement>(true, "Invalid token in function definition: " + res.LastToken);
 			}
 			var fn = new FunctionDef { Static = !dotted, Name = name };
 
 			var par = parseVars();
 			if (par.Error)
 			{
-				return new ParseResult<IStatement>(par.Result[par.Result.Count - 1], true);
+				return new ParseResult<IClassStatement>(par.Result[par.Result.Count - 1] as IClassStatement, true);
 			}
 			foreach (Variable v in par.Result) { fn.Params.Add(v); }
 
 			res = accept(TokenType.RightParen);
 			if (!res.Success)
 			{
-				return error<IStatement>(true, "Invalid token in function definition: " + res.LastToken);
+				return error<IClassStatement>(true, "Invalid token in function definition: " + res.LastToken);
 			}
 
 			res = accept(TokenType.EOL, TokenType.Indent);
 			if (!res.Success)
 			{
-				return error<IStatement>(true, "Invalid token in function definition: " + res.LastToken);
+				return error<IClassStatement>(true, "Invalid token in function definition: " + res.LastToken);
 			}
 
 			while (!peek.Type.IsDedentStop())
@@ -460,7 +463,7 @@ namespace Minet.Compiler
 			// (followed by either ',' or ')' ) then put the EOL back.
 			if (string.IsNullOrEmpty(name) && !peek.Type.IsInBlock()) { backup(1); }
 
-			return new ParseResult<IStatement>(fn, false);
+			return new ParseResult<IClassStatement>(fn, false);
 		}
 
 		private ParseResult<IStatement> parseFunctionStmt()

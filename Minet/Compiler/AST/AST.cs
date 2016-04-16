@@ -8,8 +8,20 @@ namespace Minet.Compiler.AST
 		void AppendPrint(int indent, StringBuilder buf);
 	}
 
-	public interface IExpression : IGeneral { }
-	public interface IStatement : IGeneral { }
+	public interface IExpression : IGeneral
+	{
+		string ToJSExpr();
+	}
+
+	public interface IStatement : IGeneral
+	{
+		void AppendJSStmt(int indent, StringBuilder buf);
+	}
+
+	public interface IClassStatement : IStatement
+	{
+		void AppendJS(int indent, string cName, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf);
+	}
 
 	public partial class Accessor : IExpression
 	{
@@ -48,7 +60,7 @@ namespace Minet.Compiler.AST
 	public partial class Class : IStatement
 	{
 		public IStatement Name;
-		public List<IStatement> Statements = new List<IStatement>();
+		public List<IClassStatement> Statements = new List<IClassStatement>();
 	}
 
 	public partial class Constructor : IExpression
@@ -90,7 +102,7 @@ namespace Minet.Compiler.AST
 		public IExpression Function, Params;
 	}
 
-	public partial class FunctionDef : IExpression, IStatement
+	public partial class FunctionDef : IExpression, IClassStatement
 	{
 		public bool Static;
 		public string Name;
@@ -116,7 +128,7 @@ namespace Minet.Compiler.AST
 		public List<IStatement> Statements = new List<IStatement>();
 	}
 
-	public partial class JSBlock : IStatement
+	public partial class JSBlock : IClassStatement
 	{
 		public string Val;
 	}
@@ -138,7 +150,7 @@ namespace Minet.Compiler.AST
 		public string Name;
 	}
 
-	public partial class PropertySet : IStatement
+	public partial class PropertySet : IClassStatement
 	{
 		public List<Property> Props = new List<Property>();
 		public IExpression Vals;

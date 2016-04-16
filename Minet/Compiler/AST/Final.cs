@@ -30,14 +30,55 @@ namespace Minet.Compiler.AST
 		public override string ToString() { return Name; }
 
 		public string Name;
-		public List<IStatement> Statements = new List<IStatement>();
+		public List<IClassStatement> Statements = new List<IClassStatement>();
 
 		public void Build(int indent, StringBuilder buffer)
 		{
+			var consSigBuffer = new StringBuilder();		// Constructor signature
+			var consDefBuffer = new StringBuilder();		// Constructor defaults
+			var consCodeBuffer = new StringBuilder();       // Constructor code
+			var funcBuffer = new StringBuilder();           // Functions
+			var staticPropBuffer = new StringBuilder();		// Static properties
+			var classBuffer = new StringBuilder();			// Classes
+
+
+			//
+			// Initialize buffers
+			//
+
+			// Constructor signature
+			Helper.PrintIndented("function ", indent + 1, consSigBuffer);
+			consSigBuffer.Append(Name);
+			consSigBuffer.Append("(");
+
+			//
+			// Statements and classes
+			//
+			foreach (var s in Statements) { s.AppendJS(indent + 1, Name, consSigBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticPropBuffer); }
+			foreach (var c in Classes) { c.Build(indent + 1, classBuffer); }
+
+
+			//
+			// Finish buffers
+			//
+
+			// Constructor signature
+			consSigBuffer.AppendLine(") {");
+
+			// Constructor body
+			Helper.PrintIndentedLine("}", indent + 1, consCodeBuffer);
+
 			Helper.PrintIndented("var ", indent, buffer);
 			buffer.Append(Name);
 			buffer.AppendLine(" = (function () {");
-			foreach (var c in Classes) { c.Build(indent + 1, buffer); }
+
+			buffer.Append(consSigBuffer);
+			buffer.Append(consDefBuffer);
+			buffer.Append(consCodeBuffer);
+			buffer.Append(funcBuffer);
+			buffer.Append(staticPropBuffer);
+			buffer.Append(classBuffer);
+
 			Helper.PrintIndented("return ", indent + 1, buffer);
 			buffer.Append(Name);
 			buffer.AppendLine(";");

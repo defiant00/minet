@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Compiler\AST\AST.cs" />
     <Compile Include="Compiler\AST\Final.cs" />
+    <Compile Include="Compiler\AST\GenJS.cs" />
     <Compile Include="Compiler\BuildConfig.cs" />
     <Compile Include="Compiler\Compiler.cs" />
     <Compile Include="Compiler\Lexer.cs" />
@@ -60,6 +61,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="test\test.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test\test.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

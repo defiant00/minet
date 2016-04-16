@@ -54,17 +54,11 @@ namespace Minet.Compiler
 		MulAssign,          // '*:'
 		DivAssign,          // '/:'
 		ModAssign,          // '%:'
-		BAndAssign,         // '&:'
-		BOrAssign,          // '|:'
-		BXOrAssign,         // '^:'
 		assign_end,
 		Add,                // '+'
 		Mul,                // '*'
 		Div,                // '/'
 		Mod,                // '%'
-		BAnd,               // '&'
-		BOr,                // '|'
-		BXOr,               // '^'
 		unary_op_start,
 		Sub,                // '-'
 		Not,                // '!'
@@ -148,17 +142,11 @@ namespace Minet.Compiler
 			{"*:",      TokenType.MulAssign},
 			{"/:",      TokenType.DivAssign},
 			{"%:",      TokenType.ModAssign},
-			{"&:",      TokenType.BAndAssign},
-			{"|:",      TokenType.BOrAssign},
-			{"^:",      TokenType.BXOrAssign},
 			{"+",       TokenType.Add},
 			{"-",       TokenType.Sub},
 			{"*",       TokenType.Mul},
 			{"/",       TokenType.Div},
 			{"%",       TokenType.Mod},
-			{"&",       TokenType.BAnd},
-			{"|",       TokenType.BOr},
-			{"^",       TokenType.BXOr},
 			{"!",       TokenType.Not}
 		};
 
@@ -192,12 +180,9 @@ namespace Minet.Compiler
 				case TokenType.Mul:
 				case TokenType.Div:
 				case TokenType.Mod:
-				case TokenType.BAnd:
 					return 5;
 				case TokenType.Add:
 				case TokenType.Sub:
-				case TokenType.BOr:
-				case TokenType.BXOr:
 					return 4;
 				case TokenType.Equal:
 				case TokenType.NotEqual:
