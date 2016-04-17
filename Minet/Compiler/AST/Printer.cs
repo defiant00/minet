@@ -67,15 +67,6 @@ namespace Minet.Compiler.AST
 		}
 	}
 
-	public partial class Blank
-	{
-		public void AppendPrint(int indent, StringBuilder buf)
-		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("_");
-		}
-	}
-
 	public partial class Bool
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
@@ -307,7 +298,7 @@ namespace Minet.Compiler.AST
 		{
 			Helper.PrintASTIndent(indent, buf);
 			buf.AppendLine("return");
-			if (Vals != null) { Vals.AppendPrint(indent + 1, buf); }
+			if (Val != null) { Val.AppendPrint(indent + 1, buf); }
 		}
 	}
 

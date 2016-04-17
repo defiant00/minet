@@ -22,7 +22,6 @@ namespace Minet.Compiler
 		Function,           // 'fn'
 		Var,                // 'var'
 		Return,             // 'ret'
-		Blank,              // '_'
 		For,                // 'for'
 		Loop,               // 'loop'
 		Break,              // 'break'
@@ -113,7 +112,6 @@ namespace Minet.Compiler
 			{"fn",      TokenType.Function},
 			{"var",     TokenType.Var},
 			{"ret",     TokenType.Return},
-			{"_",       TokenType.Blank},
 			{"for",     TokenType.For},
 			{"loop",    TokenType.Loop},
 			{"break",   TokenType.Break},

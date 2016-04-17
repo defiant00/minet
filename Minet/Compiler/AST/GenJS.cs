@@ -8,7 +8,12 @@ namespace Minet.Compiler.AST
 	{
 		public string ToJSExpr()
 		{
-			return "<accessor>";
+			var sb = new StringBuilder();
+			sb.Append(Object.ToJSExpr());
+			sb.Append("[");
+			sb.Append(Index.ToJSExpr());
+			sb.Append("]");
+			return sb.ToString();
 		}
 	}
 
@@ -16,7 +21,16 @@ namespace Minet.Compiler.AST
 	{
 		public string ToJSExpr()
 		{
-			return "<array value list>";
+			var vals = Vals as ExprList;
+			if (vals != null)
+			{
+				var sb = new StringBuilder("[");
+				sb.Append(string.Join(", ", vals.Expressions.Select(e => e.ToJSExpr())));
+				sb.Append("]");
+				return sb.ToString();
+			}
+			Compiler.Errors.Add("Array value list Vals is of type " + Vals.GetType());
+			return "[]";
 		}
 	}
 
@@ -148,7 +162,7 @@ namespace Minet.Compiler.AST
 					op = " === ";
 					break;
 				case TokenType.NotEqual:
-					op = " != ";
+					op = " !== ";
 					break;
 				case TokenType.LessThan:
 					op = " < ";
@@ -185,27 +199,22 @@ namespace Minet.Compiler.AST
 		}
 	}
 
-	public partial class Blank
-	{
-		public string ToJSExpr()
-		{
-			return "<Blank>";
-		}
-	}
-
 	public partial class Bool
 	{
-		public string ToJSExpr()
-		{
-			return Val ? "true" : "false";
-		}
+		public string ToJSExpr() { return Val ? "true" : "false"; }
 	}
 
 	public partial class Break
 	{
 		public void AppendJSStmt(int indent, StringBuilder buf)
 		{
-			Helper.PrintIndentedLine("<break>", indent, buf);
+			Helper.PrintIndented("break", indent, buf);
+			if (!string.IsNullOrEmpty(Label))
+			{
+				buf.Append(" ");
+				buf.Append(Label);
+			}
+			buf.AppendLine(";");
 		}
 	}
 
@@ -213,7 +222,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(int indent, StringBuilder buf)
 		{
-			Helper.PrintIndentedLine("<class>", indent, buf);
+			Compiler.Errors.Add("Class encountered when generating JS statements.");
 		}
 	}
 
@@ -242,7 +251,8 @@ namespace Minet.Compiler.AST
 	{
 		public string ToJSExpr()
 		{
-			return "<ExprList>";
+			Compiler.Errors.Add("Attempted to directly generate JS from an expression list.");
+			return "/* Expression List */";
 		}
 	}
 
@@ -349,7 +359,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(int indent, StringBuilder buf)
 		{
-			Helper.PrintIndentedLine("<property set>", indent, buf);
+			Compiler.Errors.Add("Tried to generate a JS statement for a property set.");
 		}
 	}
 
@@ -357,7 +367,9 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(int indent, StringBuilder buf)
 		{
-			Helper.PrintIndentedLine("<return>", indent, buf);
+			Helper.PrintIndented("return ", indent, buf);
+			buf.Append(Val.ToJSExpr());
+			buf.AppendLine(";");
 		}
 	}
 
@@ -384,7 +396,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(int indent, StringBuilder buf)
 		{
-			Helper.PrintIndentedLine("<variable>", indent, buf);
+			Compiler.Errors.Add("Tried to directly generate JS for a variable.");
 		}
 	}
 
@@ -392,7 +404,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(int indent, StringBuilder buf)
 		{
-			Helper.PrintIndentedLine("<var set>", indent, buf);
+			foreach (var l in Lines) { l.AppendJSStmt(indent, buf); }
 		}
 	}
 
@@ -400,7 +412,30 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(int indent, StringBuilder buf)
 		{
-			Helper.PrintIndentedLine("<var set line>", indent, buf);
+			var vals = Vals as ExprList;
+			if (vals != null)
+			{
+				if (Vars.Count == vals.Expressions.Count)
+				{
+					Helper.PrintIndented("var ", indent, buf);
+					for (int i = 0; i < Vars.Count; i++)
+					{
+						buf.Append(Vars[i].Name);
+						buf.Append(" = ");
+						buf.Append(vals.Expressions[i].ToJSExpr());
+						if (i + 1 < Vars.Count) { buf.Append(", "); }
+					}
+					buf.AppendLine(";");
+				}
+				else
+				{
+					Compiler.Errors.Add("Mismatched vars and values in VarSetLine, " + Vars.Count + " != " + vals.Expressions.Count);
+				}
+			}
+			else
+			{
+				Compiler.Errors.Add("Expected ExprList in VarSetLine, found " + Vals.GetType());
+			}
 		}
 	}
 

@@ -46,8 +46,16 @@ v: myArr[3]                                     v = myArr[3];
 fn(a, b)                                        function(a, b);
 
 a: b                                            a = b;
-a, b: 3, 'hello'                                a = 3; c = 'hello';
-a, _, c: 1, 2, 3                                a = 1; c = 3;
+
+a, b: 3, 'hello'                                var __t0 = 3;
+                                                var __t1 = 'hello';
+                                                a = __t0;
+                                                b = __t1;
+
+a, b: b, a                                      var __t0 = b;
+                                                var __t1 = a;
+                                                a = __t0;
+                                                b = __t1;
 
 arr: [1, 2, 3]                                  arr = [1, 2, 3];
 
@@ -61,32 +69,38 @@ MyClass                                         // TODO - Some JS
 for i in 0 to 10 by 2                           for (var i = 0; i < 10; i += 2) {
 myLoop for i in 0 to 10                         myLoop: for (var i = 0; i < 10; i++) {
 
-for i in myItems                                for (var __i = 0; i < myItems.length; i++) {
-                                                    var i = myItems[i];
+for i in myItems                                for (var __i0 = 0; __i0 < myItems.length; __i0++) {
+                                                    var i = myItems[__i0];
 
 myObj.doThing(1, 2, 3)                          myObj.doThing(1, 2, 3);
 
 MyFunc(a, b)                                    var MyFunc = function(a, b) {
+    alert('hi')                                     alert('hi');
+                                                }
 
 if x < 3                                        if (x < 3) {
+
+if x < 3                                        if (x < 3) {
+    alert('< 3')                                    alert('< 3');
+else                                            } else {
+    alert('>= 3')                                   alert('>= 3');
+                                                }
 
 if                                              if (x < 3) {
     is x < 3                                        alert("< 3");
         alert("< 3")                            } else {
-    is _                                            alert(">= 3");
+    else                                            alert(">= 3");
         alert(">= 3")                           }
 
-if x < 3 with x: calc(y)                        var __x = calc(y);
-                                                if (__x < 3) {
+if x < 3 with x: calc(y)                        var x = calc(y);
+                                                if (x < 3) {
 
-if with x: calc(y)                              var __x = calc(y);
-    is x < 3                                    if (__x < 3) {
+if with x: calc(y)                              var x = calc(y);
+    is x < 3                                    if (x < 3) {
         alert("< 3")                                alert("< 3");
-    is _                                        } else {
+    else                                        } else {
         alert(">= 3")                               alert(">= 3");
                                                 }
-
-if x = 2, 3, 4                                  if (x === 2 || x === 3 || x === 4) {
 
 if x                                            if (x === 2 || x === 3) {
     is 2, 3                                         alert("2 or 3");
@@ -94,13 +108,10 @@ if x                                            if (x === 2 || x === 3) {
     is 4                                            alert("4");
         alert("4")                              }
 
-if x, y = 2, 3                                  if (x === 2 && y === 3) {
-
 loop                                            while(true) {
 myLoop loop                                     myLoop: while(true) {
 
 ret 3                                           return 3;
-ret result, "hello", true                       return [result, "hello", true];
 
 var x, y                                        var x, y;
     a, b                                        var a, b;
@@ -110,17 +121,18 @@ var x, y: 1, 2                                  var x = 1, y = 2;
 
 x: 3                                            x = 3;
 x +: 3                                          x += 3;
-x, y -: 1, 2                                    x -= 1; y -= 2;
+
+x, y -: 1, 2                                    var __t0 = x - 1;
+                                                var __t1 = y - 2;
+                                                x = __t0;
+                                                y = __t1;
+
+x, y -: 1                                       var __t = 1;
+                                                x -= t;
+                                                y -= t;
+
 x: true or false                                x = true || false;
 y: x and true                                   y = x && true;
 
-x: doSomething(3)                               x = doSomething(3);
 
-x, y: doSomething(3)                            var __m = doSomething(3);
-                                                x = __m[0];
-                                                y = __m[1];
-
-x, _, z: doSomething(3)                         var __m = doSomething(3);
-                                                x = __m[0];
-                                                z = __m[2];
 ```

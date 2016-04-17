@@ -121,7 +121,7 @@ namespace Minet.Compiler
 		private ParseResult<IExpression> parseAccessor(IExpression lhs)
 		{
 			next(); // eat [
-			var expr = parseExprList();
+			var expr = parseExpr();
 			if (expr.Error) { return expr; }
 			var res = accept(TokenType.RightBracket);
 			if (!res.Success)
@@ -177,12 +177,6 @@ namespace Minet.Compiler
 				// Merge LHS/RHS.
 				lhs = new Binary { Op = op.Type, Left = lhs, Right = rhs.Result };
 			}
-		}
-
-		private ParseResult<IExpression> parseBlankExpr()
-		{
-			next(); // eat _
-			return new ParseResult<IExpression>(new Blank(), false);
 		}
 
 		private ParseResult<IExpression> parseBoolExpr()
@@ -682,9 +676,6 @@ namespace Minet.Compiler
 			IExpression lhs = null;
 			switch (peek.Type)
 			{
-				case TokenType.Blank:
-					lhs = parseBlankExpr().Result;
-					break;
 				case TokenType.Function:
 					lhs = parseAnonFuncExpr().Result;
 					break;
@@ -738,11 +729,11 @@ namespace Minet.Compiler
 		{
 			next(); // eat ret
 			var r = new Return();
-			if (peek.Type != TokenType.EOL) { r.Vals = parseExprList().Result; }
+			if (peek.Type != TokenType.EOL) { r.Val = parseExpr().Result; }
 			var res = accept(TokenType.EOL);
 			if (!res.Success)
 			{
-				r.Vals = error<IExpression>(true, "Invalid token in return: " + res.LastToken).Result;
+				r.Val = error<IExpression>(true, "Invalid token in return: " + res.LastToken).Result;
 			}
 			return new ParseResult<IStatement>(r, false);
 		}
@@ -820,7 +811,7 @@ namespace Minet.Compiler
 		private ParseResult<List<IStatement>> parseVars()
 		{
 			var parameters = new List<IStatement>();
-			while (peek.Type == TokenType.Identifier || peek.Type == TokenType.Blank)
+			while (peek.Type == TokenType.Identifier)
 			{
 				string pName = next().Val;
 				parameters.Add(new Variable { Name = pName });

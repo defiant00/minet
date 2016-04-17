@@ -3,12 +3,5 @@
 MyClass
 	.prop, staticProp: 1, 2
 
-	MyClass(p)
-		alert("hi" + (3 * 2))
-		x, y : calc()
-	
-	.Inc()
-		prop +: 1 + 2 * 3
-
 	Main()
 		alert("Hello from Minet!")

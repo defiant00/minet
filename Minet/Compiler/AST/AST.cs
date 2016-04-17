@@ -45,8 +45,6 @@ namespace Minet.Compiler.AST
 		public TokenType Op;
 	}
 
-	public partial class Blank : IExpression { }
-
 	public partial class Bool : IExpression
 	{
 		public bool Val;
@@ -158,7 +156,7 @@ namespace Minet.Compiler.AST
 
 	public partial class Return : IStatement
 	{
-		public IExpression Vals;
+		public IExpression Val;
 	}
 
 	public partial class String : IExpression
