@@ -32,7 +32,7 @@ namespace Minet.Compiler.AST
 		public string Name;
 		public List<IClassStatement> Statements = new List<IClassStatement>();
 
-		public void Build(int indent, StringBuilder buffer)
+		public void Build(Status s, StringBuilder buffer)
 		{
 			var consSigBuffer = new StringBuilder();		// Constructor signature
 			var consDefBuffer = new StringBuilder();		// Constructor defaults
@@ -47,16 +47,17 @@ namespace Minet.Compiler.AST
 			//
 
 			// Constructor signature
-			Helper.PrintIndented("function ", indent + 1, consSigBuffer);
+			Helper.PrintIndented("function ", s.Indent + 1, consSigBuffer);
 			consSigBuffer.Append(Name);
 			consSigBuffer.Append("(");
 
 			//
 			// Statements and classes
 			//
-			foreach (var s in Statements) { s.AppendJS(indent + 1, Name, consSigBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticPropBuffer); }
-			foreach (var c in Classes) { c.Build(indent + 1, classBuffer); }
-
+			s.Indent++;
+			foreach (var st in Statements) { st.AppendJS(s, Name, consSigBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticPropBuffer); }
+			foreach (var c in Classes) { c.Build(s, classBuffer); }
+			s.Indent--;
 
 			//
 			// Finish buffers
@@ -66,9 +67,9 @@ namespace Minet.Compiler.AST
 			consSigBuffer.AppendLine(") {");
 
 			// Constructor body
-			Helper.PrintIndentedLine("}", indent + 1, consCodeBuffer);
+			Helper.PrintIndentedLine("}", s.Indent + 1, consCodeBuffer);
 
-			Helper.PrintIndented("var ", indent, buffer);
+			Helper.PrintIndented("var ", s.Indent, buffer);
 			buffer.Append(Name);
 			buffer.AppendLine(" = (function () {");
 
@@ -79,10 +80,10 @@ namespace Minet.Compiler.AST
 			buffer.Append(staticPropBuffer);
 			buffer.Append(classBuffer);
 
-			Helper.PrintIndented("return ", indent + 1, buffer);
+			Helper.PrintIndented("return ", s.Indent + 1, buffer);
 			buffer.Append(Name);
 			buffer.AppendLine(";");
-			Helper.PrintIndentedLine("})();", indent, buffer);
+			Helper.PrintIndentedLine("})();", s.Indent, buffer);
 		}
 	}
 
@@ -116,7 +117,7 @@ namespace Minet.Compiler.AST
 			}
 		}
 
-		public string Build()
+		public string Build(Status s)
 		{
 			if (JSBlocks.Count > 0)
 			{
@@ -128,13 +129,13 @@ namespace Minet.Compiler.AST
 			if (Classes.Count > 0)
 			{
 				Buffer.AppendLine("// Classes");
-				foreach (var c in Classes) { c.Build(0, Buffer); }
+				foreach (var c in Classes) { c.Build(s, Buffer); }
 			}
 
-			if (!string.IsNullOrEmpty(Compiler.Main))
+			if (!string.IsNullOrEmpty(s.Main))
 			{
 				Buffer.AppendLine("window.onload = function () {");
-				Helper.PrintIndented(Compiler.Main, 1, Buffer);
+				Helper.PrintIndented(s.Main, 1, Buffer);
 				Buffer.AppendLine("();");
 				Buffer.AppendLine("};");
 			}

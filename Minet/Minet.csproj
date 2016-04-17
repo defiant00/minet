@@ -46,11 +46,13 @@
     <Compile Include="Compiler\AST\AST.cs" />
     <Compile Include="Compiler\AST\Final.cs" />
     <Compile Include="Compiler\AST\GenJS.cs" />
+    <Compile Include="Compiler\AST\Helper.cs" />
     <Compile Include="Compiler\BuildConfig.cs" />
     <Compile Include="Compiler\Compiler.cs" />
     <Compile Include="Compiler\Lexer.cs" />
     <Compile Include="Compiler\Parser.cs" />
     <Compile Include="Compiler\AST\Printer.cs" />
+    <Compile Include="Compiler\Status.cs" />
     <Compile Include="Compiler\Token.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

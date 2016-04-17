@@ -17,18 +17,20 @@ namespace Minet.Compiler
 		Identifier,         // an identifier
 		keyword_start,
 		If,                 // 'if'
-		In,                 // 'in'
+		Is,                 // 'is'
 		With,               // 'with'
 		Function,           // 'fn'
 		Var,                // 'var'
 		Return,             // 'ret'
 		For,                // 'for'
+		In,                 // 'in'
+		To,                 // 'to'
+		By,                 // 'by'
 		Loop,               // 'loop'
 		Break,              // 'break'
 		True,               // 'true'
 		False,              // 'false'
 		bool_op_start,
-		Is,                 // 'is'
 		Equal,              // '='
 		NotEqual,           // '!='
 		LessThan,           // '<'
@@ -107,17 +109,19 @@ namespace Minet.Compiler
 		public readonly static Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType>
 		{
 			{"if",      TokenType.If},
-			{"in",      TokenType.In},
+			{"is",      TokenType.Is},
 			{"with",    TokenType.With},
 			{"fn",      TokenType.Function},
 			{"var",     TokenType.Var},
 			{"ret",     TokenType.Return},
 			{"for",     TokenType.For},
+			{"in",      TokenType.In},
+			{"to",      TokenType.To},
+			{"by",      TokenType.By},
 			{"loop",    TokenType.Loop},
 			{"break",   TokenType.Break},
 			{"true",    TokenType.True},
 			{"false",   TokenType.False},
-			{"is",      TokenType.Is},
 			{"=",       TokenType.Equal},
 			{"!=",      TokenType.NotEqual},
 			{"<",       TokenType.LessThan},

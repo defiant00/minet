@@ -10,14 +10,16 @@ namespace Minet.Compiler
 		private BuildConfig config;
 		private int pos = 0;
 		private List<Token> tokens = new List<Token>();
+		private Status status;
 
-		public Parser(string filename, BuildConfig config)
+		public Parser(string filename, BuildConfig config, Status status)
 		{
 			this.filename = filename;
 			this.config = config;
+			this.status = status;
 		}
 
-		public void AddError(string error) { Compiler.Errors.Add(error); }
+		public void AddError(string error) { status.Errors.Add(error); }
 
 		public ParseResult<IStatement> Parse(System.IO.StreamWriter output)
 		{
@@ -343,34 +345,44 @@ namespace Minet.Compiler
 		private ParseResult<IStatement> parseFor(string label)
 		{
 			next(); // eat for
-			AcceptResult res;
 
 			var f = new For { Label = label };
 
-			var par = parseVars();
-			if (par.Result.Count == 0)
-			{
-				return error<IStatement>(true, "No variable specified for for loop.");
-			}
-			else if (par.Error)
-			{
-				return new ParseResult<IStatement>(par.Result[par.Result.Count - 1], true);
-			}
-
-			foreach (Variable v in par.Result) { f.Vars.Add(v); }
-
-			res = accept(TokenType.In);
+			var res = accept(TokenType.Identifier, TokenType.In);
 			if (!res.Success)
 			{
 				return error<IStatement>(true, "Invalid token in for: " + res.LastToken);
 			}
+			f.Var = res[0].Val;
 
-			var inExpr = parseExpr();
-			if (inExpr.Error)
+			var from = parseExpr();
+			if (from.Error)
 			{
-				return new ParseResult<IStatement>(inExpr.Result as IStatement, true);
+				return new ParseResult<IStatement>(from.Result as IStatement, true);
 			}
-			f.In = inExpr.Result;
+			f.From = from.Result;
+
+			res = accept(TokenType.To);
+			if (res.Success)
+			{
+				var to = parseExpr();
+				if (to.Error)
+				{
+					return new ParseResult<IStatement>(to.Result as IStatement, true);
+				}
+				f.To = to.Result;
+			}
+
+			res = accept(TokenType.By);
+			if (res.Success)
+			{
+				var by = parseExpr();
+				if (by.Error)
+				{
+					return new ParseResult<IStatement>(by.Result as IStatement, true);
+				}
+				f.By = by.Result;
+			}
 
 			res = accept(TokenType.EOL, TokenType.Indent);
 			if (!res.Success)

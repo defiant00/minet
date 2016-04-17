@@ -2,26 +2,6 @@
 
 namespace Minet.Compiler.AST
 {
-	public static class Helper
-	{
-		public static void PrintASTIndent(int indent, StringBuilder buf)
-		{
-			for (int i = 0; i < indent; i++) { buf.Append("|   "); }
-		}
-
-		public static void PrintIndented(string line, int indent, StringBuilder buf)
-		{
-			for (int i = 0; i < indent; i++) { buf.Append("\t"); }
-			buf.Append(line);
-		}
-
-		public static void PrintIndentedLine(string line, int indent, StringBuilder buf)
-		{
-			for (int i = 0; i < indent; i++) { buf.Append("\t"); }
-			buf.AppendLine(line);
-		}
-	}
-
 	public partial class Accessor
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
@@ -155,8 +135,20 @@ namespace Minet.Compiler.AST
 		{
 			Helper.PrintASTIndent(indent, buf);
 			if (!string.IsNullOrEmpty(Label)) { buf.Append(Label + ": "); }
-			buf.AppendLine("for " + string.Join(", ", Vars) + " in");
-			In.AppendPrint(indent + 2, buf);
+			buf.AppendLine("for " + Var + " in");
+			From.AppendPrint(indent + 2, buf);
+			if (To != null)
+			{
+				Helper.PrintASTIndent(indent + 1, buf);
+				buf.AppendLine("to");
+				To.AppendPrint(indent + 2, buf);
+			}
+			if (By != null)
+			{
+				Helper.PrintASTIndent(indent + 1, buf);
+				buf.AppendLine("by");
+				By.AppendPrint(indent + 2, buf);
+			}
 			foreach (var s in Statements) { s.AppendPrint(indent + 1, buf); }
 		}
 	}
