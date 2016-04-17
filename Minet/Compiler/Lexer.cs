@@ -222,7 +222,7 @@ namespace Minet.Compiler
 				else if (char.IsLetter(c) || c == '_')
 				{
 					inStmt = true;
-					return lexIdentifier;
+					return lexLiteral;
 				}
 				else if (char.IsDigit(c))
 				{
@@ -289,12 +289,12 @@ namespace Minet.Compiler
 			return error("Unclosed " + jsStart);
 		}
 
-		private stateFn lexIdentifier()
+		private stateFn lexLiteral()
 		{
 			for (var c = peek; char.IsLetterOrDigit(c) || c == '_'; c = peek) { next(); }
 			TokenType t;
 			bool found = Token.Keywords.TryGetValue(current, out t);
-			if (!found) { t = TokenType.Identifier; }
+			if (!found) { t = TokenType.Literal; }
 			emit(t);
 			return lexStatement;
 		}

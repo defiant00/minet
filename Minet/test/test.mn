@@ -3,10 +3,6 @@
 MyClass
 	Main()
 		var arr: ['first', 'second', 'third']
-		for i in 0 to 3
-			console.log(i)
-		for i in 3 to 0
-			console.log(i)
 		for i in arr
 			for j in arr
 				console.log(i + j)

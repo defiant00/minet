@@ -14,7 +14,7 @@ namespace Minet.Compiler
 		JSBlock,            // a block of Javascript
 		String,             // a literal string
 		Number,             // a literal number
-		Identifier,         // an identifier
+		Literal,            // a literal
 		keyword_start,
 		If,                 // 'if'
 		Is,                 // 'is'
@@ -24,8 +24,6 @@ namespace Minet.Compiler
 		Return,             // 'ret'
 		For,                // 'for'
 		In,                 // 'in'
-		To,                 // 'to'
-		By,                 // 'by'
 		Loop,               // 'loop'
 		Break,              // 'break'
 		True,               // 'true'
@@ -106,6 +104,9 @@ namespace Minet.Compiler
 		public Position Pos;
 		public string Val;
 
+		public const string KeywordTo = "to";
+		public const string KeywordBy = "by";
+
 		public readonly static Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType>
 		{
 			{"if",      TokenType.If},
@@ -116,8 +117,6 @@ namespace Minet.Compiler
 			{"ret",     TokenType.Return},
 			{"for",     TokenType.For},
 			{"in",      TokenType.In},
-			{"to",      TokenType.To},
-			{"by",      TokenType.By},
 			{"loop",    TokenType.Loop},
 			{"break",   TokenType.Break},
 			{"true",    TokenType.True},
@@ -161,7 +160,7 @@ namespace Minet.Compiler
 				case TokenType.Comment:
 				case TokenType.JSBlock:
 				case TokenType.Number:
-				case TokenType.Identifier:
+				case TokenType.Literal:
 				case TokenType.Error:
 					return Pos + " " + Type + " : '" + Val + "'";
 				case TokenType.String:

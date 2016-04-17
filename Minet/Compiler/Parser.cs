@@ -119,6 +119,11 @@ namespace Minet.Compiler
 			}
 			return res;
 		}
+		
+		private bool nextIsLit(string lit)
+		{
+			return peek.Type == TokenType.Literal && peek.Val == lit;
+		}
 
 		private ParseResult<IExpression> parseAccessor(IExpression lhs)
 		{
@@ -198,7 +203,7 @@ namespace Minet.Compiler
 		{
 			next(); // eat break
 			var b = new Break();
-			var res = accept(TokenType.Identifier);
+			var res = accept(TokenType.Literal);
 			if (res.Success) { b.Label = res[0].Val; }
 			res = accept(TokenType.EOL);
 			if (!res.Success)
@@ -247,7 +252,7 @@ namespace Minet.Compiler
 			while (true)
 			{
 				bool dotted = accept(TokenType.Dot).Success;
-				var r = accept(TokenType.Identifier);
+				var r = accept(TokenType.Literal);
 				if (!r.Success)
 				{
 					return error<IClassStatement>(true, "Invalid token in class statement: " + r.LastToken);
@@ -327,7 +332,7 @@ namespace Minet.Compiler
 					case TokenType.EOF:
 						next();
 						break;
-					case TokenType.Identifier:
+					case TokenType.Literal:
 						f.Statements.Add(parseClass().Result);
 						break;
 					case TokenType.JSBlock:
@@ -348,7 +353,7 @@ namespace Minet.Compiler
 
 			var f = new For { Label = label };
 
-			var res = accept(TokenType.Identifier, TokenType.In);
+			var res = accept(TokenType.Literal, TokenType.In);
 			if (!res.Success)
 			{
 				return error<IStatement>(true, "Invalid token in for: " + res.LastToken);
@@ -362,9 +367,9 @@ namespace Minet.Compiler
 			}
 			f.From = from.Result;
 
-			res = accept(TokenType.To);
-			if (res.Success)
+			if (nextIsLit(Token.KeywordTo))
 			{
+				next(); // eat to
 				var to = parseExpr();
 				if (to.Error)
 				{
@@ -373,9 +378,9 @@ namespace Minet.Compiler
 				f.To = to.Result;
 			}
 
-			res = accept(TokenType.By);
-			if (res.Success)
+			if (nextIsLit(Token.KeywordBy))
 			{
+				next(); // eat by
 				var by = parseExpr();
 				if (by.Error)
 				{
@@ -488,7 +493,7 @@ namespace Minet.Compiler
 				case TokenType.Var:
 					return parseVar();
 				default:
-					var res = accept(TokenType.Identifier);
+					var res = accept(TokenType.Literal);
 					if (res.Success)
 					{
 						if (peek.Type == TokenType.For || peek.Type == TokenType.Loop)
@@ -506,7 +511,7 @@ namespace Minet.Compiler
 			var id = new Identifier();
 			while (true)
 			{
-				var res = accept(TokenType.Identifier);
+				var res = accept(TokenType.Literal);
 				if (!res.Success) { return error<T>(true, "Invalid token in identifier: " + res.LastToken); }
 				id.Idents.Add(res[0].Val);
 				res = accept(TokenType.Dot);
@@ -691,7 +696,7 @@ namespace Minet.Compiler
 				case TokenType.Function:
 					lhs = parseAnonFuncExpr().Result;
 					break;
-				case TokenType.Identifier:
+				case TokenType.Literal:
 					lhs = parseIdentifier<IExpression>().Result;
 					break;
 				case TokenType.LeftBracket:
@@ -823,7 +828,7 @@ namespace Minet.Compiler
 		private ParseResult<List<IStatement>> parseVars()
 		{
 			var parameters = new List<IStatement>();
-			while (peek.Type == TokenType.Identifier)
+			while (peek.Type == TokenType.Literal)
 			{
 				string pName = next().Val;
 				parameters.Add(new Variable { Name = pName });
