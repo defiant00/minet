@@ -18,7 +18,6 @@ namespace Minet.Compiler
 		keyword_start,
 		If,                 // 'if'
 		Is,                 // 'is'
-		With,               // 'with'
 		Function,           // 'fn'
 		Var,                // 'var'
 		Return,             // 'ret'
@@ -111,7 +110,6 @@ namespace Minet.Compiler
 		{
 			{"if",      TokenType.If},
 			{"is",      TokenType.Is},
-			{"with",    TokenType.With},
 			{"fn",      TokenType.Function},
 			{"var",     TokenType.Var},
 			{"ret",     TokenType.Return},

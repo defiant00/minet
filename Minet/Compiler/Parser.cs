@@ -119,7 +119,7 @@ namespace Minet.Compiler
 			}
 			return res;
 		}
-		
+
 		private bool nextIsLit(string lit)
 		{
 			return peek.Type == TokenType.Literal && peek.Val == lit;
@@ -242,7 +242,8 @@ namespace Minet.Compiler
 
 		private ParseResult<IClassStatement> parseClassStmt()
 		{
-			if (peek.Type == TokenType.JSBlock) {
+			if (peek.Type == TokenType.JSBlock)
+			{
 				var js = parseJSBlock();
 				return new ParseResult<IClassStatement>(js.Result as IClassStatement, js.Error);
 			}
@@ -524,7 +525,7 @@ namespace Minet.Compiler
 		{
 			next(); // eat if
 			IExpression cond = null;
-			if (peek.Type != TokenType.EOL && peek.Type != TokenType.With)
+			if (peek.Type != TokenType.EOL)
 			{
 				var condRes = parseExpr();
 				if (condRes.Error)
@@ -534,16 +535,13 @@ namespace Minet.Compiler
 				cond = condRes.Result;
 			}
 
-			IStatement with = null;
-			if (accept(TokenType.With).Success) { with = parseVarLine(false).Result; }
-
 			var res = accept(TokenType.EOL, TokenType.Indent);
 			if (!res.Success)
 			{
 				return error<IStatement>(true, "Invalid token in if: " + res.LastToken);
 			}
 
-			var ifs = new If { Condition = cond, With = with };
+			var ifs = new If { Condition = cond };
 			while (!peek.Type.IsDedentStop())
 			{
 				ifs.Statements.Add(parseIfInnerStmt().Result);

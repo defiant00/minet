@@ -229,7 +229,16 @@ namespace Minet.Compiler.AST
 	{
 		public string ToJSExpr(Status s)
 		{
-			return "<Constructor>";
+			var sb = new StringBuilder("new ");
+			sb.Append(Type.ToJSExpr(s));
+			sb.Append("(");
+			var exprList = Params as ExprList;
+			if (exprList != null)
+			{
+				sb.Append(string.Join(", ", exprList.Expressions.Select(p => p.ToJSExpr(s))));
+			}
+			sb.Append(")");
+			return sb.ToString();
 		}
 	}
 

@@ -116,7 +116,6 @@ namespace Minet.Compiler.AST
 	public partial class If : IStatement
 	{
 		public IExpression Condition;
-		public IStatement With;
 		public List<IStatement> Statements = new List<IStatement>();
 	}
 

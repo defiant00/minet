@@ -207,12 +207,6 @@ namespace Minet.Compiler.AST
 				Helper.PrintASTIndent(indent + 1, buf);
 				buf.AppendLine("(implicit true)");
 			}
-			if (With != null)
-			{
-				Helper.PrintASTIndent(indent + 1, buf);
-				buf.AppendLine("with");
-				With.AppendPrint(indent + 2, buf);
-			}
 			Helper.PrintASTIndent(indent + 1, buf);
 			buf.AppendLine("then");
 			foreach (var s in Statements) { s.AppendPrint(indent + 2, buf); }

@@ -2,7 +2,21 @@
 
 MyClass
 	Main()
-		var arr: ['first', 'second', 'third']
-		for i in arr
-			for j in arr
-				console.log(i + j)
+		var obj: MyClass{}
+		obj: MyClass{1, 2}
+		obj: MyClass{
+			1, 2,
+			3, 4
+		}
+		<;
+		obj: {}
+		obj: {x, y: 1, 2}
+		obj: {
+			a: 1
+			b, c: 2, 3
+		}
+		obj: {
+			a, b: 1, 2
+			c, d: 3, 4
+		}
+		;>
