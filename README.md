@@ -28,10 +28,10 @@ Both spaces and tabs are supported; during lexing, tabs are treated as four spac
 ; Class names can be chained together, resulting in classes containing other classes.
 ; In this example, MyClass is a child class of MyProject, which is also a class.
 MyProject.MyClass
-    Counter: 0                         ; Instance variables and functions start with a "." and static
+    Counter: 0                          ; Instance variables and functions start with a "." and static
                                         ; variables and functions do not. This is a static counter.
 
-    .InstCounter: 0                    ; This is an instance variable.
+    .InstCounter: 0                     ; This is an instance variable.
 
     Main: fn()                          ; A project should contain a single static Main function
         alert("Hello from Minet!")      ; which will be used to run the project.
