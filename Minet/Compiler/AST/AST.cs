@@ -100,11 +100,9 @@ namespace Minet.Compiler.AST
 		public IExpression Function, Params;
 	}
 
-	public partial class FunctionDef : IExpression, IClassStatement
+	public partial class FunctionDef : IExpression
 	{
-		public bool Static;
-		public string Name;
-		public List<Variable> Params = new List<Variable>();
+		public List<string> Params = new List<string>();
 		public List<IStatement> Statements = new List<IStatement>();
 	}
 
@@ -169,11 +167,6 @@ namespace Minet.Compiler.AST
 		public TokenType Op;
 	}
 
-	public partial class Variable : IStatement
-	{
-		public string Name;
-	}
-
 	public partial class VarSet : IStatement
 	{
 		public List<VarSetLine> Lines = new List<VarSetLine>();
@@ -181,7 +174,7 @@ namespace Minet.Compiler.AST
 
 	public partial class VarSetLine : IStatement
 	{
-		public List<Variable> Vars = new List<Variable>();
+		public List<string> Vars = new List<string>();
 		public IExpression Vals;
 	}
 }

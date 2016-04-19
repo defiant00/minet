@@ -392,50 +392,25 @@ namespace Minet.Compiler.AST
 		public string ToJSExpr(Status s)
 		{
 			var buf = new StringBuilder("function(");
-			buf.Append(string.Join(", ", Params));
+			AppendParams(buf);
 			buf.AppendLine(") {");
 
 			s.Indent++;
-			foreach(var st in Statements) { st.AppendJSStmt(s, buf); }
+			AppendStatements(s, buf);
 			s.Indent--;
 
 			Helper.PrintIndented("}", s.Indent, buf);
 			return buf.ToString();
 		}
 
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendParams(StringBuilder buf)
 		{
-			Helper.PrintIndentedLine("<function def>", s.Indent, buf);
+			buf.Append(string.Join(", ", Params));
 		}
 
-		public void AppendJS(Status s, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
+		public void AppendStatements(Status s, StringBuilder buf)
 		{
-			if (Name == s.Class)  // Constructor
-			{
-				cSigBuf.Append(string.Join(", ", Params));
-
-				s.Indent++;
-				foreach (var st in Statements) { st.AppendJSStmt(s, cCodeBuf); }
-				s.Indent--;
-			}
-			else
-			{
-				if (Static && Name == "Main") { s.Main = s.Class + "." + Name; }
-
-				Helper.PrintIndented(s.Class, s.Indent, funcBuf);
-				funcBuf.Append(".");
-				if (!Static) { funcBuf.Append("prototype."); }
-				funcBuf.Append(Name);
-				funcBuf.Append(" = function(");
-				funcBuf.Append(string.Join(", ", Params));
-				funcBuf.AppendLine(") {");
-
-				s.Indent++;
-				foreach (var st in Statements) { st.AppendJSStmt(s, funcBuf); }
-				s.Indent--;
-
-				Helper.PrintIndentedLine("};", s.Indent, funcBuf);
-			}
+			foreach (var st in Statements) { st.AppendJSStmt(s, buf); }
 		}
 	}
 
@@ -499,26 +474,58 @@ namespace Minet.Compiler.AST
 					{
 						var p = Props[i];
 						var v = vals.Expressions[i];
+						var fn = v as FunctionDef;
 
 						if (p.Static)
 						{
-							Helper.PrintIndented(s.Class, s.Indent, sPropBuf);
-							if (p.Name != s.Class)		// If they're equal then it's the constructor
+							if (p.Name == s.Class)      // Constructor
 							{
-								sPropBuf.Append(".");
-								sPropBuf.Append(p.Name);
+								if (fn != null)
+								{
+									fn.AppendParams(cSigBuf);
+									s.Indent++;
+									fn.AppendStatements(s, cCodeBuf);
+									s.Indent--;
+								}
+								else
+								{
+									s.Errors.Add("Property " + p.Name + " matches the class name, so it must be a function.");
+								}
 							}
-							sPropBuf.Append(" = ");
-							sPropBuf.Append(v.ToJSExpr(s));
-							sPropBuf.AppendLine(";");
+							else
+							{
+								if (fn != null && p.Name == "Main") { s.Main = s.Class + "." + p.Name; }
+								var buf = fn != null ? funcBuf : sPropBuf;
+								Helper.PrintIndented(s.Class, s.Indent, buf);
+								buf.Append(".");
+								buf.Append(p.Name);
+								buf.Append(" = ");
+								buf.Append(v.ToJSExpr(s));
+								buf.AppendLine(";");
+							}
 						}
 						else
 						{
-							Helper.PrintIndented("this.", s.Indent + 1, cDefBuf);
-							cDefBuf.Append(p.Name);
-							cDefBuf.Append(" = ");
-							cDefBuf.Append(v.ToJSExpr(s));
-							cDefBuf.AppendLine(";");
+							var buf = funcBuf;
+							if (fn == null)
+							{
+								s.Indent++;
+
+								buf = cDefBuf;
+								Helper.PrintIndented("this.", s.Indent, buf);
+							}
+							else
+							{
+								Helper.PrintIndented(s.Class, s.Indent, buf);
+								buf.Append(".prototype.");
+							}
+
+							buf.Append(p.Name);
+							buf.Append(" = ");
+							buf.Append(v.ToJSExpr(s));
+							buf.AppendLine(";");
+
+							if (fn == null) { s.Indent--; }
 						}
 					}
 				}
@@ -560,14 +567,6 @@ namespace Minet.Compiler.AST
 		}
 	}
 
-	public partial class Variable
-	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
-		{
-			s.Errors.Add("Tried to directly generate JS for a variable.");
-		}
-	}
-
 	public partial class VarSet
 	{
 		public void AppendJSStmt(Status s, StringBuilder buf)
@@ -588,7 +587,7 @@ namespace Minet.Compiler.AST
 					Helper.PrintIndented("var ", s.Indent, buf);
 					for (int i = 0; i < Vars.Count; i++)
 					{
-						buf.Append(Vars[i].Name);
+						buf.Append(Vars[i]);
 						buf.Append(" = ");
 						buf.Append(vals.Expressions[i].ToJSExpr(s));
 						if (i + 1 < Vars.Count) { buf.Append(", "); }

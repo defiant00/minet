@@ -142,8 +142,44 @@ namespace Minet.Compiler
 		private ParseResult<IExpression> parseAnonFuncExpr()
 		{
 			next(); // eat fn
-			var st = parseFunctionDef(true, "");
-			return new ParseResult<IExpression>(st.Result as IExpression, st.Error);
+
+			var res = accept(TokenType.LeftParen);
+			if (!res.Success)
+			{
+				return error<IExpression>(true, "Invalid token in function definition: " + res.LastToken);
+			}
+			var fn = new FunctionDef();
+
+			var pars = parseVars();
+			fn.Params.AddRange(pars);
+
+			res = accept(TokenType.RightParen);
+			if (!res.Success)
+			{
+				return error<IExpression>(true, "Invalid token in function definition: " + res.LastToken);
+			}
+
+			res = accept(TokenType.EOL, TokenType.Indent);
+			if (!res.Success)
+			{
+				return error<IExpression>(true, "Invalid token in function definition: " + res.LastToken);
+			}
+
+			while (!peek.Type.IsDedentStop())
+			{
+				fn.Statements.Add(parseFunctionStmt().Result);
+			}
+
+			res = accept(TokenType.Dedent, TokenType.EOL);
+			if (!res.Success)
+			{
+				fn.Statements.Add(error<IStatement>(true, "Invalid token in function definition: " + res.LastToken).Result);
+			}
+
+			// If we're not in the middle of a block (followed by either ',' or ')' ) then put the EOL back.
+			if (!peek.Type.IsInBlock()) { backup(1); }
+
+			return new ParseResult<IExpression>(fn, false);
 		}
 
 		private ParseResult<IStatement> parseAssign(IExpression lhs)
@@ -258,14 +294,7 @@ namespace Minet.Compiler
 				{
 					return error<IClassStatement>(true, "Invalid token in class statement: " + r.LastToken);
 				}
-				string name = r[0].Val;
-
-				if (peek.Type == TokenType.LeftParen)
-				{
-					return parseFunctionDef(dotted, name);
-				}
-
-				ps.Props.Add(new Property { Static = !dotted, Name = name });
+				ps.Props.Add(new Property { Static = !dotted, Name = r[0].Val });
 				if (!accept(TokenType.Comma).Success) { break; }
 			}
 
@@ -428,52 +457,6 @@ namespace Minet.Compiler
 			var fc = new FunctionCall { Function = lhs };
 			fc.Params = parseMLExprList(TokenType.LeftParen, TokenType.RightParen).Result;
 			return new ParseResult<IExpression>(fc, false);
-		}
-
-		private ParseResult<IClassStatement> parseFunctionDef(bool dotted, string name)
-		{
-			var res = accept(TokenType.LeftParen);
-			if (!res.Success)
-			{
-				return error<IClassStatement>(true, "Invalid token in function definition: " + res.LastToken);
-			}
-			var fn = new FunctionDef { Static = !dotted, Name = name };
-
-			var par = parseVars();
-			if (par.Error)
-			{
-				return new ParseResult<IClassStatement>(par.Result[par.Result.Count - 1] as IClassStatement, true);
-			}
-			foreach (Variable v in par.Result) { fn.Params.Add(v); }
-
-			res = accept(TokenType.RightParen);
-			if (!res.Success)
-			{
-				return error<IClassStatement>(true, "Invalid token in function definition: " + res.LastToken);
-			}
-
-			res = accept(TokenType.EOL, TokenType.Indent);
-			if (!res.Success)
-			{
-				return error<IClassStatement>(true, "Invalid token in function definition: " + res.LastToken);
-			}
-
-			while (!peek.Type.IsDedentStop())
-			{
-				fn.Statements.Add(parseFunctionStmt().Result);
-			}
-
-			res = accept(TokenType.Dedent, TokenType.EOL);
-			if (!res.Success)
-			{
-				fn.Statements.Add(error<IStatement>(true, "Invalid token in function definition: " + res.LastToken).Result);
-			}
-
-			// If it's an anonymous function and we're not in the middle of a block
-			// (followed by either ',' or ')' ) then put the EOL back.
-			if (string.IsNullOrEmpty(name) && !peek.Type.IsInBlock()) { backup(1); }
-
-			return new ParseResult<IClassStatement>(fn, false);
 		}
 
 		private ParseResult<IStatement> parseFunctionStmt()
@@ -800,15 +783,11 @@ namespace Minet.Compiler
 			var v = new VarSetLine();
 
 			var vars = parseVars();
-			if (vars.Result.Count == 0)
+			if (vars.Count == 0)
 			{
 				return error<IStatement>(true, "No variables specified after var.");
 			}
-			else if (vars.Error)
-			{
-				return new ParseResult<IStatement>(vars.Result[vars.Result.Count - 1], true);
-			}
-			foreach (Variable va in vars.Result) { v.Vars.Add(va); }
+			v.Vars.AddRange(vars);
 
 			if (accept(TokenType.Assign).Success) { v.Vals = parseExprList().Result; }
 
@@ -823,16 +802,15 @@ namespace Minet.Compiler
 			return new ParseResult<IStatement>(v, false);
 		}
 
-		private ParseResult<List<IStatement>> parseVars()
+		private List<string> parseVars()
 		{
-			var parameters = new List<IStatement>();
+			var vars = new List<string>();
 			while (peek.Type == TokenType.Literal)
 			{
-				string pName = next().Val;
-				parameters.Add(new Variable { Name = pName });
+				vars.Add(next().Val);
 				if (!accept(TokenType.Comma).Success) { break; }
 			}
-			return new ParseResult<List<IStatement>>(parameters, false);
+			return vars;
 		}
 	}
 

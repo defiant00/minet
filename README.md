@@ -28,12 +28,12 @@ Both spaces and tabs are supported; during lexing, tabs are treated as four spac
 ; Class names can be chained together, resulting in classes containing other classes.
 ; In this example, MyClass is a child class of MyProject, which is also a class.
 MyProject.MyClass
-    Counter = 0                         ; Instance variables and methods start with a "." and static
-                                        ; variables and methods do not. This is a static counter.
+    Counter: 0                         ; Instance variables and functions start with a "." and static
+                                        ; variables and functions do not. This is a static counter.
 
-    .InstCounter = 0                    ; This is an instance variable.
+    .InstCounter: 0                    ; This is an instance variable.
 
-    Main()                              ; A project should contain a single static Main method
+    Main: fn()                          ; A project should contain a single static Main function
         alert("Hello from Minet!")      ; which will be used to run the project.
 ```
 
@@ -62,9 +62,18 @@ arr: [1, 2, 3]                                  arr = [1, 2, 3];
 break                                           break;
 break myLoop                                    break myLoop;
 
-MyClass                                         // TODO - Some JS
+MyClass                                         var MyClass = (function () {
+                                                    function MyClass() {
+                                                    }
+                                                    return MyClass;
+                                                })();
 
-// constructor
+MyClass{}                                       new MyClass()
+MyClass{3}                                      new MyClass(3)
+MyClass{                                        new MyClass(1, 2, 3, 4)
+    1, 2,
+    3, 4
+}
 
 for i in 0 to 10 by 2                           for (var i = 0; i < 10; i += 2) {
 myLoop for i in 0 to 10                         myLoop: for (var i = 0; i < 10; i++) {
@@ -74,7 +83,7 @@ for i in myItems                                for (var __i0 = 0; __i0 < myItem
 
 myObj.doThing(1, 2, 3)                          myObj.doThing(1, 2, 3);
 
-MyFunc(a, b)                                    var MyFunc = function(a, b) {
+MyFunc: fn(a, b)                                MyFunc = function(a, b) {
     alert('hi')                                     alert('hi');
                                                 }
 
@@ -87,34 +96,23 @@ else                                            } else {
                                                 }
 
 if                                              if (x < 3) {
-    is x < 3                                        alert("< 3");
-        alert("< 3")                            } else {
+    x < 3                                        alert("< 3");
+        alert("< 3")                            } else if (x > 7) {
+    x > 7                                           alert("> 7");
+        alert("> 7")                            } else {
     else                                            alert(">= 3");
         alert(">= 3")                           }
 
-if x < 3 with x: calc(y)                        var x = calc(y);
-                                                if (x < 3) {
-
-if with x: calc(y)                              var x = calc(y);
-    is x < 3                                    if (x < 3) {
-        alert("< 3")                                alert("< 3");
-    else                                        } else {
-        alert(">= 3")                               alert(">= 3");
-                                                }
-
 if x                                            if (x === 2 || x === 3) {
-    is 2, 3                                         alert("2 or 3");
+    = 2, 3                                          alert("2 or 3");
         alert("2 or 3")                         } else if (x === 4) {
-    is 4                                            alert("4");
+    = 4                                             alert("4");
         alert("4")                              }
 
 loop                                            while(true) {
 myLoop loop                                     myLoop: while(true) {
 
 ret 3                                           return 3;
-
-var x, y                                        var x, y;
-    a, b                                        var a, b;
 
 var x, y: 1, 2                                  var x = 1, y = 2;
     a, b: "hello", "world"                      var a = "hello", b = "world"
@@ -133,6 +131,4 @@ x, y -: 1                                       var __t = 1;
 
 x: true or false                                x = true || false;
 y: x and true                                   y = x && true;
-
-
 ```

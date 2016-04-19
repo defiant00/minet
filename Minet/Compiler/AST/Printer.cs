@@ -174,9 +174,7 @@ namespace Minet.Compiler.AST
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
 			Helper.PrintASTIndent(indent, buf);
-			if (Static) { buf.Append("static "); }
-			buf.Append(string.IsNullOrEmpty(Name) ? "fn" : Name);
-			buf.Append("(");
+			buf.Append("fn(");
 			buf.Append(string.Join(", ", Params));
 			buf.Append(")");
 			buf.AppendLine();
@@ -304,17 +302,6 @@ namespace Minet.Compiler.AST
 			Helper.PrintASTIndent(indent, buf);
 			buf.AppendLine(Op.ToString());
 			Expr.AppendPrint(indent + 1, buf);
-		}
-	}
-
-	public partial class Variable
-	{
-		public override string ToString() { return Name; }
-
-		public void AppendPrint(int indent, StringBuilder buf)
-		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine(ToString());
 		}
 	}
 

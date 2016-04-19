@@ -1,30 +1,15 @@
 ; Minet Test Project
 
 MyClass
-	MyClass()
-		alert('old cons')
-	MyClass: fn()
-		alert('new cons')
-
-
-	DoStatic()
-		alert('old static')
-	DoStatic: fn()
-		alert('new static')
-
-	.Do()
-		alert('old')
-	.Do: fn()
-		alert('new')
-	<;
-
-	Main()
+	Main: fn()
 		var obj: MyClass{}
 		obj: MyClass{1, 2}
 		obj: MyClass{
 			1, 2,
 			3, 4
 		}
+
+		<;
 		obj: {}
 		obj: {x, y: 1, 2}
 		obj: {
