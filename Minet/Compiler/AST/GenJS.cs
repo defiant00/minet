@@ -363,7 +363,7 @@ namespace Minet.Compiler.AST
 			}
 
 			s.Indent++;
-			foreach(var st in Statements) { st.AppendJSStmt(s, buf); }
+			foreach (var st in Statements) { st.AppendJSStmt(s, buf); }
 			s.Indent--;
 
 			Helper.PrintIndentedLine("}", s.Indent, buf);
@@ -391,7 +391,16 @@ namespace Minet.Compiler.AST
 	{
 		public string ToJSExpr(Status s)
 		{
-			return "<FunctionDef>";
+			var buf = new StringBuilder("function(");
+			buf.Append(string.Join(", ", Params));
+			buf.AppendLine(") {");
+
+			s.Indent++;
+			foreach(var st in Statements) { st.AppendJSStmt(s, buf); }
+			s.Indent--;
+
+			Helper.PrintIndented("}", s.Indent, buf);
+			return buf.ToString();
 		}
 
 		public void AppendJSStmt(Status s, StringBuilder buf)
@@ -399,9 +408,9 @@ namespace Minet.Compiler.AST
 			Helper.PrintIndentedLine("<function def>", s.Indent, buf);
 		}
 
-		public void AppendJS(Status s, string cName, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
+		public void AppendJS(Status s, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
 		{
-			if (Name == cName)  // Constructor
+			if (Name == s.Class)  // Constructor
 			{
 				cSigBuf.Append(string.Join(", ", Params));
 
@@ -411,9 +420,9 @@ namespace Minet.Compiler.AST
 			}
 			else
 			{
-				if (Static && Name == "Main") { s.Main = cName + "." + Name; }
+				if (Static && Name == "Main") { s.Main = s.Class + "." + Name; }
 
-				Helper.PrintIndented(cName, s.Indent, funcBuf);
+				Helper.PrintIndented(s.Class, s.Indent, funcBuf);
 				funcBuf.Append(".");
 				if (!Static) { funcBuf.Append("prototype."); }
 				funcBuf.Append(Name);
@@ -456,7 +465,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(Status s, StringBuilder buf) { Helper.PrintIndentedLine(Val, s.Indent, buf); }
 
-		public void AppendJS(Status s, string cName, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
+		public void AppendJS(Status s, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
 		{
 			Helper.PrintIndentedLine(Val, s.Indent, funcBuf);
 		}
@@ -479,7 +488,7 @@ namespace Minet.Compiler.AST
 			s.Errors.Add("Tried to generate a JS statement for a property set.");
 		}
 
-		public void AppendJS(Status s, string cName, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
+		public void AppendJS(Status s, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
 		{
 			var vals = Vals as ExprList;
 			if (vals != null)
@@ -493,9 +502,12 @@ namespace Minet.Compiler.AST
 
 						if (p.Static)
 						{
-							Helper.PrintIndented(cName, s.Indent, sPropBuf);
-							sPropBuf.Append(".");
-							sPropBuf.Append(p.Name);
+							Helper.PrintIndented(s.Class, s.Indent, sPropBuf);
+							if (p.Name != s.Class)		// If they're equal then it's the constructor
+							{
+								sPropBuf.Append(".");
+								sPropBuf.Append(p.Name);
+							}
 							sPropBuf.Append(" = ");
 							sPropBuf.Append(v.ToJSExpr(s));
 							sPropBuf.AppendLine(";");

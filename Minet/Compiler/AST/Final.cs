@@ -34,6 +34,9 @@ namespace Minet.Compiler.AST
 
 		public void Build(Status s, StringBuilder buffer)
 		{
+			string priorClass = s.Class;
+			s.Class = Name;
+
 			var consSigBuffer = new StringBuilder();		// Constructor signature
 			var consDefBuffer = new StringBuilder();		// Constructor defaults
 			var consCodeBuffer = new StringBuilder();       // Constructor code
@@ -55,7 +58,7 @@ namespace Minet.Compiler.AST
 			// Statements and classes
 			//
 			s.Indent++;
-			foreach (var st in Statements) { st.AppendJS(s, Name, consSigBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticPropBuffer); }
+			foreach (var st in Statements) { st.AppendJS(s, consSigBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticPropBuffer); }
 			foreach (var c in Classes) { c.Build(s, classBuffer); }
 			s.Indent--;
 
@@ -84,6 +87,8 @@ namespace Minet.Compiler.AST
 			buffer.Append(Name);
 			buffer.AppendLine(";");
 			Helper.PrintIndentedLine("})();", s.Indent, buffer);
+
+			s.Class = priorClass;
 		}
 	}
 

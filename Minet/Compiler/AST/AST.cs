@@ -20,7 +20,7 @@ namespace Minet.Compiler.AST
 
 	public interface IClassStatement : IStatement
 	{
-		void AppendJS(Status s, string cName, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf);
+		void AppendJS(Status s, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf);
 	}
 
 	public partial class Accessor : IExpression
