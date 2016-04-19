@@ -43,7 +43,9 @@ Minet                                           Javascript
 
 v: myArr[3]                                     v = myArr[3];
 
-fn(a, b)                                        function(a, b);
+fn(a, b)                                        function(a, b) {
+    alert('hi')                                     alert('hi');
+                                                }
 
 a: b                                            a = b;
 
@@ -68,9 +70,9 @@ MyClass                                         var MyClass = (function () {
                                                     return MyClass;
                                                 })();
 
-MyClass{}                                       new MyClass()
-MyClass{3}                                      new MyClass(3)
-MyClass{                                        new MyClass(1, 2, 3, 4)
+MyClass{}                                       new MyClass();
+MyClass{3}                                      new MyClass(3);
+MyClass{                                        new MyClass(1, 2, 3, 4);
     1, 2,
     3, 4
 }
@@ -85,7 +87,7 @@ myObj.doThing(1, 2, 3)                          myObj.doThing(1, 2, 3);
 
 MyFunc: fn(a, b)                                MyFunc = function(a, b) {
     alert('hi')                                     alert('hi');
-                                                }
+                                                };
 
 if x < 3                                        if (x < 3) {
 
@@ -107,7 +109,9 @@ if x                                            if (x === 2 || x === 3) {
     = 2, 3                                          alert("2 or 3");
         alert("2 or 3")                         } else if (x === 4) {
     = 4                                             alert("4");
-        alert("4")                              }
+        alert("4")                              } else if (x > 8) {
+    > 8                                             alert("> 8");
+        alert("> 8")                            }
 
 loop                                            while(true) {
 myLoop loop                                     myLoop: while(true) {

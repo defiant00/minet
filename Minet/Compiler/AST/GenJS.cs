@@ -450,7 +450,14 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(Status s, StringBuilder buf)
 		{
-			Helper.PrintIndentedLine("<loop>", s.Indent, buf);
+			Helper.PrintIndented(string.IsNullOrEmpty(Label) ? "" : Label + ":", s.Indent, buf);
+			buf.AppendLine("while(true) {");
+
+			s.Indent++;
+			foreach(var st in Statements) { st.AppendJSStmt(s, buf); }
+			s.Indent--;
+
+			Helper.PrintIndentedLine("}", s.Indent, buf);
 		}
 	}
 
