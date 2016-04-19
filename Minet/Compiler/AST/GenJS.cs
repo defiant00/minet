@@ -20,16 +20,10 @@ namespace Minet.Compiler.AST
 	{
 		public string ToJSExpr(Status s)
 		{
-			var vals = Vals as ExprList;
-			if (vals != null)
-			{
-				var sb = new StringBuilder("[");
-				sb.Append(string.Join(", ", vals.Expressions.Select(e => e.ToJSExpr(s))));
-				sb.Append("]");
-				return sb.ToString();
-			}
-			s.Errors.Add("Array value list Vals is of type " + Vals.GetType());
-			return "[]";
+			var sb = new StringBuilder("[");
+			sb.Append(string.Join(", ", Vals.Expressions.Select(e => e.ToJSExpr(s))));
+			sb.Append("]");
+			return sb.ToString();
 		}
 	}
 
@@ -37,8 +31,6 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(Status s, StringBuilder buf)
 		{
-			var left = Left as ExprList;
-			var right = Right as ExprList;
 			string op = "/* No Op */";
 			string mulOp = "/* No Multi-Op */";
 			switch (Op)
@@ -70,64 +62,61 @@ namespace Minet.Compiler.AST
 					s.Errors.Add("Unknown assignment operator " + Op);
 					break;
 			}
-			if (left != null && right != null)
+			if (Left.Expressions.Count == 1 && Right.Expressions.Count == 1)
 			{
-				if (left.Expressions.Count == 1 && right.Expressions.Count == 1)
+				var l = Left.Expressions[0];
+				var r = Right.Expressions[0];
+				Helper.PrintIndented(l.ToJSExpr(s), s.Indent, buf);
+				buf.Append(op);
+				buf.Append(r.ToJSExpr(s));
+				buf.AppendLine(";");
+			}
+			else if (Right.Expressions.Count == 1)
+			{
+				var r = Right.Expressions[0];
+				Helper.PrintIndented("var __t", s.Indent, buf);
+				buf.Append(" = ");
+				buf.Append(r.ToJSExpr(s));
+				buf.AppendLine(";");
+				for (int i = 0; i < Left.Expressions.Count; i++)
 				{
-					var l = left.Expressions[0];
-					var r = right.Expressions[0];
+					var l = Left.Expressions[i];
 					Helper.PrintIndented(l.ToJSExpr(s), s.Indent, buf);
 					buf.Append(op);
-					buf.Append(r.ToJSExpr(s));
-					buf.AppendLine(";");
+					buf.AppendLine("__t;");
 				}
-				else if (right.Expressions.Count == 1)
+			}
+			else if (Left.Expressions.Count == Right.Expressions.Count)
+			{
+				for (int i = 0; i < Left.Expressions.Count; i++)
 				{
-					var r = right.Expressions[0];
+					var l = Left.Expressions[i];
+					var r = Right.Expressions[i];
 					Helper.PrintIndented("var __t", s.Indent, buf);
-					buf.Append(" = ");
+					buf.Append(i);
+
+					if (Op != TokenType.Assign)
+					{
+						buf.Append(" = ");
+						buf.Append(l.ToJSExpr(s));
+						buf.Append(mulOp);
+					}
+					else { buf.Append(op); }
 					buf.Append(r.ToJSExpr(s));
 					buf.AppendLine(";");
-					for (int i = 0; i < left.Expressions.Count; i++)
-					{
-						var l = left.Expressions[i];
-						Helper.PrintIndented(l.ToJSExpr(s), s.Indent, buf);
-						buf.Append(op);
-						buf.AppendLine("__t;");
-					}
 				}
-				else if (left.Expressions.Count == right.Expressions.Count)
+				for (int i = 0; i < Left.Expressions.Count; i++)
 				{
-					for (int i = 0; i < left.Expressions.Count; i++)
-					{
-						var l = left.Expressions[i];
-						var r = right.Expressions[i];
-						Helper.PrintIndented("var __t", s.Indent, buf);
-						buf.Append(i);
-
-						if (Op != TokenType.Assign)
-						{
-							buf.Append(" = ");
-							buf.Append(l.ToJSExpr(s));
-							buf.Append(mulOp);
-						}
-						else { buf.Append(op); }
-						buf.Append(r.ToJSExpr(s));
-						buf.AppendLine(";");
-					}
-					for (int i = 0; i < left.Expressions.Count; i++)
-					{
-						var l = left.Expressions[i];
-						Helper.PrintIndented(l.ToJSExpr(s), s.Indent, buf);
-						buf.Append(" = __t");
-						buf.Append(i);
-						buf.AppendLine(";");
-					}
+					var l = Left.Expressions[i];
+					Helper.PrintIndented(l.ToJSExpr(s), s.Indent, buf);
+					buf.Append(" = __t");
+					buf.Append(i);
+					buf.AppendLine(";");
 				}
-				else
-				{
-					s.Errors.Add("Mismatched expression count, " + left.Expressions.Count + " != " + right.Expressions.Count);
-				}
+			}
+			else
+			{
+				s.Errors.Add("Mismatched expression count, " + Left.Expressions.Count + " != " + Right.Expressions.Count);
 			}
 		}
 	}
@@ -454,7 +443,7 @@ namespace Minet.Compiler.AST
 			buf.AppendLine("while(true) {");
 
 			s.Indent++;
-			foreach(var st in Statements) { st.AppendJSStmt(s, buf); }
+			foreach (var st in Statements) { st.AppendJSStmt(s, buf); }
 			s.Indent--;
 
 			Helper.PrintIndentedLine("}", s.Indent, buf);

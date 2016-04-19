@@ -30,12 +30,12 @@ namespace Minet.Compiler.AST
 
 	public partial class ArrayValueList : IExpression
 	{
-		public IExpression Vals;
+		public ExprList Vals;
 	}
 
 	public partial class Assign : IStatement
 	{
-		public IExpression Left, Right;
+		public ExprList Left, Right;
 		public TokenType Op;
 	}
 
@@ -175,6 +175,6 @@ namespace Minet.Compiler.AST
 	public partial class VarSetLine : IStatement
 	{
 		public List<string> Vars = new List<string>();
-		public IExpression Vals;
+		public ExprList Vals;
 	}
 }

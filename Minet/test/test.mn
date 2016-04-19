@@ -2,6 +2,8 @@
 
 MyClass
 	Main: fn()
+		x, y: 1, 2
+	<;
 		var obj: MyClass{}
 		obj: MyClass{1, 2}
 		obj: MyClass{
@@ -21,3 +23,4 @@ MyClass
 			c, d: 3, 4
 		}
 		;>
+	;>

@@ -182,7 +182,7 @@ namespace Minet.Compiler
 			return new ParseResult<IExpression>(fn, false);
 		}
 
-		private ParseResult<IStatement> parseAssign(IExpression lhs)
+		private ParseResult<IStatement> parseAssign(ExprList lhs)
 		{
 			var op = next().Type;
 			var rhs = parseExprList();
@@ -231,7 +231,7 @@ namespace Minet.Compiler
 		private ParseResult<IExpression> parseBracketExpr()
 		{
 			var ex = parseMLExprList(TokenType.LeftBracket, TokenType.RightBracket);
-			if (ex.Error) { return ex; }
+			if (ex.Error) { return new ParseResult<IExpression>(ex.Result, true); }
 			return new ParseResult<IExpression>(new ArrayValueList { Vals = ex.Result }, false);
 		}
 
@@ -309,11 +309,11 @@ namespace Minet.Compiler
 			return new ParseResult<IClassStatement>(ps, false);
 		}
 
-		private ParseResult<IExpression> parseConstructor(IExpression lhs)
+		private ParseResult<Constructor> parseConstructor(IExpression lhs)
 		{
 			var fc = new Constructor { Type = lhs };
 			fc.Params = parseMLExprList(TokenType.LeftCurly, TokenType.RightCurly).Result;
-			return new ParseResult<IExpression>(fc, false);
+			return new ParseResult<Constructor>(fc, false);
 		}
 
 		private ParseResult<IExpression> parseExpr()
@@ -323,7 +323,7 @@ namespace Minet.Compiler
 			return parseBinopRHS(0, lhs.Result);
 		}
 
-		private ParseResult<IExpression> parseExprList()
+		private ParseResult<ExprList> parseExprList()
 		{
 			var el = new ExprList();
 			while (true)
@@ -333,7 +333,7 @@ namespace Minet.Compiler
 				if (ex.Error) { break; }
 				if (!accept(TokenType.Comma).Success) { break; }
 			}
-			return new ParseResult<IExpression>(el, false);
+			return new ParseResult<ExprList>(el, false);
 		}
 
 		private ParseResult<IStatement> parseExprStmt()
@@ -604,14 +604,14 @@ namespace Minet.Compiler
 			return new ParseResult<IStatement>(l, false);
 		}
 
-		private ParseResult<IExpression> parseMLExprList(TokenType start, TokenType end)
+		private ParseResult<ExprList> parseMLExprList(TokenType start, TokenType end)
 		{
 			var el = new ExprList();
 			var res = accept(start);
 			if (!res.Success)
 			{
 				el.Expressions.Add(error<IExpression>(true, "Invalid token in expression list: " + res.LastToken).Result);
-				return new ParseResult<IExpression>(el, true);
+				return new ParseResult<ExprList>(el, true);
 			}
 			if (peek.Type != end)
 			{
@@ -638,9 +638,9 @@ namespace Minet.Compiler
 					if (ex.Error)
 					{
 						el.Expressions.Add(ex.Result);
-						return new ParseResult<IExpression>(el, true);
+						return new ParseResult<ExprList>(el, true);
 					}
-					el = ex.Result as ExprList;
+					el = ex.Result;
 				}
 			}
 			res = accept(end);
@@ -648,7 +648,7 @@ namespace Minet.Compiler
 			{
 				el.Expressions.Add(error<IExpression>(true, "Invalid token in expression list: " + res.LastToken).Result);
 			}
-			return new ParseResult<IExpression>(el, false);
+			return new ParseResult<ExprList>(el, false);
 		}
 
 		private ParseResult<IExpression> parseNumberExpr()
