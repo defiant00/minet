@@ -81,12 +81,9 @@ namespace Minet.Compiler.AST
 		{
 			Helper.PrintASTIndent(indent, buf);
 			buf.AppendLine("cons " + Type);
-			if (Params != null)
-			{
-				Helper.PrintASTIndent(indent + 1, buf);
-				buf.AppendLine("params");
-				Params.AppendPrint(indent + 2, buf);
-			}
+			Helper.PrintASTIndent(indent + 1, buf);
+			buf.AppendLine("params");
+			Params.AppendPrint(indent + 2, buf);
 		}
 	}
 
@@ -160,12 +157,9 @@ namespace Minet.Compiler.AST
 			Helper.PrintASTIndent(indent, buf);
 			buf.AppendLine("func");
 			Function.AppendPrint(indent + 2, buf);
-			if (Params != null)
-			{
-				Helper.PrintASTIndent(indent + 1, buf);
-				buf.AppendLine("params");
-				Params.AppendPrint(indent + 2, buf);
-			}
+			Helper.PrintASTIndent(indent + 1, buf);
+			buf.AppendLine("params");
+			Params.AppendPrint(indent + 2, buf);
 		}
 	}
 
@@ -249,6 +243,16 @@ namespace Minet.Compiler.AST
 		{
 			Helper.PrintASTIndent(indent, buf);
 			buf.AppendLine("num " + Val);
+		}
+	}
+
+	public partial class ObjectConstructor
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndent(indent, buf);
+			buf.AppendLine("anonymous constructor");
+			foreach (var l in Lines) { l.AppendPrint(indent + 1, buf); }
 		}
 	}
 

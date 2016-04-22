@@ -316,6 +316,23 @@ namespace Minet.Compiler
 			return new ParseResult<Constructor>(fc, false);
 		}
 
+		private ParseResult<IExpression> parseCurlyExpr()
+		{
+			next(); // eat {
+			var cons = new ObjectConstructor();
+			//
+			// TODO - Parse anonymous constructor
+			//
+
+			var res = accept(TokenType.RightCurly);
+			if (!res.Success)
+			{
+				return error<IExpression>(true, "Invalid token in object constructor: " + res.LastToken);
+			}
+
+			return new ParseResult<IExpression>(cons, false);
+		}
+
 		private ParseResult<IExpression> parseExpr()
 		{
 			var lhs = parsePrimaryExpr();
@@ -683,6 +700,9 @@ namespace Minet.Compiler
 				case TokenType.LeftBracket:
 					lhs = parseBracketExpr().Result;
 					break;
+				case TokenType.LeftCurly:
+					lhs = parseCurlyExpr().Result;
+					break;
 				case TokenType.LeftParen:
 					lhs = parseParenExpr().Result;
 					break;
@@ -755,7 +775,7 @@ namespace Minet.Compiler
 			next(); // eat var
 			var vs = new VarSet();
 
-			var vsl = parseVarLine(true);
+			var vsl = parseVarLine();
 			if (vsl.Error) { return vsl; }
 			vs.Lines.Add(vsl.Result as VarSetLine);
 
@@ -763,7 +783,7 @@ namespace Minet.Compiler
 			{
 				while (!peek.Type.IsDedentStop())
 				{
-					vsl = parseVarLine(true);
+					vsl = parseVarLine();
 					if (vsl.Error) { return vsl; }
 					vs.Lines.Add(vsl.Result as VarSetLine);
 				}
@@ -778,7 +798,7 @@ namespace Minet.Compiler
 			return new ParseResult<IStatement>(vs, false);
 		}
 
-		private ParseResult<IStatement> parseVarLine(bool eatEOL)
+		private ParseResult<IStatement> parseVarLine()
 		{
 			var v = new VarSetLine();
 
@@ -791,14 +811,12 @@ namespace Minet.Compiler
 
 			if (accept(TokenType.Assign).Success) { v.Vals = parseExprList().Result; }
 
-			if (eatEOL)
+			var res = accept(TokenType.EOL);
+			if (!res.Success)
 			{
-				var res = accept(TokenType.EOL);
-				if (!res.Success)
-				{
-					return error<IStatement>(true, "Invalid token in var statement: " + res.LastToken);
-				}
+				return error<IStatement>(true, "Invalid token in var statement: " + res.LastToken);
 			}
+
 			return new ParseResult<IStatement>(v, false);
 		}
 

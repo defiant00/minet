@@ -63,7 +63,8 @@ namespace Minet.Compiler.AST
 
 	public partial class Constructor : IExpression
 	{
-		public IExpression Type, Params;
+		public IExpression Type;
+		public ExprList Params;
 	}
 
 	public partial class Error : IExpression, IStatement
@@ -78,7 +79,7 @@ namespace Minet.Compiler.AST
 
 	public partial class ExprStmt : IStatement
 	{
-		public IExpression Expr;
+		public ExprList Expr;
 	}
 
 	public partial class File : IStatement
@@ -97,7 +98,8 @@ namespace Minet.Compiler.AST
 
 	public partial class FunctionCall : IExpression
 	{
-		public IExpression Function, Params;
+		public IExpression Function;
+		public ExprList Params;
 	}
 
 	public partial class FunctionDef : IExpression
@@ -139,6 +141,11 @@ namespace Minet.Compiler.AST
 		public string Val;
 	}
 
+	public partial class ObjectConstructor : IExpression
+	{
+		public List<VarSetLine> Lines = new List<VarSetLine>();
+	}
+
 	public partial class Property
 	{
 		public bool Static;
@@ -148,7 +155,7 @@ namespace Minet.Compiler.AST
 	public partial class PropertySet : IClassStatement
 	{
 		public List<Property> Props = new List<Property>();
-		public IExpression Vals;
+		public ExprList Vals;
 	}
 
 	public partial class Return : IStatement

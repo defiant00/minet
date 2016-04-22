@@ -221,11 +221,7 @@ namespace Minet.Compiler.AST
 			var sb = new StringBuilder("new ");
 			sb.Append(Type.ToJSExpr(s));
 			sb.Append("(");
-			var exprList = Params as ExprList;
-			if (exprList != null)
-			{
-				sb.Append(string.Join(", ", exprList.Expressions.Select(p => p.ToJSExpr(s))));
-			}
+			sb.Append(string.Join(", ", Params.Expressions.Select(p => p.ToJSExpr(s))));
 			sb.Append(")");
 			return sb.ToString();
 		}
@@ -257,18 +253,14 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(Status s, StringBuilder buf)
 		{
-			var el = Expr as ExprList;
-			if (el != null)
+			if (Expr.Expressions.Count == 1)
 			{
-				if (el.Expressions.Count == 1)
-				{
-					Helper.PrintIndented(el.Expressions[0].ToJSExpr(s), s.Indent, buf);
-					buf.AppendLine(";");
-				}
-				else
-				{
-					s.Errors.Add("Cannot have more than one expression in an expression statement.");
-				}
+				Helper.PrintIndented(Expr.Expressions[0].ToJSExpr(s), s.Indent, buf);
+				buf.AppendLine(";");
+			}
+			else
+			{
+				s.Errors.Add("Cannot have more than one expression in an expression statement.");
 			}
 		}
 	}
@@ -365,12 +357,8 @@ namespace Minet.Compiler.AST
 		public string ToJSExpr(Status s)
 		{
 			var sb = new StringBuilder(Function.ToJSExpr(s));
-			var par = Params as ExprList;
 			sb.Append("(");
-			if (par != null)
-			{
-				sb.Append(string.Join(", ", par.Expressions.Select(p => p.ToJSExpr(s))));
-			}
+			sb.Append(string.Join(", ", Params.Expressions.Select(p => p.ToJSExpr(s))));
 			sb.Append(")");
 			return sb.ToString();
 		}
@@ -452,6 +440,14 @@ namespace Minet.Compiler.AST
 
 	public partial class Number { public string ToJSExpr(Status s) { return Val; } }
 
+	public partial class ObjectConstructor
+	{
+		public string ToJSExpr(Status s)
+		{
+			return "<Anonymous Constructor>";
+		}
+	}
+
 	public partial class PropertySet
 	{
 		public void AppendJSStmt(Status s, StringBuilder buf)
@@ -461,15 +457,14 @@ namespace Minet.Compiler.AST
 
 		public void AppendJS(Status s, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
 		{
-			var vals = Vals as ExprList;
-			if (vals != null)
+			if (Vals != null)
 			{
-				if (Props.Count == vals.Expressions.Count)
+				if (Props.Count == Vals.Expressions.Count)
 				{
 					for (int i = 0; i < Props.Count; i++)
 					{
 						var p = Props[i];
-						var v = vals.Expressions[i];
+						var v = Vals.Expressions[i];
 						var fn = v as FunctionDef;
 
 						if (p.Static)
@@ -527,7 +522,7 @@ namespace Minet.Compiler.AST
 				}
 				else
 				{
-					s.Errors.Add("Mismatched property / value counts, " + Props.Count + " != " + vals.Expressions.Count);
+					s.Errors.Add("Mismatched property / value counts, " + Props.Count + " != " + Vals.Expressions.Count);
 				}
 			}
 		}
@@ -537,8 +532,12 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(Status s, StringBuilder buf)
 		{
-			Helper.PrintIndented("return ", s.Indent, buf);
-			buf.Append(Val.ToJSExpr(s));
+			Helper.PrintIndented("return", s.Indent, buf);
+			if (Val != null)
+			{
+				buf.Append(" ");
+				buf.Append(Val.ToJSExpr(s));
+			}
 			buf.AppendLine(";");
 		}
 	}
@@ -575,29 +574,24 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(Status s, StringBuilder buf)
 		{
-			var vals = Vals as ExprList;
-			if (vals != null)
+			if (Vals != null)
 			{
-				if (Vars.Count == vals.Expressions.Count)
+				if (Vars.Count == Vals.Expressions.Count)
 				{
 					Helper.PrintIndented("var ", s.Indent, buf);
 					for (int i = 0; i < Vars.Count; i++)
 					{
 						buf.Append(Vars[i]);
 						buf.Append(" = ");
-						buf.Append(vals.Expressions[i].ToJSExpr(s));
+						buf.Append(Vals.Expressions[i].ToJSExpr(s));
 						if (i + 1 < Vars.Count) { buf.Append(", "); }
 					}
 					buf.AppendLine(";");
 				}
 				else
 				{
-					s.Errors.Add("Mismatched vars and values in VarSetLine, " + Vars.Count + " != " + vals.Expressions.Count);
+					s.Errors.Add("Mismatched vars and values in VarSetLine, " + Vars.Count + " != " + Vals.Expressions.Count);
 				}
-			}
-			else
-			{
-				s.Errors.Add("Expected ExprList in VarSetLine, found " + Vals.GetType());
 			}
 		}
 	}

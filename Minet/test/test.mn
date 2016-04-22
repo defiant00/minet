@@ -1,9 +1,17 @@
 ; Minet Test Project
 
+; TODO
+
+; anonymous constructors
+
+; standard if/else
+; empty if condition
+; if, boolean op, value list and else
+
+; indent-chained statements
+
 MyClass
 	Main: fn()
-		x, y: 1, 2
-	<;
 		var obj: MyClass{}
 		obj: MyClass{1, 2}
 		obj: MyClass{
@@ -11,7 +19,6 @@ MyClass
 			3, 4
 		}
 
-		<;
 		obj: {}
 		obj: {x, y: 1, 2}
 		obj: {
@@ -22,5 +29,3 @@ MyClass
 			a, b: 1, 2
 			c, d: 3, 4
 		}
-		;>
-	;>
