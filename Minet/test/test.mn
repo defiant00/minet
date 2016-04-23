@@ -2,35 +2,22 @@
 
 ; TODO
 
-; anonymous constructors
+; indent-chained statements
 
 ; standard if/else
 ; empty if condition
 ; if, boolean op, value list and else
-
-; indent-chained statements
 
 ; check what characters are allowed in js vars (add $, others?)
 
 ; hex
 
 MyClass
-	MyClass: fn(i)
-		this.ident = i
-
 	Main: fn()
-		var obj: {}
-		obj: {x, y: 1, 2}
-		obj: {x, y: 0}
-		obj: {
-			a: 1
-			b, c: 2, 3
-		}
-		obj: {
+		myObj
 			a, b: 1, 2
-			c, d: 3, 4
-		}
-		obj: {
-			a, b: 1
-			c, d: 3, 4
-		}
+			second
+				third
+					fourth: 4
+			another, couple
+				doAThing()

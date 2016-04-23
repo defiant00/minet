@@ -251,7 +251,7 @@ namespace Minet.Compiler.AST
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
 			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("anonymous constructor");
+			buf.AppendLine("object constructor");
 			foreach (var l in Lines) { l.AppendPrint(indent + 1, buf); }
 		}
 	}
@@ -287,6 +287,16 @@ namespace Minet.Compiler.AST
 			Helper.PrintASTIndent(indent, buf);
 			buf.AppendLine("return");
 			if (Val != null) { Val.AppendPrint(indent + 1, buf); }
+		}
+	}
+
+	public partial class SetLine
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndent(indent, buf);
+			buf.AppendLine(string.Join(", ", Names));
+			if (Vals != null) { Vals.AppendPrint(indent + 1, buf); }
 		}
 	}
 

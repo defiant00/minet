@@ -444,7 +444,14 @@ namespace Minet.Compiler.AST
 	{
 		public string ToJSExpr(Status s)
 		{
-			return "<Anonymous Constructor>";
+			var sb = new StringBuilder("{");
+			for (int i = 0; i < Lines.Count; i++)
+			{
+				sb.Append(Lines[i].ToJSExpr(s));
+				if (i + 1 < Lines.Count) { sb.Append(", "); }
+			}
+			sb.Append("}");
+			return sb.ToString();
 		}
 	}
 
@@ -539,6 +546,43 @@ namespace Minet.Compiler.AST
 				buf.Append(Val.ToJSExpr(s));
 			}
 			buf.AppendLine(";");
+		}
+	}
+
+	public partial class SetLine
+	{
+		public string ToJSExpr(Status s)
+		{
+			var sb = new StringBuilder();
+			if (Vals != null)
+			{
+				if (Names.Count == Vals.Expressions.Count)
+				{
+					for (int i = 0; i < Names.Count; i++)
+					{
+						sb.Append(Names[i]);
+						sb.Append(":");
+						sb.Append(Vals.Expressions[i].ToJSExpr(s));
+						if (i + 1 < Names.Count) { sb.Append(", "); }
+					}
+				}
+				else if (Vals.Expressions.Count == 1)
+				{
+					string val = Vals.Expressions[0].ToJSExpr(s);
+					for (int i = 0; i < Names.Count; i++)
+					{
+						sb.Append(Names[i]);
+						sb.Append(":");
+						sb.Append(val);
+						if (i + 1 < Names.Count) { sb.Append(", "); }
+					}
+				}
+				else
+				{
+					s.Errors.Add("Mismatched name and value counts in set line, " + Names.Count + " != " + Vals.Expressions.Count);
+				}
+			}
+			return sb.ToString();
 		}
 	}
 

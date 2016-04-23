@@ -143,7 +143,7 @@ namespace Minet.Compiler.AST
 
 	public partial class ObjectConstructor : IExpression
 	{
-		public List<VarSetLine> Lines = new List<VarSetLine>();
+		public List<SetLine> Lines = new List<SetLine>();
 	}
 
 	public partial class Property
@@ -161,6 +161,12 @@ namespace Minet.Compiler.AST
 	public partial class Return : IStatement
 	{
 		public IExpression Val;
+	}
+
+	public partial class SetLine : IExpression
+	{
+		public List<string> Names = new List<string>();
+		public ExprList Vals;
 	}
 
 	public partial class String : IExpression

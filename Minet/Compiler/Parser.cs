@@ -320,11 +320,38 @@ namespace Minet.Compiler
 		{
 			next(); // eat {
 			var cons = new ObjectConstructor();
-			//
-			// TODO - Parse anonymous constructor
-			//
+			AcceptResult res;
 
-			var res = accept(TokenType.RightCurly);
+			if (accept(TokenType.EOL, TokenType.Indent).Success)
+			{
+				while (!peek.Type.IsDedentStop())
+				{
+					var sl = parseSetLine();
+					if (sl.Error) { return sl; }
+					cons.Lines.Add(sl.Result as SetLine);
+
+					res = accept(TokenType.EOL);
+					if (!res.Success)
+					{
+						return error<IExpression>(true, "Invalid token in object constructor: " + res.LastToken);
+					}
+				}
+
+				res = accept(TokenType.Dedent, TokenType.EOL);
+				if (!res.Success)
+				{
+					return error<IExpression>(true, "Invalid token in object constructor: " + res.LastToken);
+				}
+			}
+			else if (peek.Type != TokenType.RightCurly)
+			{
+				var sl = parseSetLine();
+				if (sl.Error) { return sl; }
+				cons.Lines.Add(sl.Result as SetLine);
+				
+			}
+
+			res = accept(TokenType.RightCurly);
 			if (!res.Success)
 			{
 				return error<IExpression>(true, "Invalid token in object constructor: " + res.LastToken);
@@ -754,6 +781,23 @@ namespace Minet.Compiler
 				r.Val = error<IExpression>(true, "Invalid token in return: " + res.LastToken).Result;
 			}
 			return new ParseResult<IStatement>(r, false);
+		}
+
+		private ParseResult<IExpression> parseSetLine()
+		{
+			var line = new SetLine();
+			var names = parseVars();
+			line.Names.AddRange(names);
+
+			var res = accept(TokenType.Assign);
+			if (!res.Success)
+			{
+				return error<IExpression>(true, "Set line must be an assignment.");
+			}
+
+			line.Vals = parseExprList().Result;
+
+			return new ParseResult<IExpression>(line, false);
 		}
 
 		private ParseResult<IExpression> parseStringExpr()
