@@ -2,6 +2,10 @@
 
 ; TODO
 
+; VarSetLine -> SetLine
+; add some sort of GenerateSets and use it wherever SetLine is used (won't work with many: one?)
+; make it also support "many: one" so it works like normal assignments
+
 ; anonymous constructors
 
 ; standard if/else
@@ -9,6 +13,8 @@
 ; if, boolean op, value list and else
 
 ; indent-chained statements
+
+; check what characters are allowed in js vars (add $, others?)
 
 MyClass
 	Main: fn()
