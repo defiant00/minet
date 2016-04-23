@@ -588,6 +588,20 @@ namespace Minet.Compiler.AST
 					}
 					buf.AppendLine(";");
 				}
+				else if (Vals.Expressions.Count == 1)
+				{
+					Helper.PrintIndented("var __t = ", s.Indent, buf);
+					buf.Append(Vals.Expressions[0].ToJSExpr(s));
+					buf.AppendLine(";");
+					Helper.PrintIndented("var ", s.Indent, buf);
+					for (int i = 0; i < Vars.Count; i++)
+					{
+						buf.Append(Vars[i]);
+						buf.Append(" = __t");
+						if (i + 1 < Vars.Count) { buf.Append(", "); }
+					}
+					buf.AppendLine(";");
+				}
 				else
 				{
 					s.Errors.Add("Mismatched vars and values in VarSetLine, " + Vars.Count + " != " + Vals.Expressions.Count);

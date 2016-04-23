@@ -2,10 +2,6 @@
 
 ; TODO
 
-; VarSetLine -> SetLine
-; add some sort of GenerateSets and use it wherever SetLine is used (won't work with many: one?)
-; make it also support "many: one" so it works like normal assignments
-
 ; anonymous constructors
 
 ; standard if/else
@@ -16,22 +12,25 @@
 
 ; check what characters are allowed in js vars (add $, others?)
 
-MyClass
-	Main: fn()
-		var obj: MyClass{}
-		obj: MyClass{1, 2}
-		obj: MyClass{
-			1, 2,
-			3, 4
-		}
+; hex
 
-		obj: {}
+MyClass
+	MyClass: fn(i)
+		this.ident = i
+
+	Main: fn()
+		var obj: {}
 		obj: {x, y: 1, 2}
+		obj: {x, y: 0}
 		obj: {
 			a: 1
 			b, c: 2, 3
 		}
 		obj: {
 			a, b: 1, 2
+			c, d: 3, 4
+		}
+		obj: {
+			a, b: 1
 			c, d: 3, 4
 		}
