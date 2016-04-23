@@ -80,6 +80,7 @@ namespace Minet.Compiler.AST
 	public partial class ExprStmt : IStatement
 	{
 		public ExprList Expr;
+		public List<IStatement> Statements = new List<IStatement>();
 	}
 
 	public partial class File : IStatement
@@ -114,12 +115,6 @@ namespace Minet.Compiler.AST
 	}
 
 	public partial class If : IStatement
-	{
-		public IExpression Condition;
-		public List<IStatement> Statements = new List<IStatement>();
-	}
-
-	public partial class Is : IStatement
 	{
 		public IExpression Condition;
 		public List<IStatement> Statements = new List<IStatement>();

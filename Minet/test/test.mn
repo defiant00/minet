@@ -2,22 +2,12 @@
 
 ; TODO
 
-; indent-chained statements
-
 ; standard if/else
 ; empty if condition
 ; if, boolean op, value list and else
 
-; check what characters are allowed in js vars (add $, others?)
-
-; hex
-
 MyClass
 	Main: fn()
-		myObj
-			a, b: 1, 2
-			second
-				third
-					fourth: 4
-			another, couple
-				doAThing()
+		this.some.thing
+			first: 1
+			second: 2

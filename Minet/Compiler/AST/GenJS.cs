@@ -66,7 +66,7 @@ namespace Minet.Compiler.AST
 			{
 				var l = Left.Expressions[0];
 				var r = Right.Expressions[0];
-				Helper.PrintIndented(l.ToJSExpr(s), s.Indent, buf);
+				Helper.PrintIndented(s.ChainName(l.ToJSExpr(s)), s.Indent, buf);
 				buf.Append(op);
 				buf.Append(r.ToJSExpr(s));
 				buf.AppendLine(";");
@@ -81,7 +81,7 @@ namespace Minet.Compiler.AST
 				for (int i = 0; i < Left.Expressions.Count; i++)
 				{
 					var l = Left.Expressions[i];
-					Helper.PrintIndented(l.ToJSExpr(s), s.Indent, buf);
+					Helper.PrintIndented(s.ChainName(l.ToJSExpr(s)), s.Indent, buf);
 					buf.Append(op);
 					buf.AppendLine("__t;");
 				}
@@ -94,7 +94,6 @@ namespace Minet.Compiler.AST
 					var r = Right.Expressions[i];
 					Helper.PrintIndented("var __t", s.Indent, buf);
 					buf.Append(i);
-
 					if (Op != TokenType.Assign)
 					{
 						buf.Append(" = ");
@@ -108,7 +107,7 @@ namespace Minet.Compiler.AST
 				for (int i = 0; i < Left.Expressions.Count; i++)
 				{
 					var l = Left.Expressions[i];
-					Helper.PrintIndented(l.ToJSExpr(s), s.Indent, buf);
+					Helper.PrintIndented(s.ChainName(l.ToJSExpr(s)), s.Indent, buf);
 					buf.Append(" = __t");
 					buf.Append(i);
 					buf.AppendLine(";");
@@ -253,14 +252,25 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(Status s, StringBuilder buf)
 		{
-			if (Expr.Expressions.Count == 1)
+			if (Statements.Count > 0)
 			{
-				Helper.PrintIndented(Expr.Expressions[0].ToJSExpr(s), s.Indent, buf);
-				buf.AppendLine(";");
+				string oldChain = s.Chain;
+				string chainRoot = s.ChainName(string.Empty);
+				foreach (var e in Expr.Expressions)
+				{
+					s.Chain = chainRoot + e.ToJSExpr(s);
+					foreach (var st in Statements) { st.AppendJSStmt(s, buf); }
+				}
+
+				s.Chain = oldChain;
 			}
 			else
 			{
-				s.Errors.Add("Cannot have more than one expression in an expression statement.");
+				foreach (var e in Expr.Expressions)
+				{
+					Helper.PrintIndented(s.ChainName(e.ToJSExpr(s)), s.Indent, buf);
+					buf.AppendLine(";");
+				}
 			}
 		}
 	}
@@ -402,14 +412,6 @@ namespace Minet.Compiler.AST
 		public void AppendJSStmt(Status s, StringBuilder buf)
 		{
 			Helper.PrintIndentedLine("<if>", s.Indent, buf);
-		}
-	}
-
-	public partial class Is
-	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
-		{
-			Helper.PrintIndentedLine("<is>", s.Indent, buf);
 		}
 	}
 

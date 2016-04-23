@@ -392,6 +392,19 @@ namespace Minet.Compiler
 			}
 			if (assign != null) { return new ParseResult<IStatement>(assign, false); }
 			var es = new ExprStmt { Expr = ex.Result };
+			if (accept(TokenType.Indent).Success)
+			{
+				while (!peek.Type.IsDedentStop())
+				{
+					es.Statements.Add(parseExprStmt().Result);
+				}
+
+				res = accept(TokenType.Dedent, TokenType.EOL);
+				if (!res.Success)
+				{
+					return error<IStatement>(true, "Invalid token in expression statement: " + res.LastToken);
+				}
+			}
 			return new ParseResult<IStatement>(es, false);
 		}
 
@@ -551,67 +564,10 @@ namespace Minet.Compiler
 		private ParseResult<IStatement> parseIf()
 		{
 			next(); // eat if
-			IExpression cond = null;
-			if (peek.Type != TokenType.EOL)
-			{
-				var condRes = parseExpr();
-				if (condRes.Error)
-				{
-					return new ParseResult<IStatement>(condRes.Result as IStatement, true);
-				}
-				cond = condRes.Result;
-			}
 
-			var res = accept(TokenType.EOL, TokenType.Indent);
-			if (!res.Success)
-			{
-				return error<IStatement>(true, "Invalid token in if: " + res.LastToken);
-			}
+			// TODO
 
-			var ifs = new If { Condition = cond };
-			while (!peek.Type.IsDedentStop())
-			{
-				ifs.Statements.Add(parseIfInnerStmt().Result);
-			}
-
-			res = accept(TokenType.Dedent, TokenType.EOL);
-			if (!res.Success)
-			{
-				ifs.Statements.Add(error<IStatement>(true, "Invalid token in if: " + res.LastToken).Result);
-			}
-
-			return new ParseResult<IStatement>(ifs, false);
-		}
-
-		private ParseResult<IStatement> parseIfInnerStmt()
-		{
-			if (peek.Type == TokenType.Is) { return parseIs(); }
-			return parseFunctionStmt();
-		}
-
-		private ParseResult<IStatement> parseIs()
-		{
-			next(); // eat is
-			var cond = parseExprList();
-			var res = accept(TokenType.EOL, TokenType.Indent);
-			if (!res.Success)
-			{
-				return error<IStatement>(true, "Invalid token in is: " + res.LastToken);
-			}
-
-			var iss = new Is { Condition = cond.Result };
-			while (!peek.Type.IsDedentStop())
-			{
-				iss.Statements.Add(parseFunctionStmt().Result);
-			}
-
-			res = accept(TokenType.Dedent, TokenType.EOL);
-			if (!res.Success)
-			{
-				iss.Statements.Add(error<IStatement>(true, "Invalid token in is: " + res.LastToken).Result);
-			}
-
-			return new ParseResult<IStatement>(iss, false);
+			return new ParseResult<IStatement>(null, false);
 		}
 
 		private ParseResult<IStatement> parseJSBlock()

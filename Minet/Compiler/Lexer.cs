@@ -5,7 +5,8 @@ namespace Minet.Compiler
 	public class Lexer
 	{
 		const char eof = '\0';
-		const string operatorChars = "()[]{}<>!=+-*/%,.:&|^";
+		const string operatorChars = "()[]{}<>!=+-*/%,.:";
+		const string hexStart = "0x";
 		const string commentStart = "<;";
 		const string commentEnd = ";>";
 		const string jsStart = "<js";
@@ -38,6 +39,21 @@ namespace Minet.Compiler
 				}
 				return new Position { Char = c, Line = l };
 			}
+		}
+
+		private bool isValidHex(char c)
+		{
+			return char.IsDigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+		}
+
+		private bool isValidLiteralStart(char c)
+		{
+			return char.IsLetter(c) || c == '_' || c == '$';
+		}
+
+		private bool isValidLiteral(char c)
+		{
+			return isValidLiteralStart(c) || char.IsDigit(c);
 		}
 
 		private string current { get { return input.Substring(start, (pos - start)); } }
@@ -219,7 +235,7 @@ namespace Minet.Compiler
 					inStmt = true;
 					return lexString;
 				}
-				else if (char.IsLetter(c) || c == '_')
+				else if (isValidLiteralStart(c))
 				{
 					inStmt = true;
 					return lexLiteral;
@@ -291,7 +307,7 @@ namespace Minet.Compiler
 
 		private stateFn lexLiteral()
 		{
-			for (var c = peek; char.IsLetterOrDigit(c) || c == '_'; c = peek) { next(); }
+			for (var c = peek; isValidLiteral(c); c = peek) { next(); }
 			TokenType t;
 			bool found = Token.Keywords.TryGetValue(current, out t);
 			if (!found) { t = TokenType.Literal; }
@@ -301,17 +317,25 @@ namespace Minet.Compiler
 
 		private stateFn lexNumber()
 		{
-			for (var c = peek; char.IsDigit(c); c = peek) { next(); }
-			if (accept("."))
+			if (currentPosStartsWith(hexStart))
 			{
-				bool afterDecimal = false;
-				for (var c = peek; char.IsDigit(c); c = peek)
+				next(hexStart.Length);
+				for (var c = peek; isValidHex(c); c = peek) { next(); }
+			}
+			else
+			{
+				for (var c = peek; char.IsDigit(c); c = peek) { next(); }
+				if (accept("."))
 				{
-					next();
-					afterDecimal = true;
+					bool afterDecimal = false;
+					for (var c = peek; char.IsDigit(c); c = peek)
+					{
+						next();
+						afterDecimal = true;
+					}
+					// Put the decimal back if there are no numbers after it.
+					if (!afterDecimal) { backup(); }
 				}
-				// Put the decimal back if there are no numbers after it.
-				if (!afterDecimal) { backup(); }
 			}
 			emit(TokenType.Number);
 			return lexStatement;

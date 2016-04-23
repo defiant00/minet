@@ -112,7 +112,10 @@ namespace Minet.Compiler.AST
 		{
 			Helper.PrintASTIndent(indent, buf);
 			buf.AppendLine("expression statement");
-			Expr.AppendPrint(indent + 1, buf);
+			Expr.AppendPrint(indent + 2, buf);
+			Helper.PrintASTIndent(indent + 1, buf);
+			buf.AppendLine("sub-expressions");
+			foreach(var s in Statements) { s.AppendPrint(indent + 2, buf); }
 		}
 	}
 
@@ -199,19 +202,6 @@ namespace Minet.Compiler.AST
 				Helper.PrintASTIndent(indent + 1, buf);
 				buf.AppendLine("(implicit true)");
 			}
-			Helper.PrintASTIndent(indent + 1, buf);
-			buf.AppendLine("then");
-			foreach (var s in Statements) { s.AppendPrint(indent + 2, buf); }
-		}
-	}
-
-	public partial class Is
-	{
-		public void AppendPrint(int indent, StringBuilder buf)
-		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("is");
-			Condition.AppendPrint(indent + 1, buf);
 			Helper.PrintASTIndent(indent + 1, buf);
 			buf.AppendLine("then");
 			foreach (var s in Statements) { s.AppendPrint(indent + 2, buf); }
