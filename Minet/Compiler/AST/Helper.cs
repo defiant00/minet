@@ -10,6 +10,12 @@ namespace Minet.Compiler.AST
 			for (int i = 0; i < indent; i++) { buf.Append("|   "); }
 		}
 
+		public static void PrintASTIndentLine(string val, int indent, StringBuilder buf)
+		{
+			for (int i = 0; i < indent; i++) { buf.Append("|   "); }
+			buf.AppendLine(val);
+		}
+
 		public static void PrintIndented(string line, int indent, StringBuilder buf)
 		{
 			for (int i = 0; i < indent; i++) { buf.Append("\t"); }

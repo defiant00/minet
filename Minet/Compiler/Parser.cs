@@ -348,7 +348,7 @@ namespace Minet.Compiler
 				var sl = parseSetLine();
 				if (sl.Error) { return sl; }
 				cons.Lines.Add(sl.Result as SetLine);
-				
+
 			}
 
 			res = accept(TokenType.RightCurly);
@@ -358,6 +358,12 @@ namespace Minet.Compiler
 			}
 
 			return new ParseResult<IExpression>(cons, false);
+		}
+
+		private ParseResult<Else> parseElse()
+		{
+			next(); // eat else
+			return new ParseResult<Else>(new Else(), false);
 		}
 
 		private ParseResult<IExpression> parseExpr()
@@ -564,10 +570,141 @@ namespace Minet.Compiler
 		private ParseResult<IStatement> parseIf()
 		{
 			next(); // eat if
+			AcceptResult res;
+			var ifSt = new If();
 
-			// TODO
+			if (accept(TokenType.EOL, TokenType.Indent).Success)        // no condition
+			{
+				while (!peek.Type.IsDedentStop())
+				{
+					var cond = parseExpr();
+					if (cond.Error) { return new ParseResult<IStatement>(cond.Result as IStatement, true); }
 
-			return new ParseResult<IStatement>(null, false);
+					var sec = new IfSection { Condition = cond.Result };
+					ifSt.Sections.Add(sec);
+
+					res = accept(TokenType.EOL, TokenType.Indent);
+					if (!res.Success)
+					{
+						return error<IStatement>(true, "Invalid token in if: " + res.LastToken);
+					}
+					while (!peek.Type.IsDedentStop())
+					{
+						sec.Statements.Add(parseFunctionStmt().Result);
+					}
+
+					res = accept(TokenType.Dedent, TokenType.EOL);
+					if (!res.Success)
+					{
+						return error<IStatement>(true, "Invalid token in if: " + res.LastToken);
+					}
+				}
+
+				res = accept(TokenType.Dedent, TokenType.EOL);
+				if (!res.Success)
+				{
+					return error<IStatement>(true, "Invalid token in if: " + res.LastToken);
+				}
+			}
+			else
+			{
+				var cond = parseExpr();
+				if (cond.Error) { return new ParseResult<IStatement>(cond.Result as IStatement, true); }
+
+				res = accept(TokenType.EOL, TokenType.Indent);
+				if (!res.Success)
+				{
+					return error<IStatement>(true, "Invalid token in if: " + res.LastToken);
+				}
+
+				if (peek.Type.IsBooleanOp())    // with indented conditions
+				{
+					while (!peek.Type.IsDedentStop())
+					{
+						IExpression subCond = null;
+						if (accept(TokenType.Else).Success)
+						{
+							subCond = new Else();
+						}
+						else
+						{
+							var op = next().Type;
+							var vals = parseExprList().Result;
+							if (vals.Expressions.Count == 0)
+							{
+								return error<IStatement>(true, "No values specified in if.");
+							}
+							subCond = new Binary { Left = cond.Result, Op = op, Right = vals.Expressions[0] };
+
+							for (int i = 1; i < vals.Expressions.Count; i++)
+							{
+								var r = new Binary { Left = cond.Result, Op = op, Right = vals.Expressions[i] };
+								subCond = new Binary { Left = subCond, Op = TokenType.Or, Right = r };
+							}
+						}
+
+						var sec = new IfSection { Condition = subCond };
+						ifSt.Sections.Add(sec);
+
+						res = accept(TokenType.EOL, TokenType.Indent);
+						if (!res.Success)
+						{
+							return error<IStatement>(true, "Invalid token in if: " + res.LastToken);
+						}
+
+						while (!peek.Type.IsDedentStop())
+						{
+							sec.Statements.Add(parseFunctionStmt().Result);
+						}
+
+						res = accept(TokenType.Dedent, TokenType.EOL);
+						if (!res.Success)
+						{
+							return error<IStatement>(true, "Invalid token in if: " + res.LastToken);
+						}
+					}
+					res = accept(TokenType.Dedent, TokenType.EOL);
+					if (!res.Success)
+					{
+						return error<IStatement>(true, "Invalid token in if: " + res.LastToken);
+					}
+				}
+				else
+				{
+					var sec = new IfSection { Condition = cond.Result };
+					ifSt.Sections.Add(sec);
+
+					while (!peek.Type.IsDedentStop())
+					{
+						sec.Statements.Add(parseFunctionStmt().Result);
+					}
+
+					res = accept(TokenType.Dedent, TokenType.EOL);
+					if (!res.Success)
+					{
+						return error<IStatement>(true, "Invalid token in if: " + res.LastToken);
+					}
+
+					if (accept(TokenType.Else, TokenType.EOL, TokenType.Indent).Success)
+					{
+						sec = new IfSection { Condition = new Else() };
+						ifSt.Sections.Add(sec);
+
+						while (!peek.Type.IsDedentStop())
+						{
+							sec.Statements.Add(parseFunctionStmt().Result);
+						}
+
+						res = accept(TokenType.Dedent, TokenType.EOL);
+						if (!res.Success)
+						{
+							return error<IStatement>(true, "Invalid token in if: " + res.LastToken);
+						}
+					}
+				}
+			}
+
+			return new ParseResult<IStatement>(ifSt, false);
 		}
 
 		private ParseResult<IStatement> parseJSBlock()
@@ -674,6 +811,9 @@ namespace Minet.Compiler
 			IExpression lhs = null;
 			switch (peek.Type)
 			{
+				case TokenType.Else:
+					lhs = parseElse().Result;
+					break;
 				case TokenType.Function:
 					lhs = parseAnonFuncExpr().Result;
 					break;

@@ -67,6 +67,8 @@ namespace Minet.Compiler.AST
 		public ExprList Params;
 	}
 
+	public partial class Else : IExpression { }
+
 	public partial class Error : IExpression, IStatement
 	{
 		public string Val;
@@ -115,6 +117,11 @@ namespace Minet.Compiler.AST
 	}
 
 	public partial class If : IStatement
+	{
+		public List<IfSection> Sections = new List<IfSection>();
+	}
+
+	public partial class IfSection : IStatement
 	{
 		public IExpression Condition;
 		public List<IStatement> Statements = new List<IStatement>();

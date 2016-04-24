@@ -6,11 +6,9 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("accessor");
+			Helper.PrintASTIndentLine("accessor", indent, buf);
 			Object.AppendPrint(indent + 2, buf);
-			Helper.PrintASTIndent(indent + 1, buf);
-			buf.AppendLine("index");
+			Helper.PrintASTIndentLine("index", indent + 1, buf);
 			Index.AppendPrint(indent + 2, buf);
 		}
 	}
@@ -19,8 +17,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("array value list");
+			Helper.PrintASTIndentLine("array value list", indent, buf);
 			Vals.AppendPrint(indent + 1, buf);
 		}
 	}
@@ -29,8 +26,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine(Op.ToString());
+			Helper.PrintASTIndentLine(Op.ToString(), indent, buf);
 			Left.AppendPrint(indent + 1, buf);
 			Right.AppendPrint(indent + 1, buf);
 		}
@@ -40,8 +36,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine(Op.ToString());
+			Helper.PrintASTIndentLine(Op.ToString(), indent, buf);
 			Left.AppendPrint(indent + 1, buf);
 			Right.AppendPrint(indent + 1, buf);
 		}
@@ -51,8 +46,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("bool " + Val);
+			Helper.PrintASTIndentLine("bool " + Val, indent, buf);
 		}
 	}
 
@@ -60,8 +54,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine(string.IsNullOrEmpty(Label) ? "break" : "break " + Label);
+			Helper.PrintASTIndentLine(string.IsNullOrEmpty(Label) ? "break" : "break " + Label, indent, buf);
 		}
 	}
 
@@ -69,8 +62,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("class " + Name);
+			Helper.PrintASTIndentLine("class " + Name, indent, buf);
 			foreach (var s in Statements) { s.AppendPrint(indent + 1, buf); }
 		}
 	}
@@ -79,11 +71,17 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("cons " + Type);
-			Helper.PrintASTIndent(indent + 1, buf);
-			buf.AppendLine("params");
+			Helper.PrintASTIndentLine("cons " + Type, indent, buf);
+			Helper.PrintASTIndentLine("params", indent + 1, buf);
 			Params.AppendPrint(indent + 2, buf);
+		}
+	}
+
+	public partial class Else
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndentLine("else", indent, buf);
 		}
 	}
 
@@ -91,8 +89,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("ERROR: " + Val);
+			Helper.PrintASTIndentLine("ERROR: " + Val, indent, buf);
 		}
 	}
 
@@ -100,8 +97,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("expression list");
+			Helper.PrintASTIndentLine("expression list", indent, buf);
 			foreach (var e in Expressions) { e.AppendPrint(indent + 1, buf); }
 		}
 	}
@@ -110,12 +106,10 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("expression statement");
+			Helper.PrintASTIndentLine("expression statement", indent, buf);
 			Expr.AppendPrint(indent + 2, buf);
-			Helper.PrintASTIndent(indent + 1, buf);
-			buf.AppendLine("sub-expressions");
-			foreach(var s in Statements) { s.AppendPrint(indent + 2, buf); }
+			Helper.PrintASTIndentLine("sub-expressions", indent + 1, buf);
+			foreach (var s in Statements) { s.AppendPrint(indent + 2, buf); }
 		}
 	}
 
@@ -123,8 +117,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine(Name);
+			Helper.PrintASTIndentLine(Name, indent, buf);
 			foreach (var s in Statements) { s.AppendPrint(indent + 1, buf); }
 		}
 	}
@@ -139,14 +132,12 @@ namespace Minet.Compiler.AST
 			From.AppendPrint(indent + 2, buf);
 			if (To != null)
 			{
-				Helper.PrintASTIndent(indent + 1, buf);
-				buf.AppendLine("to");
+				Helper.PrintASTIndentLine("to", indent + 1, buf);
 				To.AppendPrint(indent + 2, buf);
 			}
 			if (By != null)
 			{
-				Helper.PrintASTIndent(indent + 1, buf);
-				buf.AppendLine("by");
+				Helper.PrintASTIndentLine("by", indent + 1, buf);
 				By.AppendPrint(indent + 2, buf);
 			}
 			foreach (var s in Statements) { s.AppendPrint(indent + 1, buf); }
@@ -157,11 +148,9 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("func");
+			Helper.PrintASTIndentLine("func", indent, buf);
 			Function.AppendPrint(indent + 2, buf);
-			Helper.PrintASTIndent(indent + 1, buf);
-			buf.AppendLine("params");
+			Helper.PrintASTIndentLine("params", indent + 1, buf);
 			Params.AppendPrint(indent + 2, buf);
 		}
 	}
@@ -173,8 +162,7 @@ namespace Minet.Compiler.AST
 			Helper.PrintASTIndent(indent, buf);
 			buf.Append("fn(");
 			buf.Append(string.Join(", ", Params));
-			buf.Append(")");
-			buf.AppendLine();
+			buf.AppendLine(")");
 			foreach (var s in Statements) { s.AppendPrint(indent + 1, buf); }
 		}
 	}
@@ -185,8 +173,7 @@ namespace Minet.Compiler.AST
 
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine(ToString());
+			Helper.PrintASTIndentLine(ToString(), indent, buf);
 		}
 	}
 
@@ -194,17 +181,19 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("if");
-			if (Condition != null) { Condition.AppendPrint(indent + 1, buf); }
-			else
-			{
-				Helper.PrintASTIndent(indent + 1, buf);
-				buf.AppendLine("(implicit true)");
-			}
-			Helper.PrintASTIndent(indent + 1, buf);
-			buf.AppendLine("then");
-			foreach (var s in Statements) { s.AppendPrint(indent + 2, buf); }
+			Helper.PrintASTIndentLine("if", indent, buf);
+			foreach (var s in Sections) { s.AppendPrint(indent + 1, buf); }
+		}
+	}
+
+	public partial class IfSection
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndentLine("cond", indent, buf);
+			Condition.AppendPrint(indent + 1, buf);
+			Helper.PrintASTIndentLine("then", indent, buf);
+			foreach(var s in Statements) { s.AppendPrint(indent + 1, buf); }
 		}
 	}
 
@@ -212,8 +201,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("JS: " + Val);
+			Helper.PrintASTIndentLine("JS: " + Val, indent, buf);
 		}
 	}
 
@@ -221,8 +209,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine(string.IsNullOrEmpty(Label) ? "loop" : Label + ": loop");
+			Helper.PrintASTIndentLine(string.IsNullOrEmpty(Label) ? "loop" : Label + ": loop", indent, buf);
 			foreach (var s in Statements) { s.AppendPrint(indent + 1, buf); }
 		}
 	}
@@ -231,8 +218,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("num " + Val);
+			Helper.PrintASTIndentLine("num " + Val, indent, buf);
 		}
 	}
 
@@ -240,8 +226,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("object constructor");
+			Helper.PrintASTIndentLine("object constructor", indent, buf);
 			foreach (var l in Lines) { l.AppendPrint(indent + 1, buf); }
 		}
 	}
@@ -255,8 +240,7 @@ namespace Minet.Compiler.AST
 
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine(ToString());
+			Helper.PrintASTIndentLine(ToString(), indent, buf);
 		}
 	}
 
@@ -264,8 +248,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("prop set: " + string.Join(", ", Props));
+			Helper.PrintASTIndentLine("prop set: " + string.Join(", ", Props), indent, buf);
 			if (Vals != null) { Vals.AppendPrint(indent + 1, buf); }
 		}
 	}
@@ -274,8 +257,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("return");
+			Helper.PrintASTIndentLine("return", indent, buf);
 			if (Val != null) { Val.AppendPrint(indent + 1, buf); }
 		}
 	}
@@ -284,8 +266,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine(string.Join(", ", Names));
+			Helper.PrintASTIndentLine(string.Join(", ", Names), indent, buf);
 			if (Vals != null) { Vals.AppendPrint(indent + 1, buf); }
 		}
 	}
@@ -294,8 +275,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("string " + Val);
+			Helper.PrintASTIndentLine("string " + Val, indent, buf);
 		}
 	}
 
@@ -303,8 +283,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine(Op.ToString());
+			Helper.PrintASTIndentLine(Op.ToString(), indent, buf);
 			Expr.AppendPrint(indent + 1, buf);
 		}
 	}
@@ -313,8 +292,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine("var set");
+			Helper.PrintASTIndentLine("var set", indent, buf);
 			foreach (var l in Lines) { l.AppendPrint(indent + 1, buf); }
 		}
 	}
@@ -323,8 +301,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndent(indent, buf);
-			buf.AppendLine(string.Join(", ", Vars));
+			Helper.PrintASTIndentLine(string.Join(", ", Vars), indent, buf);
 			if (Vals != null) { Vals.AppendPrint(indent + 1, buf); }
 		}
 	}

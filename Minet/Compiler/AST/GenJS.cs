@@ -226,6 +226,15 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class Else
+	{
+		public string ToJSExpr(Status s)
+		{
+			s.Errors.Add("Attempted to directly generate JS for an else.");
+			return "/* Else */";
+		}
+	}
+
 	public partial class Error
 	{
 		public string ToJSExpr(Status s)
@@ -411,7 +420,33 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(Status s, StringBuilder buf)
 		{
-			Helper.PrintIndentedLine("<if>", s.Indent, buf);
+			Helper.PrintIndented(string.Empty, s.Indent, buf);
+			for (int i = 0; i < Sections.Count; i++)
+			{
+				if (i > 0) { buf.Append(" else "); }
+				if (!(Sections[i].Condition is Else))
+				{
+					buf.Append("if (");
+					buf.Append(Sections[i].Condition.ToJSExpr(s));
+					buf.Append(") ");
+				}
+				buf.AppendLine("{");
+
+				s.Indent++;
+				foreach(var st in Sections[i].Statements) { st.AppendJSStmt(s, buf); }
+				s.Indent--;
+
+				Helper.PrintIndented("}", s.Indent, buf);
+			}
+			buf.AppendLine();
+		}
+	}
+
+	public partial class IfSection
+	{
+		public void AppendJSStmt(Status s, StringBuilder buf)
+		{
+			s.Errors.Add("Attempted to directly generate JS for an if section.");
 		}
 	}
 

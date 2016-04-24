@@ -61,6 +61,11 @@ a, b: b, a                                      var __t0 = b;
 
 arr: [1, 2, 3]                                  arr = [1, 2, 3];
 
+myObj.subObject                                 myObj.subObject.first = 1;
+    first: 1                                    myObj.subObject.second = 2;
+    second: 2
+    
+
 break                                           break;
 break myLoop                                    break myLoop;
 
@@ -98,7 +103,7 @@ else                                            } else {
                                                 }
 
 if                                              if (x < 3) {
-    x < 3                                        alert("< 3");
+    x < 3                                           alert("< 3");
         alert("< 3")                            } else if (x > 7) {
     x > 7                                           alert("> 7");
         alert("> 7")                            } else {
@@ -111,7 +116,9 @@ if x                                            if (x === 2 || x === 3) {
     = 4                                             alert("4");
         alert("4")                              } else if (x > 8) {
     > 8                                             alert("> 8");
-        alert("> 8")                            }
+        alert("> 8")                            } else {
+    else                                            alert("something else");
+        alert("something else")                 }
 
 loop                                            while(true) {
 myLoop loop                                     myLoop: while(true) {
