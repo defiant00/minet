@@ -35,14 +35,16 @@ namespace Minet.Compiler.AST
 		public void Build(Status s, StringBuilder buffer)
 		{
 			string priorClass = s.Class;
+			string priorClassChain = s.ClassChain;
 			s.Class = Name;
+			s.ClassChain = s.ChainClassName(Name);
 
-			var consSigBuffer = new StringBuilder();		// Constructor signature
-			var consDefBuffer = new StringBuilder();		// Constructor defaults
+			var consSigBuffer = new StringBuilder();        // Constructor signature
+			var consDefBuffer = new StringBuilder();        // Constructor defaults
 			var consCodeBuffer = new StringBuilder();       // Constructor code
 			var funcBuffer = new StringBuilder();           // Functions
-			var staticPropBuffer = new StringBuilder();		// Static properties
-			var classBuffer = new StringBuilder();			// Classes
+			var staticPropBuffer = new StringBuilder();     // Static properties
+			var classBuffer = new StringBuilder();          // Classes
 
 
 			//
@@ -72,7 +74,7 @@ namespace Minet.Compiler.AST
 			// Constructor body
 			Helper.PrintIndentedLine("}", s.Indent + 1, consCodeBuffer);
 
-			Helper.PrintIndented("var ", s.Indent, buffer);
+			Helper.PrintIndented(string.IsNullOrEmpty(priorClass) ? "var " : priorClass + ".", s.Indent, buffer);
 			buffer.Append(Name);
 			buffer.AppendLine(" = (function () {");
 
@@ -89,6 +91,7 @@ namespace Minet.Compiler.AST
 			Helper.PrintIndentedLine("})();", s.Indent, buffer);
 
 			s.Class = priorClass;
+			s.ClassChain = priorClassChain;
 		}
 	}
 
@@ -124,17 +127,18 @@ namespace Minet.Compiler.AST
 
 		public string Build(Status s)
 		{
-			if (JSBlocks.Count > 0)
-			{
-				Buffer.AppendLine("// Javascript Blocks");
-				foreach (var b in JSBlocks) { Buffer.AppendLine(b.Val); }
-				Buffer.AppendLine();
-			}
-
 			if (Classes.Count > 0)
 			{
 				Buffer.AppendLine("// Classes");
 				foreach (var c in Classes) { c.Build(s, Buffer); }
+			}
+
+			if (JSBlocks.Count > 0)
+			{
+				Buffer.AppendLine();
+				Buffer.AppendLine("// Javascript Blocks");
+				foreach (var b in JSBlocks) { Buffer.AppendLine(b.Val); }
+				Buffer.AppendLine();
 			}
 
 			if (!string.IsNullOrEmpty(s.Main))

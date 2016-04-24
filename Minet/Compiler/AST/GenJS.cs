@@ -237,10 +237,7 @@ namespace Minet.Compiler.AST
 
 	public partial class Error
 	{
-		public string ToJSExpr(Status s)
-		{
-			return "/* Error: " + Val + " */";
-		}
+		public string ToJSExpr(Status s) { return "/* Error: " + Val + " */"; }
 
 		public void AppendJSStmt(Status s, StringBuilder buf)
 		{
@@ -265,6 +262,7 @@ namespace Minet.Compiler.AST
 			{
 				string oldChain = s.Chain;
 				string chainRoot = s.ChainName(string.Empty);
+
 				foreach (var e in Expr.Expressions)
 				{
 					s.Chain = chainRoot + e.ToJSExpr(s);
@@ -340,10 +338,7 @@ namespace Minet.Compiler.AST
 			buf.Append(compStr);
 			buf.Append("; ");
 			buf.Append(var);
-			if (By == null)
-			{
-				buf.Append(asc ? "++" : "--");
-			}
+			if (By == null) { buf.Append(asc ? "++" : "--"); }
 			else
 			{
 				buf.Append(" += ");
@@ -433,7 +428,7 @@ namespace Minet.Compiler.AST
 				buf.AppendLine("{");
 
 				s.Indent++;
-				foreach(var st in Sections[i].Statements) { st.AppendJSStmt(s, buf); }
+				foreach (var st in Sections[i].Statements) { st.AppendJSStmt(s, buf); }
 				s.Indent--;
 
 				Helper.PrintIndented("}", s.Indent, buf);
@@ -529,7 +524,7 @@ namespace Minet.Compiler.AST
 							}
 							else
 							{
-								if (fn != null && p.Name == "Main") { s.Main = s.Class + "." + p.Name; }
+								if (fn != null && p.Name == "Main") { s.Main = s.ChainClassName(p.Name); }
 								var buf = fn != null ? funcBuf : sPropBuf;
 								Helper.PrintIndented(s.Class, s.Indent, buf);
 								buf.Append(".");
