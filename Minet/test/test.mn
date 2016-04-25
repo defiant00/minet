@@ -5,10 +5,15 @@
 ; always do errors even if not printing tokens, etc.
 ; add pos to errors
 
+<jsalert('hai from js');js>
+
 Test
+	stat: "a static thing"
 	.name: "aaron"
 	.func: fn()
 		this.name: "ed"
 		var f: fn()
 			console.log(this)
 		f()
+	Main: fn()
+		alert('hai')

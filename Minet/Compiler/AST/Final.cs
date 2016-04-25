@@ -111,7 +111,6 @@ namespace Minet.Compiler.AST
 			Buffer.Append(" * Input Files: ");
 			Buffer.AppendLine(string.Join(", ", files.Select(f => f.Name)));
 			Buffer.AppendLine(" */");
-			Buffer.AppendLine();
 
 			foreach (var f in files)
 			{
@@ -133,6 +132,7 @@ namespace Minet.Compiler.AST
 		{
 			if (Classes.Count > 0)
 			{
+				Buffer.AppendLine();
 				Buffer.AppendLine("// Classes");
 				foreach (var c in Classes) { c.Build(Buffer, StaticBuffer); }
 			}
@@ -149,11 +149,12 @@ namespace Minet.Compiler.AST
 				Buffer.AppendLine();
 				Buffer.AppendLine("// Javascript Blocks");
 				foreach (var b in JSBlocks) { Buffer.AppendLine(b.Val); }
-				Buffer.AppendLine();
 			}
 
 			if (!string.IsNullOrEmpty(Status.Main))
 			{
+				Buffer.AppendLine();
+				Buffer.AppendLine("// Run Main");
 				Buffer.AppendLine("window.onload = function () {");
 				Helper.PrintIndented(Status.Main, 1, Buffer);
 				Buffer.AppendLine("();");
