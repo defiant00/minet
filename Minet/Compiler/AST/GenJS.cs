@@ -481,7 +481,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(StringBuilder buf) { Helper.PrintIndentedLine(Val, buf); }
 
-		public void AppendJS(StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
+		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
 		{
 			Helper.PrintIndentedLine(Val, funcBuf);
 		}
@@ -526,7 +526,7 @@ namespace Minet.Compiler.AST
 			Status.Errors.Add("Tried to generate a JS statement for a property set.");
 		}
 
-		public void AppendJS(StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
+		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
 		{
 			if (Vals != null)
 			{
@@ -544,10 +544,22 @@ namespace Minet.Compiler.AST
 							{
 								if (fn != null)
 								{
+									Status.FnCounter++;
+									if (Status.FnCounter == 1) { Status.NeedsThisVar = false; }
+									
 									fn.AppendParams(cSigBuf);
 									Status.Indent++;
 									fn.AppendStatements(cCodeBuf);
+
+									if (Status.NeedsThisVar && Status.FnCounter == 1)
+									{
+										Helper.PrintIndented("var ", cThisBuf);
+										cThisBuf.Append(Compiler.InternalVarPrefix);
+										cThisBuf.AppendLine("this = this;");
+									}
+
 									Status.Indent--;
+									Status.FnCounter--;
 								}
 								else
 								{

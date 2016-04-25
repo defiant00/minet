@@ -40,6 +40,7 @@ namespace Minet.Compiler.AST
 			Status.ClassChain = Status.ChainClassName(Name);
 
 			var consSigBuffer = new StringBuilder();        // Constructor signature
+			var consThisBuffer = new StringBuilder();		// Constructor _this line if necessary
 			var consDefBuffer = new StringBuilder();        // Constructor defaults
 			var consCodeBuffer = new StringBuilder();       // Constructor code
 			var funcBuffer = new StringBuilder();           // Functions
@@ -60,7 +61,7 @@ namespace Minet.Compiler.AST
 			//
 			// Statements and classes
 			//
-			foreach (var st in Statements) { st.AppendJS(consSigBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticBuffer); }
+			foreach (var st in Statements) { st.AppendJS(consSigBuffer, consThisBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticBuffer); }
 			foreach (var c in Classes) { c.Build(classBuffer, staticBuffer); }
 
 
@@ -81,6 +82,7 @@ namespace Minet.Compiler.AST
 			buffer.AppendLine(" = (function () {");
 
 			buffer.Append(consSigBuffer);
+			buffer.Append(consThisBuffer);
 			buffer.Append(consDefBuffer);
 			buffer.Append(consCodeBuffer);
 			buffer.Append(funcBuffer);
