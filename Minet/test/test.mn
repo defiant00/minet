@@ -2,18 +2,13 @@
 
 ; TODO
 
-; this to __this if fn in fn?
-; co-dependent classes?
-; accept the globals
 ; always do errors even if not printing tokens, etc.
 ; add pos to errors
 
-MyProj.MyClass
-	stat, .inst: 1, 2
-
-	first: fn()
-		alert('first')
-		ret true
-	Main: fn()
-		if MyClass.first()
-			alert('within the if')
+Test
+	.name: "aaron"
+	.func: fn()
+		this.name: "ed"
+		var f: fn()
+			console.log(this)
+		f()

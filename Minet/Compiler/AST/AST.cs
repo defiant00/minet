@@ -10,17 +10,17 @@ namespace Minet.Compiler.AST
 
 	public interface IExpression : IGeneral
 	{
-		string ToJSExpr(Status s);
+		string ToJSExpr();
 	}
 
 	public interface IStatement : IGeneral
 	{
-		void AppendJSStmt(Status s, StringBuilder buf);
+		void AppendJSStmt(StringBuilder buf);
 	}
 
 	public interface IClassStatement : IStatement
 	{
-		void AppendJS(Status s, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf);
+		void AppendJS(StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf);
 	}
 
 	public partial class Accessor : IExpression

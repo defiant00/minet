@@ -32,18 +32,17 @@ namespace Minet.Compiler.AST
 		public string Name;
 		public List<IClassStatement> Statements = new List<IClassStatement>();
 
-		public void Build(Status s, StringBuilder buffer)
+		public void Build(StringBuilder buffer, StringBuilder staticBuffer)
 		{
-			string priorClass = s.Class;
-			string priorClassChain = s.ClassChain;
-			s.Class = Name;
-			s.ClassChain = s.ChainClassName(Name);
+			string priorClass = Status.Class;
+			string priorClassChain = Status.ClassChain;
+			Status.Class = Name;
+			Status.ClassChain = Status.ChainClassName(Name);
 
 			var consSigBuffer = new StringBuilder();        // Constructor signature
 			var consDefBuffer = new StringBuilder();        // Constructor defaults
 			var consCodeBuffer = new StringBuilder();       // Constructor code
 			var funcBuffer = new StringBuilder();           // Functions
-			var staticPropBuffer = new StringBuilder();     // Static properties
 			var classBuffer = new StringBuilder();          // Classes
 
 
@@ -51,18 +50,19 @@ namespace Minet.Compiler.AST
 			// Initialize buffers
 			//
 
+			Status.Indent++;
+
 			// Constructor signature
-			Helper.PrintIndented("function ", s.Indent + 1, consSigBuffer);
+			Helper.PrintIndented("function ", consSigBuffer);
 			consSigBuffer.Append(Name);
 			consSigBuffer.Append("(");
 
 			//
 			// Statements and classes
 			//
-			s.Indent++;
-			foreach (var st in Statements) { st.AppendJS(s, consSigBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticPropBuffer); }
-			foreach (var c in Classes) { c.Build(s, classBuffer); }
-			s.Indent--;
+			foreach (var st in Statements) { st.AppendJS(consSigBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticBuffer); }
+			foreach (var c in Classes) { c.Build(classBuffer, staticBuffer); }
+
 
 			//
 			// Finish buffers
@@ -72,9 +72,11 @@ namespace Minet.Compiler.AST
 			consSigBuffer.AppendLine(") {");
 
 			// Constructor body
-			Helper.PrintIndentedLine("}", s.Indent + 1, consCodeBuffer);
+			Helper.PrintIndentedLine("}", consCodeBuffer);
 
-			Helper.PrintIndented(string.IsNullOrEmpty(priorClass) ? "var " : priorClass + ".", s.Indent, buffer);
+			Status.Indent--;
+
+			Helper.PrintIndented(string.IsNullOrEmpty(priorClass) ? "var " : priorClass + ".", buffer);
 			buffer.Append(Name);
 			buffer.AppendLine(" = (function () {");
 
@@ -82,16 +84,15 @@ namespace Minet.Compiler.AST
 			buffer.Append(consDefBuffer);
 			buffer.Append(consCodeBuffer);
 			buffer.Append(funcBuffer);
-			buffer.Append(staticPropBuffer);
 			buffer.Append(classBuffer);
 
-			Helper.PrintIndented("return ", s.Indent + 1, buffer);
+			Helper.PrintIndented("return ", Status.Indent + 1, buffer);
 			buffer.Append(Name);
 			buffer.AppendLine(";");
-			Helper.PrintIndentedLine("})();", s.Indent, buffer);
+			Helper.PrintIndentedLine("})();", buffer);
 
-			s.Class = priorClass;
-			s.ClassChain = priorClassChain;
+			Status.Class = priorClass;
+			Status.ClassChain = priorClassChain;
 		}
 	}
 
@@ -99,6 +100,7 @@ namespace Minet.Compiler.AST
 	{
 		public List<JSBlock> JSBlocks = new List<JSBlock>();
 		public StringBuilder Buffer = new StringBuilder();
+		public StringBuilder StaticBuffer = new StringBuilder();
 
 		public F_Project(List<File> files)
 		{
@@ -125,12 +127,19 @@ namespace Minet.Compiler.AST
 			}
 		}
 
-		public string Build(Status s)
+		public string Build()
 		{
 			if (Classes.Count > 0)
 			{
 				Buffer.AppendLine("// Classes");
-				foreach (var c in Classes) { c.Build(s, Buffer); }
+				foreach (var c in Classes) { c.Build(Buffer, StaticBuffer); }
+			}
+
+			if (StaticBuffer.Length > 0)
+			{
+				Buffer.AppendLine();
+				Buffer.AppendLine("// Static Variables");
+				Buffer.Append(StaticBuffer);
 			}
 
 			if (JSBlocks.Count > 0)
@@ -141,10 +150,10 @@ namespace Minet.Compiler.AST
 				Buffer.AppendLine();
 			}
 
-			if (!string.IsNullOrEmpty(s.Main))
+			if (!string.IsNullOrEmpty(Status.Main))
 			{
 				Buffer.AppendLine("window.onload = function () {");
-				Helper.PrintIndented(s.Main, 1, Buffer);
+				Helper.PrintIndented(Status.Main, 1, Buffer);
 				Buffer.AppendLine("();");
 				Buffer.AppendLine("};");
 			}

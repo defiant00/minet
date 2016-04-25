@@ -5,12 +5,12 @@ namespace Minet.Compiler.AST
 {
 	public partial class Accessor
 	{
-		public string ToJSExpr(Status s)
+		public string ToJSExpr()
 		{
 			var sb = new StringBuilder();
-			sb.Append(Object.ToJSExpr(s));
+			sb.Append(Object.ToJSExpr());
 			sb.Append("[");
-			sb.Append(Index.ToJSExpr(s));
+			sb.Append(Index.ToJSExpr());
 			sb.Append("]");
 			return sb.ToString();
 		}
@@ -18,10 +18,10 @@ namespace Minet.Compiler.AST
 
 	public partial class ArrayValueList
 	{
-		public string ToJSExpr(Status s)
+		public string ToJSExpr()
 		{
 			var sb = new StringBuilder("[");
-			sb.Append(string.Join(", ", Vals.Expressions.Select(e => e.ToJSExpr(s))));
+			sb.Append(string.Join(", ", Vals.Expressions.Select(e => e.ToJSExpr())));
 			sb.Append("]");
 			return sb.ToString();
 		}
@@ -29,7 +29,7 @@ namespace Minet.Compiler.AST
 
 	public partial class Assign
 	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf)
 		{
 			string op = "/* No Op */";
 			string mulOp = "/* No Multi-Op */";
@@ -59,31 +59,33 @@ namespace Minet.Compiler.AST
 					mulOp = " % ";
 					break;
 				default:
-					s.Errors.Add("Unknown assignment operator " + Op);
+					Status.Errors.Add("Unknown assignment operator " + Op);
 					break;
 			}
 			if (Left.Expressions.Count == 1 && Right.Expressions.Count == 1)
 			{
 				var l = Left.Expressions[0];
 				var r = Right.Expressions[0];
-				Helper.PrintIndented(s.ChainName(l.ToJSExpr(s)), s.Indent, buf);
+				Helper.PrintIndented(Status.ChainName(l.ToJSExpr()), buf);
 				buf.Append(op);
-				buf.Append(r.ToJSExpr(s));
+				buf.Append(r.ToJSExpr());
 				buf.AppendLine(";");
 			}
 			else if (Right.Expressions.Count == 1)
 			{
 				var r = Right.Expressions[0];
-				Helper.PrintIndented("var __t", s.Indent, buf);
-				buf.Append(" = ");
-				buf.Append(r.ToJSExpr(s));
+				Helper.PrintIndented("var ", buf);
+				buf.Append(Compiler.InternalVarPrefix);
+				buf.Append("t = ");
+				buf.Append(r.ToJSExpr());
 				buf.AppendLine(";");
 				for (int i = 0; i < Left.Expressions.Count; i++)
 				{
 					var l = Left.Expressions[i];
-					Helper.PrintIndented(s.ChainName(l.ToJSExpr(s)), s.Indent, buf);
+					Helper.PrintIndented(Status.ChainName(l.ToJSExpr()), buf);
 					buf.Append(op);
-					buf.AppendLine("__t;");
+					buf.Append(Compiler.InternalVarPrefix);
+					buf.AppendLine("t;");
 				}
 			}
 			else if (Left.Expressions.Count == Right.Expressions.Count)
@@ -92,37 +94,41 @@ namespace Minet.Compiler.AST
 				{
 					var l = Left.Expressions[i];
 					var r = Right.Expressions[i];
-					Helper.PrintIndented("var __t", s.Indent, buf);
+					Helper.PrintIndented("var ", buf);
+					buf.Append(Compiler.InternalVarPrefix);
+					buf.Append("t");
 					buf.Append(i);
 					if (Op != TokenType.Assign)
 					{
 						buf.Append(" = ");
-						buf.Append(l.ToJSExpr(s));
+						buf.Append(l.ToJSExpr());
 						buf.Append(mulOp);
 					}
 					else { buf.Append(op); }
-					buf.Append(r.ToJSExpr(s));
+					buf.Append(r.ToJSExpr());
 					buf.AppendLine(";");
 				}
 				for (int i = 0; i < Left.Expressions.Count; i++)
 				{
 					var l = Left.Expressions[i];
-					Helper.PrintIndented(s.ChainName(l.ToJSExpr(s)), s.Indent, buf);
-					buf.Append(" = __t");
+					Helper.PrintIndented(Status.ChainName(l.ToJSExpr()), buf);
+					buf.Append(" = ");
+					buf.Append(Compiler.InternalVarPrefix);
+					buf.Append("t");
 					buf.Append(i);
 					buf.AppendLine(";");
 				}
 			}
 			else
 			{
-				s.Errors.Add("Mismatched expression count, " + Left.Expressions.Count + " != " + Right.Expressions.Count);
+				Status.Errors.Add("Mismatched expression count, " + Left.Expressions.Count + " != " + Right.Expressions.Count);
 			}
 		}
 	}
 
 	public partial class Binary
 	{
-		public string ToJSExpr(Status s)
+		public string ToJSExpr()
 		{
 			string op = "/* No Op */";
 			switch (Op)
@@ -170,17 +176,17 @@ namespace Minet.Compiler.AST
 					op = " || ";
 					break;
 				default:
-					s.Errors.Add("Unknown binary operator " + Op);
+					Status.Errors.Add("Unknown binary operator " + Op);
 					break;
 			}
 
 			var sb = new StringBuilder();
 			if (Left is Binary) { sb.Append("("); }
-			sb.Append(Left.ToJSExpr(s));
+			sb.Append(Left.ToJSExpr());
 			if (Left is Binary) { sb.Append(")"); }
 			sb.Append(op);
 			if (Right is Binary) { sb.Append("("); }
-			sb.Append(Right.ToJSExpr(s));
+			sb.Append(Right.ToJSExpr());
 			if (Right is Binary) { sb.Append(")"); }
 			return sb.ToString();
 		}
@@ -188,14 +194,14 @@ namespace Minet.Compiler.AST
 
 	public partial class Bool
 	{
-		public string ToJSExpr(Status s) { return Val ? "true" : "false"; }
+		public string ToJSExpr() { return Val ? "true" : "false"; }
 	}
 
 	public partial class Break
 	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf)
 		{
-			Helper.PrintIndented("break", s.Indent, buf);
+			Helper.PrintIndented("break", buf);
 			if (!string.IsNullOrEmpty(Label))
 			{
 				buf.Append(" ");
@@ -207,20 +213,20 @@ namespace Minet.Compiler.AST
 
 	public partial class Class
 	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf)
 		{
-			s.Errors.Add("Class encountered when generating JS statements.");
+			Status.Errors.Add("Class encountered when generating JS statements.");
 		}
 	}
 
 	public partial class Constructor
 	{
-		public string ToJSExpr(Status s)
+		public string ToJSExpr()
 		{
 			var sb = new StringBuilder("new ");
-			sb.Append(Type.ToJSExpr(s));
+			sb.Append(Type.ToJSExpr());
 			sb.Append("(");
-			sb.Append(string.Join(", ", Params.Expressions.Select(p => p.ToJSExpr(s))));
+			sb.Append(string.Join(", ", Params.Expressions.Select(p => p.ToJSExpr())));
 			sb.Append(")");
 			return sb.ToString();
 		}
@@ -228,54 +234,54 @@ namespace Minet.Compiler.AST
 
 	public partial class Else
 	{
-		public string ToJSExpr(Status s)
+		public string ToJSExpr()
 		{
-			s.Errors.Add("Attempted to directly generate JS for an else.");
+			Status.Errors.Add("Attempted to directly generate JS for an else.");
 			return "/* Else */";
 		}
 	}
 
 	public partial class Error
 	{
-		public string ToJSExpr(Status s) { return "/* Error: " + Val + " */"; }
+		public string ToJSExpr() { return "/* Error: " + Val + " */"; }
 
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf)
 		{
-			Helper.PrintIndentedLine("// Error: " + Val, s.Indent, buf);
+			Helper.PrintIndentedLine("// Error: " + Val, buf);
 		}
 	}
 
 	public partial class ExprList
 	{
-		public string ToJSExpr(Status s)
+		public string ToJSExpr()
 		{
-			s.Errors.Add("Attempted to directly generate JS from an expression list.");
+			Status.Errors.Add("Attempted to directly generate JS from an expression list.");
 			return "/* Expression List */";
 		}
 	}
 
 	public partial class ExprStmt
 	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf)
 		{
 			if (Statements.Count > 0)
 			{
-				string oldChain = s.Chain;
-				string chainRoot = s.ChainName(string.Empty);
+				string oldChain = Status.Chain;
+				string chainRoot = Status.ChainName(string.Empty);
 
 				foreach (var e in Expr.Expressions)
 				{
-					s.Chain = chainRoot + e.ToJSExpr(s);
-					foreach (var st in Statements) { st.AppendJSStmt(s, buf); }
+					Status.Chain = chainRoot + e.ToJSExpr();
+					foreach (var st in Statements) { st.AppendJSStmt(buf); }
 				}
 
-				s.Chain = oldChain;
+				Status.Chain = oldChain;
 			}
 			else
 			{
 				foreach (var e in Expr.Expressions)
 				{
-					Helper.PrintIndented(s.ChainName(e.ToJSExpr(s)), s.Indent, buf);
+					Helper.PrintIndented(Status.ChainName(e.ToJSExpr()), buf);
 					buf.AppendLine(";");
 				}
 			}
@@ -284,15 +290,15 @@ namespace Minet.Compiler.AST
 
 	public partial class File
 	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf)
 		{
-			s.Errors.Add("Tried to generate JS for a File object.");
+			Status.Errors.Add("Tried to generate JS for a File object.");
 		}
 	}
 
 	public partial class For
 	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf)
 		{
 			bool asc = true;
 			bool iterator = (To == null);
@@ -307,17 +313,17 @@ namespace Minet.Compiler.AST
 				asc = false;
 			}
 
-			Helper.PrintIndented(string.IsNullOrEmpty(Label) ? "" : Label + ":", s.Indent, buf);
+			Helper.PrintIndented(string.IsNullOrEmpty(Label) ? "" : Label + ":", buf);
 
 			string var = Var;
 			if (iterator)
 			{
-				var = "__i" + s.ForCounter;
-				s.ForCounter++;
+				var = Compiler.InternalVarPrefix + "i" + Status.ForCounter;
+				Status.ForCounter++;
 			}
 
-			string startStr = iterator ? (asc ? "0" : From.ToJSExpr(s) + ".length") : (From.ToJSExpr(s));
-			string compStr = iterator ? (asc ? From.ToJSExpr(s) + ".length" : "0") : (To.ToJSExpr(s));
+			string startStr = iterator ? (asc ? "0" : From.ToJSExpr() + ".length") : From.ToJSExpr();
+			string compStr = iterator ? (asc ? From.ToJSExpr() + ".length" : "0") : To.ToJSExpr();
 
 			buf.Append("for (var ");
 			buf.Append(var);
@@ -342,37 +348,37 @@ namespace Minet.Compiler.AST
 			else
 			{
 				buf.Append(" += ");
-				buf.Append(By.ToJSExpr(s));
+				buf.Append(By.ToJSExpr());
 			}
 			buf.AppendLine(") {");
 
+			Status.Indent++;
 			if (iterator)
 			{
-				Helper.PrintIndented("var ", s.Indent + 1, buf);
+				Helper.PrintIndented("var ", buf);
 				buf.Append(Var);
 				buf.Append(" = ");
-				buf.Append(From.ToJSExpr(s));
+				buf.Append(From.ToJSExpr());
 				buf.Append("[");
 				buf.Append(var);
 				buf.AppendLine("];");
 			}
 
-			s.Indent++;
-			foreach (var st in Statements) { st.AppendJSStmt(s, buf); }
-			s.Indent--;
+			foreach (var st in Statements) { st.AppendJSStmt(buf); }
+			Status.Indent--;
 
-			Helper.PrintIndentedLine("}", s.Indent, buf);
-			if (iterator) { s.ForCounter--; }
+			Helper.PrintIndentedLine("}", buf);
+			if (iterator) { Status.ForCounter--; }
 		}
 	}
 
 	public partial class FunctionCall
 	{
-		public string ToJSExpr(Status s)
+		public string ToJSExpr()
 		{
-			var sb = new StringBuilder(Function.ToJSExpr(s));
+			var sb = new StringBuilder(Function.ToJSExpr());
 			sb.Append("(");
-			sb.Append(string.Join(", ", Params.Expressions.Select(p => p.ToJSExpr(s))));
+			sb.Append(string.Join(", ", Params.Expressions.Select(p => p.ToJSExpr())));
 			sb.Append(")");
 			return sb.ToString();
 		}
@@ -380,17 +386,33 @@ namespace Minet.Compiler.AST
 
 	public partial class FunctionDef
 	{
-		public string ToJSExpr(Status s)
+		public string ToJSExpr()
 		{
+			Status.FnCounter++;
+
+			if (Status.FnCounter == 1) { Status.NeedsThisVar = false; }
+
 			var buf = new StringBuilder("function(");
+			var stmtBuf = new StringBuilder();
 			AppendParams(buf);
 			buf.AppendLine(") {");
 
-			s.Indent++;
-			AppendStatements(s, buf);
-			s.Indent--;
+			Status.Indent++;
+			AppendStatements(stmtBuf);
 
-			Helper.PrintIndented("}", s.Indent, buf);
+			if (Status.NeedsThisVar && Status.FnCounter == 1)
+			{
+				Helper.PrintIndented("var ", buf);
+				buf.Append(Compiler.InternalVarPrefix);
+				buf.AppendLine("this = this;");
+			}
+			buf.Append(stmtBuf);
+
+			Status.Indent--;
+
+			Helper.PrintIndented("}", buf);
+
+			Status.FnCounter--;
 			return buf.ToString();
 		}
 
@@ -399,39 +421,49 @@ namespace Minet.Compiler.AST
 			buf.Append(string.Join(", ", Params));
 		}
 
-		public void AppendStatements(Status s, StringBuilder buf)
+		public void AppendStatements(StringBuilder buf)
 		{
-			foreach (var st in Statements) { st.AppendJSStmt(s, buf); }
+			foreach (var st in Statements) { st.AppendJSStmt(buf); }
 		}
 	}
 
 	public partial class Identifier
 	{
-		public string ToJSExpr(Status s) { return string.Join(".", Idents); }
-		public void AppendJSStmt(Status s, StringBuilder buf) { Helper.PrintIndentedLine(string.Join(".", Idents), s.Indent, buf); }
+		public string ToJSExpr() { return string.Join(".", Idents.Select(i => CalculateIdentifier(i))); }
+		public void AppendJSStmt(StringBuilder buf) { Helper.PrintIndentedLine(string.Join(".", Idents.Select(i => CalculateIdentifier(i))), buf); }
+
+		public string CalculateIdentifier(string val)
+		{
+			if (val == "this" && Status.FnCounter > 1)
+			{
+				Status.NeedsThisVar = true;
+				return Compiler.InternalVarPrefix + "this";
+			}
+			return val;
+		}
 	}
 
 	public partial class If
 	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf)
 		{
-			Helper.PrintIndented(string.Empty, s.Indent, buf);
+			Helper.PrintIndented(string.Empty, buf);
 			for (int i = 0; i < Sections.Count; i++)
 			{
 				if (i > 0) { buf.Append(" else "); }
 				if (!(Sections[i].Condition is Else))
 				{
 					buf.Append("if (");
-					buf.Append(Sections[i].Condition.ToJSExpr(s));
+					buf.Append(Sections[i].Condition.ToJSExpr());
 					buf.Append(") ");
 				}
 				buf.AppendLine("{");
 
-				s.Indent++;
-				foreach (var st in Sections[i].Statements) { st.AppendJSStmt(s, buf); }
-				s.Indent--;
+				Status.Indent++;
+				foreach (var st in Sections[i].Statements) { st.AppendJSStmt(buf); }
+				Status.Indent--;
 
-				Helper.PrintIndented("}", s.Indent, buf);
+				Helper.PrintIndented("}", buf);
 			}
 			buf.AppendLine();
 		}
@@ -439,47 +471,47 @@ namespace Minet.Compiler.AST
 
 	public partial class IfSection
 	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf)
 		{
-			s.Errors.Add("Attempted to directly generate JS for an if section.");
+			Status.Errors.Add("Attempted to directly generate JS for an if section.");
 		}
 	}
 
 	public partial class JSBlock
 	{
-		public void AppendJSStmt(Status s, StringBuilder buf) { Helper.PrintIndentedLine(Val, s.Indent, buf); }
+		public void AppendJSStmt(StringBuilder buf) { Helper.PrintIndentedLine(Val, buf); }
 
-		public void AppendJS(Status s, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
+		public void AppendJS(StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
 		{
-			Helper.PrintIndentedLine(Val, s.Indent, funcBuf);
+			Helper.PrintIndentedLine(Val, funcBuf);
 		}
 	}
 
 	public partial class Loop
 	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf)
 		{
-			Helper.PrintIndented(string.IsNullOrEmpty(Label) ? "" : Label + ":", s.Indent, buf);
+			Helper.PrintIndented(string.IsNullOrEmpty(Label) ? "" : Label + ":", buf);
 			buf.AppendLine("while(true) {");
 
-			s.Indent++;
-			foreach (var st in Statements) { st.AppendJSStmt(s, buf); }
-			s.Indent--;
+			Status.Indent++;
+			foreach (var st in Statements) { st.AppendJSStmt(buf); }
+			Status.Indent--;
 
-			Helper.PrintIndentedLine("}", s.Indent, buf);
+			Helper.PrintIndentedLine("}", buf);
 		}
 	}
 
-	public partial class Number { public string ToJSExpr(Status s) { return Val; } }
+	public partial class Number { public string ToJSExpr() { return Val; } }
 
 	public partial class ObjectConstructor
 	{
-		public string ToJSExpr(Status s)
+		public string ToJSExpr()
 		{
 			var sb = new StringBuilder("{");
 			for (int i = 0; i < Lines.Count; i++)
 			{
-				sb.Append(Lines[i].ToJSExpr(s));
+				sb.Append(Lines[i].ToJSExpr());
 				if (i + 1 < Lines.Count) { sb.Append(", "); }
 			}
 			sb.Append("}");
@@ -489,12 +521,12 @@ namespace Minet.Compiler.AST
 
 	public partial class PropertySet
 	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf)
 		{
-			s.Errors.Add("Tried to generate a JS statement for a property set.");
+			Status.Errors.Add("Tried to generate a JS statement for a property set.");
 		}
 
-		public void AppendJS(Status s, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
+		public void AppendJS(StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
 		{
 			if (Vals != null)
 			{
@@ -508,30 +540,40 @@ namespace Minet.Compiler.AST
 
 						if (p.Static)
 						{
-							if (p.Name == s.Class)      // Constructor
+							if (p.Name == Status.Class)      // Constructor
 							{
 								if (fn != null)
 								{
 									fn.AppendParams(cSigBuf);
-									s.Indent++;
-									fn.AppendStatements(s, cCodeBuf);
-									s.Indent--;
+									Status.Indent++;
+									fn.AppendStatements(cCodeBuf);
+									Status.Indent--;
 								}
 								else
 								{
-									s.Errors.Add("Property " + p.Name + " matches the class name, so it must be a function.");
+									Status.Errors.Add("Property " + p.Name + " matches the class name, so it must be a function.");
 								}
 							}
 							else
 							{
-								if (fn != null && p.Name == "Main") { s.Main = s.ChainClassName(p.Name); }
-								var buf = fn != null ? funcBuf : sPropBuf;
-								Helper.PrintIndented(s.Class, s.Indent, buf);
-								buf.Append(".");
-								buf.Append(p.Name);
-								buf.Append(" = ");
-								buf.Append(v.ToJSExpr(s));
-								buf.AppendLine(";");
+								if (fn != null)
+								{
+									if (p.Name == "Main") { Status.Main = Status.ChainClassName(p.Name); }
+
+									Helper.PrintIndented(Status.Class, funcBuf);
+									funcBuf.Append(".");
+									funcBuf.Append(p.Name);
+									funcBuf.Append(" = ");
+									funcBuf.Append(v.ToJSExpr());
+									funcBuf.AppendLine(";");
+								}
+								else
+								{
+									sPropBuf.Append(Status.ChainClassName(p.Name));
+									sPropBuf.Append(" = ");
+									sPropBuf.Append(v.ToJSExpr());
+									sPropBuf.AppendLine(";");
+								}
 							}
 						}
 						else
@@ -539,29 +581,29 @@ namespace Minet.Compiler.AST
 							var buf = funcBuf;
 							if (fn == null)
 							{
-								s.Indent++;
+								Status.Indent++;
 
 								buf = cDefBuf;
-								Helper.PrintIndented("this.", s.Indent, buf);
+								Helper.PrintIndented("this.", buf);
 							}
 							else
 							{
-								Helper.PrintIndented(s.Class, s.Indent, buf);
+								Helper.PrintIndented(Status.Class, buf);
 								buf.Append(".prototype.");
 							}
 
 							buf.Append(p.Name);
 							buf.Append(" = ");
-							buf.Append(v.ToJSExpr(s));
+							buf.Append(v.ToJSExpr());
 							buf.AppendLine(";");
 
-							if (fn == null) { s.Indent--; }
+							if (fn == null) { Status.Indent--; }
 						}
 					}
 				}
 				else
 				{
-					s.Errors.Add("Mismatched property / value counts, " + Props.Count + " != " + Vals.Expressions.Count);
+					Status.Errors.Add("Mismatched property / value counts, " + Props.Count + " != " + Vals.Expressions.Count);
 				}
 			}
 		}
@@ -569,13 +611,13 @@ namespace Minet.Compiler.AST
 
 	public partial class Return
 	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf)
 		{
-			Helper.PrintIndented("return", s.Indent, buf);
+			Helper.PrintIndented("return", buf);
 			if (Val != null)
 			{
 				buf.Append(" ");
-				buf.Append(Val.ToJSExpr(s));
+				buf.Append(Val.ToJSExpr());
 			}
 			buf.AppendLine(";");
 		}
@@ -583,7 +625,7 @@ namespace Minet.Compiler.AST
 
 	public partial class SetLine
 	{
-		public string ToJSExpr(Status s)
+		public string ToJSExpr()
 		{
 			var sb = new StringBuilder();
 			if (Vals != null)
@@ -594,13 +636,13 @@ namespace Minet.Compiler.AST
 					{
 						sb.Append(Names[i]);
 						sb.Append(":");
-						sb.Append(Vals.Expressions[i].ToJSExpr(s));
+						sb.Append(Vals.Expressions[i].ToJSExpr());
 						if (i + 1 < Names.Count) { sb.Append(", "); }
 					}
 				}
 				else if (Vals.Expressions.Count == 1)
 				{
-					string val = Vals.Expressions[0].ToJSExpr(s);
+					string val = Vals.Expressions[0].ToJSExpr();
 					for (int i = 0; i < Names.Count; i++)
 					{
 						sb.Append(Names[i]);
@@ -611,20 +653,20 @@ namespace Minet.Compiler.AST
 				}
 				else
 				{
-					s.Errors.Add("Mismatched name and value counts in set line, " + Names.Count + " != " + Vals.Expressions.Count);
+					Status.Errors.Add("Mismatched name and value counts in set line, " + Names.Count + " != " + Vals.Expressions.Count);
 				}
 			}
 			return sb.ToString();
 		}
 	}
 
-	public partial class String { public string ToJSExpr(Status s) { return Val; } }
+	public partial class String { public string ToJSExpr() { return Val; } }
 
 	public partial class Unary
 	{
-		public string ToJSExpr(Status s)
+		public string ToJSExpr()
 		{
-			string expr = Expr.ToJSExpr(s);
+			string expr = Expr.ToJSExpr();
 			switch (Op)
 			{
 				case TokenType.Not:
@@ -632,7 +674,7 @@ namespace Minet.Compiler.AST
 				case TokenType.Sub:
 					return "-" + expr;
 				default:
-					s.Errors.Add("Unknown unary operator " + Op);
+					Status.Errors.Add("Unknown unary operator " + Op);
 					return "/* ERROR: Unknown unary " + Op + " */";
 			}
 		}
@@ -640,47 +682,51 @@ namespace Minet.Compiler.AST
 
 	public partial class VarSet
 	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf)
 		{
-			foreach (var l in Lines) { l.AppendJSStmt(s, buf); }
+			foreach (var l in Lines) { l.AppendJSStmt(buf); }
 		}
 	}
 
 	public partial class VarSetLine
 	{
-		public void AppendJSStmt(Status s, StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf)
 		{
 			if (Vals != null)
 			{
 				if (Vars.Count == Vals.Expressions.Count)
 				{
-					Helper.PrintIndented("var ", s.Indent, buf);
+					Helper.PrintIndented("var ", buf);
 					for (int i = 0; i < Vars.Count; i++)
 					{
 						buf.Append(Vars[i]);
 						buf.Append(" = ");
-						buf.Append(Vals.Expressions[i].ToJSExpr(s));
+						buf.Append(Vals.Expressions[i].ToJSExpr());
 						if (i + 1 < Vars.Count) { buf.Append(", "); }
 					}
 					buf.AppendLine(";");
 				}
 				else if (Vals.Expressions.Count == 1)
 				{
-					Helper.PrintIndented("var __t = ", s.Indent, buf);
-					buf.Append(Vals.Expressions[0].ToJSExpr(s));
+					Helper.PrintIndented("var ", buf);
+					buf.Append(Compiler.InternalVarPrefix);
+					buf.Append("t = ");
+					buf.Append(Vals.Expressions[0].ToJSExpr());
 					buf.AppendLine(";");
-					Helper.PrintIndented("var ", s.Indent, buf);
+					Helper.PrintIndented("var ", buf);
 					for (int i = 0; i < Vars.Count; i++)
 					{
 						buf.Append(Vars[i]);
-						buf.Append(" = __t");
+						buf.Append(" = ");
+						buf.Append(Compiler.InternalVarPrefix);
+						buf.Append("t");
 						if (i + 1 < Vars.Count) { buf.Append(", "); }
 					}
 					buf.AppendLine(";");
 				}
 				else
 				{
-					s.Errors.Add("Mismatched vars and values in VarSetLine, " + Vars.Count + " != " + Vals.Expressions.Count);
+					Status.Errors.Add("Mismatched vars and values in VarSetLine, " + Vars.Count + " != " + Vals.Expressions.Count);
 				}
 			}
 		}

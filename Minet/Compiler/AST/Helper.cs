@@ -16,10 +16,20 @@ namespace Minet.Compiler.AST
 			buf.AppendLine(val);
 		}
 
+		public static void PrintIndented(string line, StringBuilder buf)
+		{
+			PrintIndented(line, Status.Indent, buf);
+		}
+
 		public static void PrintIndented(string line, int indent, StringBuilder buf)
 		{
 			for (int i = 0; i < indent; i++) { buf.Append("\t"); }
 			buf.Append(line);
+		}
+
+		public static void PrintIndentedLine(string line, StringBuilder buf)
+		{
+			PrintIndentedLine(line, Status.Indent, buf);
 		}
 
 		public static void PrintIndentedLine(string line, int indent, StringBuilder buf)

@@ -7,7 +7,7 @@ namespace Minet
 {
 	public class Constants
 	{
-		public const string Program = "Minet Compiler 0.9";
+		public const string Program = "Minet Compiler 0.95";
 	}
 
 	public class Program

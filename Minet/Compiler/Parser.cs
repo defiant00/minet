@@ -10,16 +10,14 @@ namespace Minet.Compiler
 		private BuildConfig config;
 		private int pos = 0;
 		private List<Token> tokens = new List<Token>();
-		private Status status;
 
-		public Parser(string filename, BuildConfig config, Status status)
+		public Parser(string filename, BuildConfig config)
 		{
 			this.filename = filename;
 			this.config = config;
-			this.status = status;
 		}
 
-		public void AddError(string error) { status.Errors.Add(error); }
+		public void AddError(string error) { Status.Errors.Add(error); }
 
 		public ParseResult<IStatement> Parse(System.IO.StreamWriter output)
 		{
