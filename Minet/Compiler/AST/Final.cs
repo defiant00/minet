@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -8,12 +9,12 @@ namespace Minet.Compiler.AST
 	{
 		public List<F_Class> Classes = new List<F_Class>();
 
-		public F_Class GetClass(List<string> name)
+		public F_Class GetClass(List<string> name, Position pos)
 		{
 			var c = Classes.Where(cl => cl.Name == name[0]).FirstOrDefault();
 			if (c == null)
 			{
-				c = new F_Class { Name = name[0] };
+				c = new F_Class(pos) { Name = name[0] };
 				Classes.Add(c);
 			}
 
@@ -21,7 +22,7 @@ namespace Minet.Compiler.AST
 			{
 				return c;
 			}
-			return c.GetClass(name.Skip(1).ToList());
+			return c.GetClass(name.Skip(1).ToList(), pos);
 		}
 	}
 
@@ -29,11 +30,44 @@ namespace Minet.Compiler.AST
 	{
 		public override string ToString() { return Name; }
 
+		public Position Pos;
 		public string Name;
 		public List<IClassStatement> Statements = new List<IClassStatement>();
 
+		public F_Class(Position pos) { Pos = pos; }
+
+		private void BuildVarList(StringBuilder buffer)
+		{
+			foreach(var c in Classes)
+			{
+				if (Name != c.Name)
+				{
+					Status.Variables.AddItem(c.Name, new Identifier(c.Pos) { Idents = { Name, c.Name } });
+				}
+			}
+
+			foreach (var s in Statements)
+			{
+				if (s is PropertySet)
+				{
+					var ps = s as PropertySet;
+					foreach(var prop in ps.Props)
+					{
+						string parent = prop.Static ? Name : "this";
+						if (parent != prop.Name)
+						{
+							Status.Variables.AddItem(prop.Name, new Identifier(prop.Pos) { Idents = { parent, prop.Name } });
+						}
+					}
+				}
+			}
+		}
+
 		public void Build(StringBuilder buffer, StringBuilder staticBuffer)
 		{
+			Status.Variables.IncrementDepth();
+			BuildVarList(buffer);
+
 			string priorClass = Status.Class;
 			string priorClassChain = Status.ClassChain;
 			Status.Class = Name;
@@ -95,6 +129,7 @@ namespace Minet.Compiler.AST
 
 			Status.Class = priorClass;
 			Status.ClassChain = priorClassChain;
+			Status.Variables.DecrementDepth();
 		}
 	}
 
@@ -107,7 +142,9 @@ namespace Minet.Compiler.AST
 		public F_Project(List<File> files)
 		{
 			Buffer.Append("/* Built with ");
-			Buffer.AppendLine(Constants.Program);
+			Buffer.Append(Constants.Program);
+			Buffer.Append(" on ");
+			Buffer.AppendLine(DateTime.Now.ToString());
 			Buffer.Append(" * Input Files: ");
 			Buffer.AppendLine(string.Join(", ", files.Select(f => f.Name)));
 			Buffer.AppendLine(" */");
@@ -119,8 +156,8 @@ namespace Minet.Compiler.AST
 					if (s is Class)
 					{
 						var cl = s as Class;
-						var fc = GetClass((cl.Name as Identifier).Idents);
-						fc.Statements = cl.Statements;
+						var fc = GetClass(cl.Name.Idents, cl.Name.Pos);
+						fc.Statements.AddRange(cl.Statements);
 					}
 					else if (s is JSBlock) { JSBlocks.Add(s as JSBlock); }
 					else { Status.Errors.Add(new ErrorMsg("Unknown statement type " + s.GetType(), s.Pos)); }
@@ -130,6 +167,12 @@ namespace Minet.Compiler.AST
 
 		public string Build()
 		{
+			Status.Variables.IncrementDepth();
+			foreach (var c in Classes)
+			{
+				Status.Variables.AddItem(c.Name, c.Pos);
+			}
+
 			if (Classes.Count > 0)
 			{
 				Buffer.AppendLine();
@@ -161,6 +204,7 @@ namespace Minet.Compiler.AST
 				Buffer.AppendLine("};");
 			}
 
+			Status.Variables.DecrementDepth();
 			return Buffer.ToString();
 		}
 	}

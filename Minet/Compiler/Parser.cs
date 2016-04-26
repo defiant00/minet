@@ -253,7 +253,7 @@ namespace Minet.Compiler
 			var nameRes = parseIdentifier<IStatement>();
 			if (nameRes.Error) { return nameRes; }
 
-			var c = new Class(peek.Pos) { Name = nameRes.Result };
+			var c = new Class(start.Pos) { Name = nameRes.Result as Identifier };
 
 			var res = accept(TokenType.EOL, TokenType.Indent);
 			if (!res.Success)

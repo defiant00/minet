@@ -75,7 +75,7 @@ namespace Minet.Compiler.AST
 
 	public partial class Class : AST, IStatement
 	{
-		public IStatement Name;
+		public Identifier Name;
 		public List<IClassStatement> Statements = new List<IClassStatement>();
 		public Class(Position pos) : base(pos) { }
 	}

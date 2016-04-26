@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Minet.Compiler.AST
@@ -300,6 +301,9 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(StringBuilder buf)
 		{
+			Status.Variables.IncrementDepth();
+			Status.Variables.AddItem(Var, Pos);
+
 			bool asc = true;
 			bool iterator = (To == null);
 
@@ -369,6 +373,8 @@ namespace Minet.Compiler.AST
 
 			Helper.PrintIndentedLine("}", buf);
 			if (iterator) { Status.ForCounter--; }
+
+			Status.Variables.DecrementDepth();
 		}
 	}
 
@@ -389,13 +395,22 @@ namespace Minet.Compiler.AST
 		public string ToJSExpr()
 		{
 			Status.FnCounter++;
-
-			if (Status.FnCounter == 1) { Status.NeedsThisVar = false; }
+			Status.Variables.IncrementDepth();
 
 			var buf = new StringBuilder("function(");
 			var stmtBuf = new StringBuilder();
-			AppendParams(buf);
+			BuildAndAppendParams(buf);
 			buf.AppendLine(") {");
+
+			if (Status.FnCounter == 1)
+			{
+				Status.NeedsThisVar = false;
+
+				if (!Status.CurrentFnStatic)
+				{
+					Status.Variables.AddItem("this", Pos);
+				}
+			}
 
 			Status.Indent++;
 			AppendStatements(stmtBuf);
@@ -412,13 +427,15 @@ namespace Minet.Compiler.AST
 
 			Helper.PrintIndented("}", buf);
 
+			Status.Variables.DecrementDepth();
 			Status.FnCounter--;
 			return buf.ToString();
 		}
 
-		public void AppendParams(StringBuilder buf)
+		public void BuildAndAppendParams(StringBuilder buf)
 		{
 			buf.Append(string.Join(", ", Params));
+			foreach (var p in Params) { Status.Variables.AddItem(p, Pos); }
 		}
 
 		public void AppendStatements(StringBuilder buf)
@@ -429,17 +446,57 @@ namespace Minet.Compiler.AST
 
 	public partial class Identifier
 	{
-		public string ToJSExpr() { return string.Join(".", Idents.Select(i => CalculateIdentifier(i))); }
-		public void AppendJSStmt(StringBuilder buf) { Helper.PrintIndentedLine(string.Join(".", Idents.Select(i => CalculateIdentifier(i))), buf); }
-
-		public string CalculateIdentifier(string val)
+		public string ToJSExpr()
 		{
-			if (val == "this" && Status.FnCounter > 1)
+			var idents = new List<string>();
+			idents.AddRange(Idents);
+			bool valid = ExpandIdentifier(idents);
+			if (!valid)
 			{
-				Status.NeedsThisVar = true;
-				return Compiler.InternalVarPrefix + "this";
+				Status.Errors.Add(new ErrorMsg("Use of undeclared variable " + idents[0], Pos));
 			}
-			return val;
+			return string.Join(".", idents);
+		}
+
+		private bool ExpandIdentifier(List<string> idents)
+		{
+			bool success = false;
+			if (idents.Count > 0)
+			{
+				bool changed = true;
+				while (changed)
+				{
+					changed = false;
+					string val = idents[0];
+					if (Status.FnCounter > 1 && val == "this")
+					{
+						Status.NeedsThisVar = true;
+						idents[0] = Compiler.InternalVarPrefix + "this";
+						changed = true;
+						success = true;
+					}
+					else
+					{
+						var repl = Status.Variables.GetItem(val);
+						if (repl != null)
+						{
+							success = true;
+							if (repl.Idents.Count > 1 || repl.Idents[0] != val)
+							{
+								idents.RemoveAt(0);
+								idents.InsertRange(0, repl.Idents);
+								changed = true;
+							}
+						}
+					}
+				}
+			}
+			return success;
+		}
+
+		public void AppendJSStmt(StringBuilder buf)
+		{
+			Helper.PrintIndentedLine(ToJSExpr(), buf);
 		}
 	}
 
@@ -538,6 +595,8 @@ namespace Minet.Compiler.AST
 						var v = Vals.Expressions[i];
 						var fn = v as FunctionDef;
 
+						Status.CurrentFnStatic = p.Static;
+
 						if (p.Static)
 						{
 							if (p.Name == Status.Class)      // Constructor
@@ -545,9 +604,14 @@ namespace Minet.Compiler.AST
 								if (fn != null)
 								{
 									Status.FnCounter++;
-									if (Status.FnCounter == 1) { Status.NeedsThisVar = false; }
-									
-									fn.AppendParams(cSigBuf);
+									Status.Variables.IncrementDepth();
+									if (Status.FnCounter == 1)
+									{
+										Status.NeedsThisVar = false;
+										Status.Variables.AddItem("this", Pos);
+									}
+
+									fn.BuildAndAppendParams(cSigBuf);
 									Status.Indent++;
 									fn.AppendStatements(cCodeBuf);
 
@@ -559,6 +623,7 @@ namespace Minet.Compiler.AST
 									}
 
 									Status.Indent--;
+									Status.Variables.DecrementDepth();
 									Status.FnCounter--;
 								}
 								else
@@ -704,6 +769,8 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(StringBuilder buf)
 		{
+			foreach (var v in Vars) { Status.Variables.AddItem(v, Pos); }
+
 			if (Vals != null)
 			{
 				if (Vars.Count == Vals.Expressions.Count)
