@@ -5,13 +5,9 @@
 ; bring back "use x" and "use x as y" so no warnings from existing JS
 
 
-Test.Sub
-	.Inst, Static: 1, 2
-
-	Sub: fn(inst, stat)
-		Inst, Static: inst, stat
-
-	Main: fn()
-		var s: Sub{7, 9}
-		alert(s.Inst)
-		alert(Static)
+Proj
+	.Inst: 3
+	.Test: fn()
+		Inst
+			x: 1
+			y: 2

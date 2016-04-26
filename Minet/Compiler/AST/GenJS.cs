@@ -450,10 +450,13 @@ namespace Minet.Compiler.AST
 		{
 			var idents = new List<string>();
 			idents.AddRange(Idents);
-			bool valid = ExpandIdentifier(idents);
-			if (!valid)
+			if (!Status.IsInChain)
 			{
-				Status.Errors.Add(new ErrorMsg("Use of undeclared variable " + idents[0], Pos));
+				bool valid = ExpandIdentifier(idents);
+				if (!valid)
+				{
+					Status.Errors.Add(new ErrorMsg("Use of undeclared variable " + idents[0], Pos));
+				}
 			}
 			return string.Join(".", idents);
 		}
@@ -516,9 +519,11 @@ namespace Minet.Compiler.AST
 				}
 				buf.AppendLine("{");
 
+				Status.Variables.IncrementDepth();
 				Status.Indent++;
 				foreach (var st in Sections[i].Statements) { st.AppendJSStmt(buf); }
 				Status.Indent--;
+				Status.Variables.DecrementDepth();
 
 				Helper.PrintIndented("}", buf);
 			}
@@ -551,9 +556,11 @@ namespace Minet.Compiler.AST
 			Helper.PrintIndented(string.IsNullOrEmpty(Label) ? "" : Label + ":", buf);
 			buf.AppendLine("while(true) {");
 
+			Status.Variables.IncrementDepth();
 			Status.Indent++;
 			foreach (var st in Statements) { st.AppendJSStmt(buf); }
 			Status.Indent--;
+			Status.Variables.DecrementDepth();
 
 			Helper.PrintIndentedLine("}", buf);
 		}

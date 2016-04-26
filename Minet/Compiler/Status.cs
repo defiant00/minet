@@ -10,6 +10,7 @@ namespace Minet.Compiler
 		public static string Class = string.Empty;
 		public static string ClassChain = string.Empty;
 		public static string Chain = string.Empty;
+		public static bool IsInChain { get { return !string.IsNullOrEmpty(Chain); } }
 		public static int Indent = 0;
 		public static int FnCounter = 0;
 		public static bool NeedsThisVar = false;
