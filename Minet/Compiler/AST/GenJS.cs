@@ -59,7 +59,7 @@ namespace Minet.Compiler.AST
 					mulOp = " % ";
 					break;
 				default:
-					Status.Errors.Add("Unknown assignment operator " + Op);
+					Status.Errors.Add(new ErrorMsg("Unknown assignment operator " + Op, Pos));
 					break;
 			}
 			if (Left.Expressions.Count == 1 && Right.Expressions.Count == 1)
@@ -121,7 +121,7 @@ namespace Minet.Compiler.AST
 			}
 			else
 			{
-				Status.Errors.Add("Mismatched expression count, " + Left.Expressions.Count + " != " + Right.Expressions.Count);
+				Status.Errors.Add(new ErrorMsg("Mismatched expression count, " + Left.Expressions.Count + " != " + Right.Expressions.Count, Pos));
 			}
 		}
 	}
@@ -176,7 +176,7 @@ namespace Minet.Compiler.AST
 					op = " || ";
 					break;
 				default:
-					Status.Errors.Add("Unknown binary operator " + Op);
+					Status.Errors.Add(new ErrorMsg("Unknown binary operator " + Op, Pos));
 					break;
 			}
 
@@ -215,7 +215,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(StringBuilder buf)
 		{
-			Status.Errors.Add("Class encountered when generating JS statements.");
+			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a class.", Pos));
 		}
 	}
 
@@ -236,7 +236,7 @@ namespace Minet.Compiler.AST
 	{
 		public string ToJSExpr()
 		{
-			Status.Errors.Add("Attempted to directly generate JS for an else.");
+			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for an else.", Pos));
 			return "/* Else */";
 		}
 	}
@@ -255,7 +255,7 @@ namespace Minet.Compiler.AST
 	{
 		public string ToJSExpr()
 		{
-			Status.Errors.Add("Attempted to directly generate JS from an expression list.");
+			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for an expression list.", Pos));
 			return "/* Expression List */";
 		}
 	}
@@ -292,7 +292,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(StringBuilder buf)
 		{
-			Status.Errors.Add("Tried to generate JS for a File object.");
+			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a file.", Pos));
 		}
 	}
 
@@ -473,7 +473,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(StringBuilder buf)
 		{
-			Status.Errors.Add("Attempted to directly generate JS for an if section.");
+			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for an if section.", Pos));
 		}
 	}
 
@@ -523,7 +523,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(StringBuilder buf)
 		{
-			Status.Errors.Add("Tried to generate a JS statement for a property set.");
+			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a property set.", Pos));
 		}
 
 		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
@@ -563,7 +563,7 @@ namespace Minet.Compiler.AST
 								}
 								else
 								{
-									Status.Errors.Add("Property " + p.Name + " matches the class name, so it must be a function.");
+									Status.Errors.Add(new ErrorMsg("Property " + p.Name + " matches the class name, so it must be a function.", Pos));
 								}
 							}
 							else
@@ -615,7 +615,7 @@ namespace Minet.Compiler.AST
 				}
 				else
 				{
-					Status.Errors.Add("Mismatched property / value counts, " + Props.Count + " != " + Vals.Expressions.Count);
+					Status.Errors.Add(new ErrorMsg("Mismatched property / value counts, " + Props.Count + " != " + Vals.Expressions.Count, Pos));
 				}
 			}
 		}
@@ -665,7 +665,7 @@ namespace Minet.Compiler.AST
 				}
 				else
 				{
-					Status.Errors.Add("Mismatched name and value counts in set line, " + Names.Count + " != " + Vals.Expressions.Count);
+					Status.Errors.Add(new ErrorMsg("Mismatched name and value counts in set line, " + Names.Count + " != " + Vals.Expressions.Count, Pos));
 				}
 			}
 			return sb.ToString();
@@ -686,7 +686,7 @@ namespace Minet.Compiler.AST
 				case TokenType.Sub:
 					return "-" + expr;
 				default:
-					Status.Errors.Add("Unknown unary operator " + Op);
+					Status.Errors.Add(new ErrorMsg("Unknown unary operator " + Op, Pos));
 					return "/* ERROR: Unknown unary " + Op + " */";
 			}
 		}
@@ -738,7 +738,7 @@ namespace Minet.Compiler.AST
 				}
 				else
 				{
-					Status.Errors.Add("Mismatched vars and values in VarSetLine, " + Vars.Count + " != " + Vals.Expressions.Count);
+					Status.Errors.Add(new ErrorMsg("Mismatched vars and values in VarSetLine, " + Vars.Count + " != " + Vals.Expressions.Count, Pos));
 				}
 			}
 		}

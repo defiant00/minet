@@ -2,18 +2,10 @@
 
 ; TODO
 
-; always do errors even if not printing tokens, etc.
-; add pos to errors
+; track available variables - string to identifier
+; convert head of identifier recursively
+; bring back "use x" and "use x as y" so no warnings from existing JS
 
-<jsalert('hai from js');js>
-
-Test
-	stat: "a static thing"
-	.name: "aaron"
-	.func: fn()
-		this.name: "ed"
-		var f: fn()
-			console.log(this)
-		f()
+Proj
 	Main: fn()
-		alert('hai')
+		alert('hello')

@@ -49,13 +49,13 @@ namespace Minet.Compiler
 			if (Status.Errors.Count > 0)
 			{
 				Console.WriteLine(Environment.NewLine + Environment.NewLine + "Errors:");
-				if (printAST) { output.WriteLine("/* Errors"); }
+				output.WriteLine("/* Errors");
 				foreach (var e in Status.Errors)
 				{
 					Console.WriteLine(e);
-					if (printAST) { output.WriteLine(e); }
+					output.WriteLine(e);
 				}
-				if (printAST) { output.WriteLine("*/"); }
+				output.WriteLine("*/");
 			}
 		}
 	}

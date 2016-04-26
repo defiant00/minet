@@ -197,10 +197,4 @@ namespace Minet.Compiler
 			}
 		}
 	}
-
-	public class Position
-	{
-		public int Line, Char;
-		public override string ToString() { return Line + ":" + Char; }
-	}
 }

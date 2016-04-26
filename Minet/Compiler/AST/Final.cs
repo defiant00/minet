@@ -40,7 +40,7 @@ namespace Minet.Compiler.AST
 			Status.ClassChain = Status.ChainClassName(Name);
 
 			var consSigBuffer = new StringBuilder();        // Constructor signature
-			var consThisBuffer = new StringBuilder();		// Constructor _this line if necessary
+			var consThisBuffer = new StringBuilder();       // Constructor _this line if necessary
 			var consDefBuffer = new StringBuilder();        // Constructor defaults
 			var consCodeBuffer = new StringBuilder();       // Constructor code
 			var funcBuffer = new StringBuilder();           // Functions
@@ -123,7 +123,7 @@ namespace Minet.Compiler.AST
 						fc.Statements = cl.Statements;
 					}
 					else if (s is JSBlock) { JSBlocks.Add(s as JSBlock); }
-					else { Buffer.AppendLine("Unknown statement type " + s.GetType()); }
+					else { Status.Errors.Add(new ErrorMsg("Unknown statement type " + s.GetType(), s.Pos)); }
 				}
 			}
 		}
