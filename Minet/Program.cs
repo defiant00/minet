@@ -7,7 +7,7 @@ namespace Minet
 {
 	public class Constants
 	{
-		public const string Program = "Minet Compiler 1.0 RC2";
+		public const string Program = "Minet Compiler 1.0 RC3";
 		public const string InternalVarPrefix = "_";
 	}
 
@@ -33,7 +33,9 @@ namespace Minet
 
 				var errors = new List<string>();
 				if (config.Files.Count == 0)
-				{ errors.Add("You must specify at least one file to build."); }
+				{
+					errors.Add("You must specify at least one file to build.");
+				}
 				if (config.IsSet("build") && !config.IsSet("out"))
 				{
 					errors.Add("You must specify an output file name with /out:filename when building.");

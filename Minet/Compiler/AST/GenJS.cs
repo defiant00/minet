@@ -478,25 +478,26 @@ namespace Minet.Compiler.AST
 				{
 					changed = false;
 					string val = idents[0];
-					if (Status.FnCounter > 1 && val == "this")
+					var repl = Status.Variables.GetItem(val);
+					if (repl != null)
 					{
-						Status.NeedsThisVar = true;
-						idents[0] = Constants.InternalVarPrefix + "this";
-						changed = true;
-						success = true;
-					}
-					else
-					{
-						var repl = Status.Variables.GetItem(val);
-						if (repl != null)
+						if (Status.FnCounter > 1 && val == "this")
+						{
+							Status.NeedsThisVar = true;
+							idents[0] = Constants.InternalVarPrefix + "this";
+							changed = true;
+							success = true;
+						}
+						else if (repl.Idents.Count > 1 || repl.Idents[0] != val)
+						{
+
+							idents.RemoveAt(0);
+							idents.InsertRange(0, repl.Idents);
+							changed = true;
+						}
+						else if (repl.Idents.Count == 1 && repl.Idents[0] == val)
 						{
 							success = true;
-							if (repl.Idents.Count > 1 || repl.Idents[0] != val)
-							{
-								idents.RemoveAt(0);
-								idents.InsertRange(0, repl.Idents);
-								changed = true;
-							}
 						}
 					}
 				}
@@ -601,12 +602,12 @@ namespace Minet.Compiler.AST
 		{
 			if (Vals != null)
 			{
-				if (Props.Count == Vals.Expressions.Count)
+				if (Props.Count == Vals.Expressions.Count || Vals.Expressions.Count == 1)
 				{
 					for (int i = 0; i < Props.Count; i++)
 					{
 						var p = Props[i];
-						var v = Vals.Expressions[i];
+						var v = Vals.Expressions.Count == 1 ? Vals.Expressions[0] : Vals.Expressions[i];
 						var fn = v as FunctionDef;
 
 						Status.CurrentFnStatic = p.Static;
@@ -829,6 +830,12 @@ namespace Minet.Compiler.AST
 				{
 					Status.Errors.Add(new ErrorMsg("Mismatched vars and values in VarSetLine, " + Vars.Count + " != " + Vals.Expressions.Count, Pos));
 				}
+			}
+			else
+			{
+				Helper.PrintIndented("var ", buf);
+				buf.Append(string.Join(", ", Vars));
+				buf.AppendLine(";");
 			}
 		}
 	}

@@ -162,7 +162,12 @@ namespace Minet.Compiler.AST
 
 	public partial class JSBlock : AST, IClassStatement
 	{
-		public string Val;
+		private string _val;
+		public string Val
+		{
+			get { return _val; }
+			set { _val = value.Trim(); }
+		}
 		public JSBlock(Position pos) : base(pos) { }
 	}
 

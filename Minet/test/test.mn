@@ -4,5 +4,6 @@ use alert
 
 Proj
 	Main: fn()
-		var bob: [{thing:[{another:'aha'}]}]
-		alert(bob[0].thing[0].another)
+		var a, b, c
+			d, e, f: 1, 2, 3
+			g, h: 4

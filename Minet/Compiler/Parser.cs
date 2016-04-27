@@ -987,15 +987,12 @@ namespace Minet.Compiler
 			}
 			v.Vars.AddRange(vars);
 
-			var res = accept(TokenType.Assign);
-			if (!res.Success)
+			if (accept(TokenType.Assign).Success)
 			{
-				return error<IStatement>(true, "Var statement must be an assignment.", res.LastToken.Pos);
+				v.Vals = parseExprList().Result;
 			}
 
-			v.Vals = parseExprList().Result;
-
-			res = accept(TokenType.EOL);
+			var res = accept(TokenType.EOL);
 			if (!res.Success)
 			{
 				return error<IStatement>(true, "Invalid token in var statement: " + res.LastToken, res.LastToken.Pos);
