@@ -1,6 +1,8 @@
 ; Minet Test Project
 
+use alert
+
 Proj
 	Main: fn()
-		alert('hi')
-		var item: document.getElementById('ah')
+		var bob: [{thing:[{another:'aha'}]}]
+		alert(bob[0].thing[0].another)

@@ -186,9 +186,16 @@ namespace Minet.Compiler.AST
 			sb.Append(Left.ToJSExpr());
 			if (Left is Binary) { sb.Append(")"); }
 			sb.Append(op);
+
+			bool prevInDot = Status.IsInDot;
+			if (Op == TokenType.Dot) { Status.IsInDot = true; }
+
 			if (Right is Binary) { sb.Append("("); }
 			sb.Append(Right.ToJSExpr());
 			if (Right is Binary) { sb.Append(")"); }
+
+			if (Op == TokenType.Dot) { Status.IsInDot = prevInDot; }
+
 			return sb.ToString();
 		}
 	}
@@ -450,7 +457,7 @@ namespace Minet.Compiler.AST
 		{
 			var idents = new List<string>();
 			idents.AddRange(Idents);
-			if (!Status.IsInChain)
+			if (Status.CheckExpandIdentifiers)
 			{
 				bool valid = ExpandIdentifier(idents);
 				if (!valid)
