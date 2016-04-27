@@ -3,7 +3,7 @@
 use alert
 
 Proj
-	Main: fn()
-		var a, b, c
-			d, e, f: 1, 2, 3
-			g, h: 4
+	._this: 1
+	.Test: fn()
+		var f: fn()
+			_this: 2

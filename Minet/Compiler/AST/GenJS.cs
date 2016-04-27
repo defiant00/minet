@@ -485,7 +485,6 @@ namespace Minet.Compiler.AST
 						{
 							Status.NeedsThisVar = true;
 							idents[0] = Constants.InternalVarPrefix + "this";
-							changed = true;
 							success = true;
 						}
 						else if (repl.Idents.Count > 1 || repl.Idents[0] != val)
