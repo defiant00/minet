@@ -15,6 +15,7 @@ namespace Minet.Compiler
 		delegate stateFn stateFn();
 
 		private string input;
+		private string filename;
 		private stateFn state;
 		private Stack<int> indentLevels;
 		private int start = 0, pos = 0;
@@ -37,7 +38,7 @@ namespace Minet.Compiler
 					}
 					else if (cl) { c++; }
 				}
-				return new Position { Char = c, Line = l };
+				return new Position(filename, l, c);
 			}
 		}
 
@@ -68,9 +69,10 @@ namespace Minet.Compiler
 			return true;
 		}
 
-		public Lexer(string input)
+		public Lexer(string input, string filename)
 		{
 			this.input = input;
+			this.filename = filename;
 			state = lexIndent;
 			indentLevels = new Stack<int>();
 			indentLevels.Push(0);

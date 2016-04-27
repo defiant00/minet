@@ -1,5 +1,6 @@
 ﻿using Minet.Compiler.AST;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Minet.Compiler
 {
@@ -35,6 +36,8 @@ namespace Minet.Compiler
 		{
 			public int Depth = 0;
 			public Identifier Ident;
+
+			public override string ToString() { return Ident + " (" + Depth + ")"; }
 		}
 
 		public override string ToString()
@@ -59,7 +62,8 @@ namespace Minet.Compiler
 		{
 			if (Items.ContainsKey(key))
 			{
-				Status.Errors.Add(new ErrorMsg("A variable named " + key + " has already been declared at this scope.", ident.Pos));
+				var existing = Items[key];
+				Status.Errors.Add(new ErrorMsg(key + " previously declared at " + existing.Ident.Pos, ident.Pos));
 			}
 			else { Items.Add(key, new VarTrackerItem { Ident = ident }); }
 		}
@@ -102,7 +106,26 @@ namespace Minet.Compiler
 
 	public class Position
 	{
+		public string File;
 		public int Line, Char;
-		public override string ToString() { return Line + ":" + Char; }
+
+		public override string ToString()
+		{
+			var sb = new StringBuilder("(");
+			sb.Append(File);
+			sb.Append(", ");
+			sb.Append(Line);
+			sb.Append(", ");
+			sb.Append(Char);
+			sb.Append(")");
+			return sb.ToString();
+		}
+
+		public Position(string file, int line, int chara)
+		{
+			File = file;
+			Line = line;
+			Char = chara;
+		}
 	}
 }

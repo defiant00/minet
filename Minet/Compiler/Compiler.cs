@@ -7,8 +7,6 @@ namespace Minet.Compiler
 {
 	public class Compiler
 	{
-		public const string InternalVarPrefix = "_";
-
 		public static void Build(BuildConfig config, StreamWriter output)
 		{
 			bool printAST = config.IsSet("printAST");

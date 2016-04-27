@@ -1,13 +1,6 @@
 ; Minet Test Project
 
-; TODO
-
-; bring back "use x" and "use x as y" so no warnings from existing JS
-
-
 Proj
-	.Inst: 3
-	.Test: fn()
-		Inst
-			x: 1
-			y: 2
+	Main: fn()
+		alert('hi')
+		var item: document.getElementById('ah')

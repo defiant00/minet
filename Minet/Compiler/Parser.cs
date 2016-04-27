@@ -24,7 +24,7 @@ namespace Minet.Compiler
 			string data = System.IO.File.ReadAllText(filename);
 			Console.WriteLine("Data loaded...");
 
-			var lexer = new Lexer(data);
+			var lexer = new Lexer(data, filename);
 
 			bool printTokens = config.IsSet("printTokens");
 			bool build = config.IsSet("build");
@@ -250,15 +250,18 @@ namespace Minet.Compiler
 		private ParseResult<IStatement> parseClass()
 		{
 			var start = peek;
-			var nameRes = parseIdentifier<IStatement>();
-			if (nameRes.Error) { return nameRes; }
-
-			var c = new Class(start.Pos) { Name = nameRes.Result as Identifier };
+			var c = new Class(start.Pos);
+			do
+			{
+				var nameRes = parseIdentifier<IStatement>();
+				if (nameRes.Error) { return nameRes; }
+				c.Names.Add(nameRes.Result as Identifier);
+			} while (accept(TokenType.Comma).Success);
 
 			var res = accept(TokenType.EOL, TokenType.Indent);
 			if (!res.Success)
 			{
-				return error<IStatement>(true, "Invalid token in class " + c.Name + " declaration: " + res.LastToken, res.LastToken.Pos);
+				return error<IStatement>(true, "Invalid token in class " + c.NameStr + " declaration: " + res.LastToken, res.LastToken.Pos);
 			}
 
 			while (!peek.Type.IsDedentStop())
@@ -269,7 +272,7 @@ namespace Minet.Compiler
 			res = accept(TokenType.Dedent, TokenType.EOL);
 			if (!res.Success)
 			{
-				c.Statements.Add(error<IClassStatement>(true, "Invalid token in class " + c.Name + " declaration: " + res.LastToken, res.LastToken.Pos).Result);
+				c.Statements.Add(error<IClassStatement>(true, "Invalid token in class " + c.NameStr + " declaration: " + res.LastToken, res.LastToken.Pos).Result);
 			}
 
 			return new ParseResult<IStatement>(c, false);
@@ -414,7 +417,7 @@ namespace Minet.Compiler
 
 		private ParseResult<IStatement> parseFile()
 		{
-			var f = new File(new Position()) { Name = filename };
+			var f = new File(new Position(filename, 0, 0)) { Name = filename };
 			bool error = false;
 			while (pos < tokens.Count)
 			{
@@ -423,11 +426,14 @@ namespace Minet.Compiler
 					case TokenType.EOF:
 						next();
 						break;
+					case TokenType.JSBlock:
+						f.Statements.Add(parseJSBlock().Result);
+						break;
 					case TokenType.Literal:
 						f.Statements.Add(parseClass().Result);
 						break;
-					case TokenType.JSBlock:
-						f.Statements.Add(parseJSBlock().Result);
+					case TokenType.Use:
+						f.Statements.Add(parseUse().Result);
 						break;
 					default:
 						f.Statements.Add(error<IStatement>(true, "Invalid token " + peek, peek.Pos).Result);
@@ -906,6 +912,39 @@ namespace Minet.Compiler
 			var ex = parsePrimaryExpr();
 			var un = new Unary(op.Pos) { Expr = ex.Result, Op = op.Type };
 			return new ParseResult<IExpression>(un, false);
+		}
+
+		private ParseResult<IStatement> parseUse()
+		{
+			var start = next(); // eat use
+			var use = new Use(start.Pos);
+			use.Names.AddRange(parseVars());
+
+			var res = accept(TokenType.EOL);
+			if (!res.Success)
+			{
+				return error<IStatement>(true, "Invalid token in Use line: " + res.LastToken, res.LastToken.Pos);
+			}
+
+			if (accept(TokenType.Indent).Success)
+			{
+				while (!peek.Type.IsDedentStop())
+				{
+					use.Names.AddRange(parseVars());
+					res = accept(TokenType.EOL);
+					if (!res.Success)
+					{
+						return error<IStatement>(true, "Invalid token in Use line: " + res.LastToken, res.LastToken.Pos);
+					}
+				}
+				res = accept(TokenType.Dedent, TokenType.EOL);
+				if (!res.Success)
+				{
+					return error<IStatement>(true, "Invalid token in Use line: " + res.LastToken, res.LastToken.Pos);
+				}
+			}
+
+			return new ParseResult<IStatement>(use, false);
 		}
 
 		private ParseResult<IStatement> parseVar()

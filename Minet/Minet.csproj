@@ -60,6 +60,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="test\test.mn" />
+    <None Include="test\useJS.mn" />
   </ItemGroup>
   <ItemGroup>
     <None Include="test\test.js" />

@@ -60,9 +60,14 @@ namespace Minet.Compiler.AST
 
 	public partial class Class
 	{
+		public string NameStr
+		{
+			get { return string.Join(", ", Names); }
+		}
+
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndentLine("class " + Name, indent, buf);
+			Helper.PrintASTIndentLine("class " + NameStr, indent, buf);
 			foreach (var s in Statements) { s.AppendPrint(indent + 1, buf); }
 		}
 	}
@@ -193,7 +198,7 @@ namespace Minet.Compiler.AST
 			Helper.PrintASTIndentLine("cond", indent, buf);
 			Condition.AppendPrint(indent + 1, buf);
 			Helper.PrintASTIndentLine("then", indent, buf);
-			foreach(var s in Statements) { s.AppendPrint(indent + 1, buf); }
+			foreach (var s in Statements) { s.AppendPrint(indent + 1, buf); }
 		}
 	}
 
@@ -285,6 +290,14 @@ namespace Minet.Compiler.AST
 		{
 			Helper.PrintASTIndentLine(Op.ToString(), indent, buf);
 			Expr.AppendPrint(indent + 1, buf);
+		}
+	}
+
+	public partial class Use
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndentLine("use " + string.Join(", ", Names), indent, buf);
 		}
 	}
 

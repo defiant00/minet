@@ -16,6 +16,7 @@ namespace Minet.Compiler
 		Number,             // a literal number
 		Literal,            // a literal
 		keyword_start,
+		Use,                // 'use'
 		If,                 // 'if'
 		Else,               // 'else'
 		Function,           // 'fn'
@@ -108,6 +109,7 @@ namespace Minet.Compiler
 
 		public readonly static Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType>
 		{
+			{"use",     TokenType.Use},
 			{"if",      TokenType.If},
 			{"else",    TokenType.Else},
 			{"fn",      TokenType.Function},

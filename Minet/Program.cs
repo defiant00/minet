@@ -7,7 +7,8 @@ namespace Minet
 {
 	public class Constants
 	{
-		public const string Program = "Minet Compiler 0.95";
+		public const string Program = "Minet Compiler 1.0 RC1";
+		public const string InternalVarPrefix = "_";
 	}
 
 	public class Program
@@ -53,7 +54,16 @@ namespace Minet
 				}
 
 			}
-			else { Console.WriteLine("Usage: minet <files> [parameters]"); }
+			else
+			{
+				Console.WriteLine("Usage: minet <files> [parameters]");
+				Console.WriteLine();
+				Console.WriteLine("Parameters:");
+				Console.WriteLine("    /build            Builds the output file.");
+				Console.WriteLine("    /out:filename     Sets the output file to use, eg: /out:project.js");
+				Console.WriteLine("    /printAST         Prints out the abstract syntax tree of the input.");
+				Console.WriteLine("    /printTokens      Prints out the parsed tokens of the input.");
+			}
 		}
 	}
 }

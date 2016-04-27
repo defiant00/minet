@@ -75,7 +75,7 @@ namespace Minet.Compiler.AST
 
 	public partial class Class : AST, IStatement
 	{
-		public Identifier Name;
+		public List<Identifier> Names = new List<Identifier>();
 		public List<IClassStatement> Statements = new List<IClassStatement>();
 		public Class(Position pos) : base(pos) { }
 	}
@@ -223,6 +223,12 @@ namespace Minet.Compiler.AST
 		public IExpression Expr;
 		public TokenType Op;
 		public Unary(Position pos) : base(pos) { }
+	}
+
+	public partial class Use : AST, IStatement
+	{
+		public List<string> Names = new List<string>();
+		public Use(Position pos) : base(pos) { }
 	}
 
 	public partial class VarSet : AST, IStatement

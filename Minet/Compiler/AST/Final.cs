@@ -38,7 +38,7 @@ namespace Minet.Compiler.AST
 
 		private void BuildVarList(StringBuilder buffer)
 		{
-			foreach(var c in Classes)
+			foreach (var c in Classes)
 			{
 				if (Name != c.Name)
 				{
@@ -51,12 +51,16 @@ namespace Minet.Compiler.AST
 				if (s is PropertySet)
 				{
 					var ps = s as PropertySet;
-					foreach(var prop in ps.Props)
+					foreach (var prop in ps.Props)
 					{
 						string parent = prop.Static ? Name : "this";
 						if (parent != prop.Name)
 						{
 							Status.Variables.AddItem(prop.Name, new Identifier(prop.Pos) { Idents = { parent, prop.Name } });
+						}
+						else
+						{
+							Status.Variables.AddItem(parent + " constructor", prop.Pos);
 						}
 					}
 				}
@@ -156,10 +160,21 @@ namespace Minet.Compiler.AST
 					if (s is Class)
 					{
 						var cl = s as Class;
-						var fc = GetClass(cl.Name.Idents, cl.Name.Pos);
-						fc.Statements.AddRange(cl.Statements);
+						foreach (var n in cl.Names)
+						{
+							var fc = GetClass(n.Idents, n.Pos);
+							fc.Statements.AddRange(cl.Statements);
+						}
 					}
 					else if (s is JSBlock) { JSBlocks.Add(s as JSBlock); }
+					else if (s is Use)
+					{
+						var use = s as Use;
+						foreach (var n in use.Names)
+						{
+							Status.Variables.AddItem(n, use.Pos);
+						}
+					}
 					else { Status.Errors.Add(new ErrorMsg("Unknown statement type " + s.GetType(), s.Pos)); }
 				}
 			}

@@ -76,7 +76,7 @@ namespace Minet.Compiler.AST
 			{
 				var r = Right.Expressions[0];
 				Helper.PrintIndented("var ", buf);
-				buf.Append(Compiler.InternalVarPrefix);
+				buf.Append(Constants.InternalVarPrefix);
 				buf.Append("t = ");
 				buf.Append(r.ToJSExpr());
 				buf.AppendLine(";");
@@ -85,7 +85,7 @@ namespace Minet.Compiler.AST
 					var l = Left.Expressions[i];
 					Helper.PrintIndented(Status.ChainName(l.ToJSExpr()), buf);
 					buf.Append(op);
-					buf.Append(Compiler.InternalVarPrefix);
+					buf.Append(Constants.InternalVarPrefix);
 					buf.AppendLine("t;");
 				}
 			}
@@ -96,7 +96,7 @@ namespace Minet.Compiler.AST
 					var l = Left.Expressions[i];
 					var r = Right.Expressions[i];
 					Helper.PrintIndented("var ", buf);
-					buf.Append(Compiler.InternalVarPrefix);
+					buf.Append(Constants.InternalVarPrefix);
 					buf.Append("t");
 					buf.Append(i);
 					if (Op != TokenType.Assign)
@@ -114,7 +114,7 @@ namespace Minet.Compiler.AST
 					var l = Left.Expressions[i];
 					Helper.PrintIndented(Status.ChainName(l.ToJSExpr()), buf);
 					buf.Append(" = ");
-					buf.Append(Compiler.InternalVarPrefix);
+					buf.Append(Constants.InternalVarPrefix);
 					buf.Append("t");
 					buf.Append(i);
 					buf.AppendLine(";");
@@ -322,7 +322,7 @@ namespace Minet.Compiler.AST
 			string var = Var;
 			if (iterator)
 			{
-				var = Compiler.InternalVarPrefix + "i" + Status.ForCounter;
+				var = Constants.InternalVarPrefix + "i" + Status.ForCounter;
 				Status.ForCounter++;
 			}
 
@@ -418,7 +418,7 @@ namespace Minet.Compiler.AST
 			if (Status.NeedsThisVar && Status.FnCounter == 1)
 			{
 				Helper.PrintIndented("var ", buf);
-				buf.Append(Compiler.InternalVarPrefix);
+				buf.Append(Constants.InternalVarPrefix);
 				buf.AppendLine("this = this;");
 			}
 			buf.Append(stmtBuf);
@@ -474,7 +474,7 @@ namespace Minet.Compiler.AST
 					if (Status.FnCounter > 1 && val == "this")
 					{
 						Status.NeedsThisVar = true;
-						idents[0] = Compiler.InternalVarPrefix + "this";
+						idents[0] = Constants.InternalVarPrefix + "this";
 						changed = true;
 						success = true;
 					}
@@ -625,7 +625,7 @@ namespace Minet.Compiler.AST
 									if (Status.NeedsThisVar && Status.FnCounter == 1)
 									{
 										Helper.PrintIndented("var ", cThisBuf);
-										cThisBuf.Append(Compiler.InternalVarPrefix);
+										cThisBuf.Append(Constants.InternalVarPrefix);
 										cThisBuf.AppendLine("this = this;");
 									}
 
@@ -764,6 +764,14 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class Use
+	{
+		public void AppendJSStmt(StringBuilder buf)
+		{
+			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a use.", Pos));
+		}
+	}
+
 	public partial class VarSet
 	{
 		public void AppendJSStmt(StringBuilder buf)
@@ -795,7 +803,7 @@ namespace Minet.Compiler.AST
 				else if (Vals.Expressions.Count == 1)
 				{
 					Helper.PrintIndented("var ", buf);
-					buf.Append(Compiler.InternalVarPrefix);
+					buf.Append(Constants.InternalVarPrefix);
 					buf.Append("t = ");
 					buf.Append(Vals.Expressions[0].ToJSExpr());
 					buf.AppendLine(";");
@@ -804,7 +812,7 @@ namespace Minet.Compiler.AST
 					{
 						buf.Append(Vars[i]);
 						buf.Append(" = ");
-						buf.Append(Compiler.InternalVarPrefix);
+						buf.Append(Constants.InternalVarPrefix);
 						buf.Append("t");
 						if (i + 1 < Vars.Count) { buf.Append(", "); }
 					}
