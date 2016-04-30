@@ -69,7 +69,13 @@ namespace Minet.Compiler.AST
 				var r = Right.Expressions[0];
 				Helper.PrintIndented(Status.ChainName(l.ToJSExpr()), buf);
 				buf.Append(op);
+
+				// Reset chain temporarily so value is calculated properly.
+				string chain = Status.Chain;
+				Status.Chain = "";
 				buf.Append(r.ToJSExpr());
+				Status.Chain = chain;
+
 				buf.AppendLine(";");
 			}
 			else if (Right.Expressions.Count == 1)
@@ -78,7 +84,13 @@ namespace Minet.Compiler.AST
 				Helper.PrintIndented("var ", buf);
 				buf.Append(Constants.InternalVarPrefix);
 				buf.Append("t = ");
+
+				// Reset chain temporarily so value is calculated properly.
+				string chain = Status.Chain;
+				Status.Chain = "";
 				buf.Append(r.ToJSExpr());
+				Status.Chain = chain;
+
 				buf.AppendLine(";");
 				for (int i = 0; i < Left.Expressions.Count; i++)
 				{
@@ -106,7 +118,13 @@ namespace Minet.Compiler.AST
 						buf.Append(mulOp);
 					}
 					else { buf.Append(op); }
+
+					// Reset chain temporarily so value is calculated properly.
+					string chain = Status.Chain;
+					Status.Chain = "";
 					buf.Append(r.ToJSExpr());
+					Status.Chain = chain;
+
 					buf.AppendLine(";");
 				}
 				for (int i = 0; i < Left.Expressions.Count; i++)

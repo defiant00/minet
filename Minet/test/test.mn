@@ -3,7 +3,9 @@
 use alert
 
 Proj
-	._this: 1
+	.inst
 	.Test: fn()
-		var f: fn()
-			_this: 2
+		this.thing: inst
+		this
+			another
+				thing: inst
