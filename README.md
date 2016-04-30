@@ -24,7 +24,17 @@ Both spaces and tabs are supported; during lexing, tabs are treated as four spac
    comment does not break parsing. ;>
 
 ; This is a single-line comment.
-; The only valid top-level statement in Minet is a class name.
+; The only valid top-level statements in Minet are class names, use statements and javascript blocks
+
+; This tells the compiler that alert is a valid identifier so it doesn't complain about an undeclared variable.
+use alert
+
+<js
+// This is a Javascript block, any code entered here will be output as-is to the output file.
+// Javascript blocks can be used at most any part of a Minet program.
+alert("Hello from Javascript");
+js>
+
 ; Class names can be chained together, resulting in classes containing other classes.
 ; In this example, MyClass is a child class of MyProject, which is also a class.
 MyProject.MyClass
