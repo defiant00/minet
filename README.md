@@ -49,15 +49,15 @@ fn(a, b)                                        function(a, b) {
 
 a: b                                            a = b;
 
-a, b: 3, 'hello'                                var __t0 = 3;
-                                                var __t1 = 'hello';
-                                                a = __t0;
-                                                b = __t1;
+a, b: 3, 'hello'                                var _t0 = 3;
+                                                var _t1 = 'hello';
+                                                a = _t0;
+                                                b = _t1;
 
-a, b: b, a                                      var __t0 = b;
-                                                var __t1 = a;
-                                                a = __t0;
-                                                b = __t1;
+a, b: b, a                                      var _t0 = b;
+                                                var _t1 = a;
+                                                a = _t0;
+                                                b = _t1;
 
 arr: [1, 2, 3]                                  arr = [1, 2, 3];
 
@@ -82,11 +82,16 @@ MyClass{                                        new MyClass(1, 2, 3, 4);
     3, 4
 }
 
+{}                                              {}
+{first, last: 'first', 'last'}                  {first: 'first', last: 'last'}
+
+for i in 0 to 10                                for (var i = 0; i < 10; i++)
+for i in 10 to 0                                for (var i = (10) - 1; i >= 0; i--)
 for i in 0 to 10 by 2                           for (var i = 0; i < 10; i += 2) {
 myLoop for i in 0 to 10                         myLoop: for (var i = 0; i < 10; i++) {
 
-for i in myItems                                for (var __i0 = 0; __i0 < myItems.length; __i0++) {
-                                                    var i = myItems[__i0];
+for i in myItems                                for (var _i0 = 0; _i0 < myItems.length; _i0++) {
+                                                    var i = myItems[_i0];
 
 myObj.doThing(1, 2, 3)                          myObj.doThing(1, 2, 3);
 
@@ -131,12 +136,12 @@ var x, y: 1, 2                                  var x = 1, y = 2;
 x: 3                                            x = 3;
 x +: 3                                          x += 3;
 
-x, y -: 1, 2                                    var __t0 = x - 1;
-                                                var __t1 = y - 2;
-                                                x = __t0;
-                                                y = __t1;
+x, y -: 1, 2                                    var _t0 = x - 1;
+                                                var _t1 = y - 2;
+                                                x = _t0;
+                                                y = _t1;
 
-x, y -: 1                                       var __t = 1;
+x, y -: 1                                       var _t = 1;
                                                 x -= t;
                                                 y -= t;
 
