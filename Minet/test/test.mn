@@ -3,11 +3,12 @@
 use alert
 
 Proj
-	.i
-	.test: fn()
-		i
-			sub++
-			sub
-				x, y: 1, 2
-			doThing()
-				arr[0]: Proj{}
+	Main: fn()
+		var i: 3
+		if i
+			> 1
+				if i
+					= 3
+						if i
+							< 7
+								alert('yup')

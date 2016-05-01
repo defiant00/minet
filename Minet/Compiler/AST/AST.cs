@@ -150,6 +150,7 @@ namespace Minet.Compiler.AST
 	public partial class If : AST, IStatement
 	{
 		public List<IfSection> Sections = new List<IfSection>();
+		public IStatement ConditionVar;
 		public If(Position pos) : base(pos) { }
 	}
 

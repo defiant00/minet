@@ -7,9 +7,20 @@ namespace Minet
 {
 	public class Constants
 	{
-		public const string Program = "Minet Compiler 1.0 RC7";
+		public const string Program = "Minet Compiler 1.0 RC8";
 		public const string InternalVarPrefix = "_";
 	}
+
+	/* Internal Variable Constants and Uses:
+	 * 
+	 * On the below, <n> is a counter.
+	 * 
+	 * Assignment    _t, _t<n>
+	 * For           _i<n>
+	 * If            _c<n>
+	 * FunctionDef   _this
+	 * VarSetLine    _t, _t<n>
+	 */
 
 	public class Program
 	{

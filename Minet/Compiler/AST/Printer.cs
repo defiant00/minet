@@ -187,6 +187,11 @@ namespace Minet.Compiler.AST
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
 			Helper.PrintASTIndentLine("if", indent, buf);
+			if (ConditionVar != null)
+			{
+				Helper.PrintASTIndentLine("condition var", indent + 1, buf);
+				ConditionVar.AppendPrint(indent + 2, buf);
+			}
 			foreach (var s in Sections) { s.AppendPrint(indent + 1, buf); }
 		}
 	}

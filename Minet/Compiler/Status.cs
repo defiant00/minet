@@ -15,6 +15,7 @@ namespace Minet.Compiler
 		public static int FnCounter = 0;
 		public static bool NeedsThisVar = false;
 		public static int ForCounter = 0;
+		public static int IfCounter = 0;
 		public static VarTracker Variables = new VarTracker();
 		public static bool CurrentFnStatic = false;
 

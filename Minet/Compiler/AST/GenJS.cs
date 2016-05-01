@@ -557,6 +557,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
+			if (ConditionVar != null) { ConditionVar.AppendJSStmt(buf, chain, true); }
 			Helper.PrintIndented(string.Empty, buf);
 			for (int i = 0; i < Sections.Count; i++)
 			{
