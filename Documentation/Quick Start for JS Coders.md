@@ -277,13 +277,13 @@ values and, optionally, the step. The format is:
 - **for** i **in** start **to** end
 - **for** i **in** start **to** end **by** step
 
-Loops are always inclusive of the smaller number and exclusive to the larger, regardless of whether
+Loops are always inclusive to the smaller number and exclusive to the larger, regardless of whether
 it is an increasing or decreasing loop.
 
 A loop will default to a step of 1 or -1 if none is specified. The scenarios in which Minet is able
 to determine that -1 should be the step are when:
 - Both start and end are literal numbers, and start > end.
-- The end is 0.
+- End is 0.
 ```
 for i in 0 to 10
     alert('hi 1')
