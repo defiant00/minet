@@ -3,8 +3,11 @@
 use alert
 
 Proj
+	.i
 	.test: fn()
-		var x: 1
-		x: ~1
-		x: 1 & 2
-		x: ~1 & 2 | 3 ^ 4 >> 5 << 6
+		i
+			sub++
+			sub
+				x, y: 1, 2
+			doThing()
+				arr[0]: Proj{}

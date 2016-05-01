@@ -38,6 +38,11 @@ namespace Minet.Compiler.AST
 			buf.AppendLine(line);
 		}
 
+		public static string DotName(string parent, string name)
+		{
+			return string.IsNullOrEmpty(parent) ? name : parent + "." + name;
+		}
+
 		public static double? GetNumVal(IExpression expr)
 		{
 			if (expr != null)

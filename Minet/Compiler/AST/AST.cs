@@ -11,12 +11,12 @@ namespace Minet.Compiler.AST
 
 	public interface IExpression : IGeneral
 	{
-		string ToJSExpr();
+		string ToJSExpr(bool expandIds);
 	}
 
 	public interface IStatement : IGeneral
 	{
-		void AppendJSStmt(StringBuilder buf);
+		void AppendJSStmt(StringBuilder buf, string chain, bool expandIds);
 	}
 
 	public interface IClassStatement : IStatement

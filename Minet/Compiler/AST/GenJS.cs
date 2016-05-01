@@ -6,12 +6,12 @@ namespace Minet.Compiler.AST
 {
 	public partial class Accessor
 	{
-		public string ToJSExpr()
+		public string ToJSExpr(bool expandIds)
 		{
 			var sb = new StringBuilder();
-			sb.Append(Object.ToJSExpr());
+			sb.Append(Object.ToJSExpr(expandIds));
 			sb.Append("[");
-			sb.Append(Index.ToJSExpr());
+			sb.Append(Index.ToJSExpr(true));
 			sb.Append("]");
 			return sb.ToString();
 		}
@@ -19,10 +19,10 @@ namespace Minet.Compiler.AST
 
 	public partial class ArrayValueList
 	{
-		public string ToJSExpr()
+		public string ToJSExpr(bool expandIds)
 		{
 			var sb = new StringBuilder("[");
-			sb.Append(string.Join(", ", Vals.Expressions.Select(e => e.ToJSExpr())));
+			sb.Append(string.Join(", ", Vals.Expressions.Select(e => e.ToJSExpr(true))));
 			sb.Append("]");
 			return sb.ToString();
 		}
@@ -30,7 +30,7 @@ namespace Minet.Compiler.AST
 
 	public partial class Assign
 	{
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			string op = "/* No Op */";
 			string mulOp = "/* No Multi-Op */";
@@ -40,7 +40,7 @@ namespace Minet.Compiler.AST
 					op = " = ";
 					break;
 				case TokenType.Unpack:
-					DoUnpack(buf);
+					DoUnpack(buf, chain, expandIds);
 					return;
 				case TokenType.AddAssign:
 					op = " += ";
@@ -70,15 +70,9 @@ namespace Minet.Compiler.AST
 			{
 				var l = Left.Expressions[0];
 				var r = Right.Expressions[0];
-				Helper.PrintIndented(Status.ChainName(l.ToJSExpr()), buf);
+				Helper.PrintIndented(Helper.DotName(chain, l.ToJSExpr(expandIds)), buf);
 				buf.Append(op);
-
-				// Reset chain temporarily so value is calculated properly.
-				string chain = Status.Chain;
-				Status.Chain = "";
-				buf.Append(r.ToJSExpr());
-				Status.Chain = chain;
-
+				buf.Append(r.ToJSExpr(true));
 				buf.AppendLine(";");
 			}
 			else if (Right.Expressions.Count == 1)
@@ -87,18 +81,12 @@ namespace Minet.Compiler.AST
 				Helper.PrintIndented("var ", buf);
 				buf.Append(Constants.InternalVarPrefix);
 				buf.Append("t = ");
-
-				// Reset chain temporarily so value is calculated properly.
-				string chain = Status.Chain;
-				Status.Chain = "";
-				buf.Append(r.ToJSExpr());
-				Status.Chain = chain;
-
+				buf.Append(r.ToJSExpr(true));
 				buf.AppendLine(";");
 				for (int i = 0; i < Left.Expressions.Count; i++)
 				{
 					var l = Left.Expressions[i];
-					Helper.PrintIndented(Status.ChainName(l.ToJSExpr()), buf);
+					Helper.PrintIndented(Helper.DotName(chain, l.ToJSExpr(expandIds)), buf);
 					buf.Append(op);
 					buf.Append(Constants.InternalVarPrefix);
 					buf.AppendLine("t;");
@@ -117,23 +105,17 @@ namespace Minet.Compiler.AST
 					if (Op != TokenType.Assign)
 					{
 						buf.Append(" = ");
-						buf.Append(l.ToJSExpr());
+						buf.Append(l.ToJSExpr(expandIds));
 						buf.Append(mulOp);
 					}
 					else { buf.Append(op); }
-
-					// Reset chain temporarily so value is calculated properly.
-					string chain = Status.Chain;
-					Status.Chain = "";
-					buf.Append(r.ToJSExpr());
-					Status.Chain = chain;
-
+					buf.Append(r.ToJSExpr(true));
 					buf.AppendLine(";");
 				}
 				for (int i = 0; i < Left.Expressions.Count; i++)
 				{
 					var l = Left.Expressions[i];
-					Helper.PrintIndented(Status.ChainName(l.ToJSExpr()), buf);
+					Helper.PrintIndented(Helper.DotName(chain, l.ToJSExpr(expandIds)), buf);
 					buf.Append(" = ");
 					buf.Append(Constants.InternalVarPrefix);
 					buf.Append("t");
@@ -147,7 +129,7 @@ namespace Minet.Compiler.AST
 			}
 		}
 
-		private void DoUnpack(StringBuilder buf)
+		private void DoUnpack(StringBuilder buf, string chain, bool expandIds)
 		{
 			if (Right.Expressions.Count == 1)
 			{
@@ -155,18 +137,12 @@ namespace Minet.Compiler.AST
 				Helper.PrintIndented("var ", buf);
 				buf.Append(Constants.InternalVarPrefix);
 				buf.Append("t = ");
-
-				// Reset chain temporarily so value is calculated properly.
-				string chain = Status.Chain;
-				Status.Chain = "";
-				buf.Append(r.ToJSExpr());
-				Status.Chain = chain;
-
+				buf.Append(r.ToJSExpr(true));
 				buf.AppendLine(";");
 				for (int i = 0; i < Left.Expressions.Count; i++)
 				{
 					var l = Left.Expressions[i];
-					Helper.PrintIndented(Status.ChainName(l.ToJSExpr()), buf);
+					Helper.PrintIndented(Helper.DotName(chain, l.ToJSExpr(expandIds)), buf);
 					buf.Append(" = ");
 					buf.Append(Constants.InternalVarPrefix);
 					buf.Append("t[");
@@ -183,7 +159,7 @@ namespace Minet.Compiler.AST
 
 	public partial class Binary
 	{
-		public string ToJSExpr()
+		public string ToJSExpr(bool expandIds)
 		{
 			string op = "/* No Op */";
 			switch (Op)
@@ -257,19 +233,16 @@ namespace Minet.Compiler.AST
 			}
 
 			var sb = new StringBuilder();
+
 			if (Left is Binary) { sb.Append("("); }
-			sb.Append(Left.ToJSExpr());
+			sb.Append(Left.ToJSExpr(expandIds));
 			if (Left is Binary) { sb.Append(")"); }
+
 			sb.Append(op);
 
-			bool prevInDot = Status.IsInDot;
-			if (Op == TokenType.Dot) { Status.IsInDot = true; }
-
 			if (Right is Binary) { sb.Append("("); }
-			sb.Append(Right.ToJSExpr());
+			sb.Append(Right.ToJSExpr(Op != TokenType.Dot));
 			if (Right is Binary) { sb.Append(")"); }
-
-			if (Op == TokenType.Dot) { Status.IsInDot = prevInDot; }
 
 			return sb.ToString();
 		}
@@ -277,12 +250,12 @@ namespace Minet.Compiler.AST
 
 	public partial class Bool
 	{
-		public string ToJSExpr() { return Val ? "true" : "false"; }
+		public string ToJSExpr(bool expandIds) { return Val ? "true" : "false"; }
 	}
 
 	public partial class Break
 	{
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			Helper.PrintIndented("break", buf);
 			if (!string.IsNullOrEmpty(Label))
@@ -296,7 +269,7 @@ namespace Minet.Compiler.AST
 
 	public partial class Class
 	{
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a class.", Pos));
 		}
@@ -304,12 +277,12 @@ namespace Minet.Compiler.AST
 
 	public partial class Constructor
 	{
-		public string ToJSExpr()
+		public string ToJSExpr(bool expandIds)
 		{
 			var sb = new StringBuilder("new ");
-			sb.Append(Type.ToJSExpr());
+			sb.Append(Type.ToJSExpr(true));
 			sb.Append("(");
-			sb.Append(string.Join(", ", Params.Expressions.Select(p => p.ToJSExpr())));
+			sb.Append(string.Join(", ", Params.Expressions.Select(p => p.ToJSExpr(true))));
 			sb.Append(")");
 			return sb.ToString();
 		}
@@ -317,7 +290,7 @@ namespace Minet.Compiler.AST
 
 	public partial class Else
 	{
-		public string ToJSExpr()
+		public string ToJSExpr(bool expandIds)
 		{
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for an else.", Pos));
 			return "/* Else */";
@@ -326,9 +299,9 @@ namespace Minet.Compiler.AST
 
 	public partial class Error
 	{
-		public string ToJSExpr() { return "/* Error: " + Val + " */"; }
+		public string ToJSExpr(bool expandIds) { return "/* Error: " + Val + " */"; }
 
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			Helper.PrintIndentedLine("// Error: " + Val, buf);
 		}
@@ -336,7 +309,7 @@ namespace Minet.Compiler.AST
 
 	public partial class ExprList
 	{
-		public string ToJSExpr()
+		public string ToJSExpr(bool expandIds)
 		{
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for an expression list.", Pos));
 			return "/* Expression List */";
@@ -345,26 +318,21 @@ namespace Minet.Compiler.AST
 
 	public partial class ExprStmt
 	{
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			if (Statements.Count > 0)
 			{
-				string oldChain = Status.Chain;
-				string chainRoot = Status.ChainName(string.Empty);
-
+				string chainRoot = Helper.DotName(chain, string.Empty);
 				foreach (var e in Expr.Expressions)
 				{
-					Status.Chain = chainRoot + e.ToJSExpr();
-					foreach (var st in Statements) { st.AppendJSStmt(buf); }
+					foreach (var st in Statements) { st.AppendJSStmt(buf, chainRoot + e.ToJSExpr(expandIds), false); }
 				}
-
-				Status.Chain = oldChain;
 			}
 			else
 			{
 				foreach (var e in Expr.Expressions)
 				{
-					Helper.PrintIndented(Status.ChainName(e.ToJSExpr()), buf);
+					Helper.PrintIndented(Helper.DotName(chain, e.ToJSExpr(expandIds)), buf);
 					buf.AppendLine(";");
 				}
 			}
@@ -373,7 +341,7 @@ namespace Minet.Compiler.AST
 
 	public partial class File
 	{
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a file.", Pos));
 		}
@@ -381,7 +349,7 @@ namespace Minet.Compiler.AST
 
 	public partial class For
 	{
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			Status.Variables.IncrementDepth();
 			Status.Variables.AddItem(Var, Pos);
@@ -408,8 +376,8 @@ namespace Minet.Compiler.AST
 				Status.ForCounter++;
 			}
 
-			string startStr = iterator ? (asc ? "0" : From.ToJSExpr() + ".length") : From.ToJSExpr();
-			string compStr = iterator ? (asc ? From.ToJSExpr() + ".length" : "0") : To.ToJSExpr();
+			string startStr = iterator ? (asc ? "0" : From.ToJSExpr(true) + ".length") : From.ToJSExpr(true);
+			string compStr = iterator ? (asc ? From.ToJSExpr(true) + ".length" : "0") : To.ToJSExpr(true);
 
 			buf.Append("for (var ");
 			buf.Append(var);
@@ -434,7 +402,7 @@ namespace Minet.Compiler.AST
 			else
 			{
 				buf.Append(" += ");
-				buf.Append(By.ToJSExpr());
+				buf.Append(By.ToJSExpr(true));
 			}
 			buf.AppendLine(") {");
 
@@ -444,13 +412,13 @@ namespace Minet.Compiler.AST
 				Helper.PrintIndented("var ", buf);
 				buf.Append(Var);
 				buf.Append(" = ");
-				buf.Append(From.ToJSExpr());
+				buf.Append(From.ToJSExpr(true));
 				buf.Append("[");
 				buf.Append(var);
 				buf.AppendLine("];");
 			}
 
-			foreach (var st in Statements) { st.AppendJSStmt(buf); }
+			foreach (var st in Statements) { st.AppendJSStmt(buf, "", true); }
 			Status.Indent--;
 
 			Helper.PrintIndentedLine("}", buf);
@@ -462,11 +430,11 @@ namespace Minet.Compiler.AST
 
 	public partial class FunctionCall
 	{
-		public string ToJSExpr()
+		public string ToJSExpr(bool expandIds)
 		{
-			var sb = new StringBuilder(Function.ToJSExpr());
+			var sb = new StringBuilder(Function.ToJSExpr(expandIds));
 			sb.Append("(");
-			sb.Append(string.Join(", ", Params.Expressions.Select(p => p.ToJSExpr())));
+			sb.Append(string.Join(", ", Params.Expressions.Select(p => p.ToJSExpr(true))));
 			sb.Append(")");
 			return sb.ToString();
 		}
@@ -474,7 +442,7 @@ namespace Minet.Compiler.AST
 
 	public partial class FunctionDef
 	{
-		public string ToJSExpr()
+		public string ToJSExpr(bool expandIds)
 		{
 			Status.FnCounter++;
 			Status.Variables.IncrementDepth();
@@ -522,17 +490,17 @@ namespace Minet.Compiler.AST
 
 		public void AppendStatements(StringBuilder buf)
 		{
-			foreach (var st in Statements) { st.AppendJSStmt(buf); }
+			foreach (var st in Statements) { st.AppendJSStmt(buf, "", true); }
 		}
 	}
 
 	public partial class Identifier
 	{
-		public string ToJSExpr()
+		public string ToJSExpr(bool expandIds)
 		{
 			var idents = new List<string>();
 			idents.AddRange(Idents);
-			if (Status.CheckExpandIdentifiers)
+			if (expandIds)
 			{
 				bool valid = ExpandIdentifier(idents);
 				if (!valid)
@@ -579,15 +547,15 @@ namespace Minet.Compiler.AST
 			return success;
 		}
 
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
-			Helper.PrintIndentedLine(ToJSExpr(), buf);
+			Helper.PrintIndentedLine(ToJSExpr(expandIds), buf);
 		}
 	}
 
 	public partial class If
 	{
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			Helper.PrintIndented(string.Empty, buf);
 			for (int i = 0; i < Sections.Count; i++)
@@ -596,14 +564,14 @@ namespace Minet.Compiler.AST
 				if (!(Sections[i].Condition is Else))
 				{
 					buf.Append("if (");
-					buf.Append(Sections[i].Condition.ToJSExpr());
+					buf.Append(Sections[i].Condition.ToJSExpr(true));
 					buf.Append(") ");
 				}
 				buf.AppendLine("{");
 
 				Status.Variables.IncrementDepth();
 				Status.Indent++;
-				foreach (var st in Sections[i].Statements) { st.AppendJSStmt(buf); }
+				foreach (var st in Sections[i].Statements) { st.AppendJSStmt(buf, "", true); }
 				Status.Indent--;
 				Status.Variables.DecrementDepth();
 
@@ -615,7 +583,7 @@ namespace Minet.Compiler.AST
 
 	public partial class IfSection
 	{
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for an if section.", Pos));
 		}
@@ -623,7 +591,7 @@ namespace Minet.Compiler.AST
 
 	public partial class JSBlock
 	{
-		public void AppendJSStmt(StringBuilder buf) { Helper.PrintIndentedLine(Val, buf); }
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds) { Helper.PrintIndentedLine(Val, buf); }
 
 		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
 		{
@@ -633,14 +601,14 @@ namespace Minet.Compiler.AST
 
 	public partial class Loop
 	{
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			Helper.PrintIndented(string.IsNullOrEmpty(Label) ? "" : Label + ":", buf);
 			buf.AppendLine("while(true) {");
 
 			Status.Variables.IncrementDepth();
 			Status.Indent++;
-			foreach (var st in Statements) { st.AppendJSStmt(buf); }
+			foreach (var st in Statements) { st.AppendJSStmt(buf, "", true); }
 			Status.Indent--;
 			Status.Variables.DecrementDepth();
 
@@ -648,16 +616,16 @@ namespace Minet.Compiler.AST
 		}
 	}
 
-	public partial class Number { public string ToJSExpr() { return Val; } }
+	public partial class Number { public string ToJSExpr(bool expandIds) { return Val; } }
 
 	public partial class ObjectConstructor
 	{
-		public string ToJSExpr()
+		public string ToJSExpr(bool expandIds)
 		{
 			var sb = new StringBuilder("{");
 			for (int i = 0; i < Lines.Count; i++)
 			{
-				sb.Append(Lines[i].ToJSExpr());
+				sb.Append(Lines[i].ToJSExpr(true));
 				if (i + 1 < Lines.Count) { sb.Append(", "); }
 			}
 			sb.Append("}");
@@ -667,9 +635,9 @@ namespace Minet.Compiler.AST
 
 	public partial class PostOperator
 	{
-		public string ToJSExpr()
+		public string ToJSExpr(bool expandIds)
 		{
-			string expr = Expr.ToJSExpr();
+			string expr = Expr.ToJSExpr(expandIds);
 			switch (Op)
 			{
 				case TokenType.Decrement:
@@ -685,7 +653,7 @@ namespace Minet.Compiler.AST
 
 	public partial class PropertySet
 	{
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a property set.", Pos));
 		}
@@ -748,14 +716,14 @@ namespace Minet.Compiler.AST
 									funcBuf.Append(".");
 									funcBuf.Append(p.Name);
 									funcBuf.Append(" = ");
-									funcBuf.Append(v.ToJSExpr());
+									funcBuf.Append(v.ToJSExpr(true));
 									funcBuf.AppendLine(";");
 								}
 								else
 								{
 									sPropBuf.Append(Status.ChainClassName(p.Name));
 									sPropBuf.Append(" = ");
-									sPropBuf.Append(v.ToJSExpr());
+									sPropBuf.Append(v.ToJSExpr(true));
 									sPropBuf.AppendLine(";");
 								}
 							}
@@ -778,7 +746,7 @@ namespace Minet.Compiler.AST
 
 							buf.Append(p.Name);
 							buf.Append(" = ");
-							buf.Append(v.ToJSExpr());
+							buf.Append(v.ToJSExpr(true));
 							buf.AppendLine(";");
 
 							if (fn == null) { Status.Indent--; }
@@ -795,13 +763,13 @@ namespace Minet.Compiler.AST
 
 	public partial class Return
 	{
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			Helper.PrintIndented("return", buf);
 			if (Val != null)
 			{
 				buf.Append(" ");
-				buf.Append(Val.ToJSExpr());
+				buf.Append(Val.ToJSExpr(true));
 			}
 			buf.AppendLine(";");
 		}
@@ -809,7 +777,7 @@ namespace Minet.Compiler.AST
 
 	public partial class SetLine
 	{
-		public string ToJSExpr()
+		public string ToJSExpr(bool expandIds)
 		{
 			var sb = new StringBuilder();
 			if (Vals != null)
@@ -820,13 +788,13 @@ namespace Minet.Compiler.AST
 					{
 						sb.Append(Names[i]);
 						sb.Append(":");
-						sb.Append(Vals.Expressions[i].ToJSExpr());
+						sb.Append(Vals.Expressions[i].ToJSExpr(true));
 						if (i + 1 < Names.Count) { sb.Append(", "); }
 					}
 				}
 				else if (Vals.Expressions.Count == 1)
 				{
-					string val = Vals.Expressions[0].ToJSExpr();
+					string val = Vals.Expressions[0].ToJSExpr(true);
 					for (int i = 0; i < Names.Count; i++)
 					{
 						sb.Append(Names[i]);
@@ -844,13 +812,13 @@ namespace Minet.Compiler.AST
 		}
 	}
 
-	public partial class String { public string ToJSExpr() { return Val; } }
+	public partial class String { public string ToJSExpr(bool expandIds) { return Val; } }
 
 	public partial class Unary
 	{
-		public string ToJSExpr()
+		public string ToJSExpr(bool expandIds)
 		{
-			string expr = Expr.ToJSExpr();
+			string expr = Expr.ToJSExpr(true);
 			switch (Op)
 			{
 				case TokenType.Add:
@@ -878,7 +846,7 @@ namespace Minet.Compiler.AST
 
 	public partial class Use
 	{
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a use.", Pos));
 		}
@@ -886,15 +854,15 @@ namespace Minet.Compiler.AST
 
 	public partial class VarSet
 	{
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
-			foreach (var l in Lines) { l.AppendJSStmt(buf); }
+			foreach (var l in Lines) { l.AppendJSStmt(buf, "", true); }
 		}
 	}
 
 	public partial class VarSetLine
 	{
-		public void AppendJSStmt(StringBuilder buf)
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			foreach (var v in Vars) { Status.Variables.AddItem(v, Pos); }
 
@@ -907,7 +875,7 @@ namespace Minet.Compiler.AST
 						Helper.PrintIndented("var ", buf);
 						buf.Append(Constants.InternalVarPrefix);
 						buf.Append("t = ");
-						buf.Append(Vals.Expressions[0].ToJSExpr());
+						buf.Append(Vals.Expressions[0].ToJSExpr(true));
 						buf.AppendLine(";");
 						Helper.PrintIndented("var ", buf);
 						for (int i = 0; i < Vars.Count; i++)
@@ -935,7 +903,7 @@ namespace Minet.Compiler.AST
 					{
 						buf.Append(Vars[i]);
 						buf.Append(" = ");
-						buf.Append(Vals.Expressions[i].ToJSExpr());
+						buf.Append(Vals.Expressions[i].ToJSExpr(true));
 						if (i + 1 < Vars.Count) { buf.Append(", "); }
 					}
 					buf.AppendLine(";");
@@ -945,7 +913,7 @@ namespace Minet.Compiler.AST
 					Helper.PrintIndented("var ", buf);
 					buf.Append(Constants.InternalVarPrefix);
 					buf.Append("t = ");
-					buf.Append(Vals.Expressions[0].ToJSExpr());
+					buf.Append(Vals.Expressions[0].ToJSExpr(true));
 					buf.AppendLine(";");
 					Helper.PrintIndented("var ", buf);
 					for (int i = 0; i < Vars.Count; i++)
