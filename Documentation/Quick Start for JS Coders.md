@@ -87,9 +87,52 @@ var x: 0
 ```
 
 ### Classes
-; nested, partial, multiple names for shared code, constructors
+The only valid statements at the root of a document are **use**, JavaScript blocks, and class names.
+Nested classes are created by dotting the names together.
+```
+MyProject.MyClass      ; Creates a class MyProject and a class MyClass within MyProject.
+    Greet: fn()
+        alert('hi')
 
-; . is inst, not is static
+MyProject              ; Adds a static property to class MyProject. The order in which they are
+	SomeProp: 3        ; defined, or even which file they are defined in, doesn't matter.
+```
+Within a class, properties that start with a **.** are instance properties, and those that do not are static.
+```
+MyClass
+    StaticCounter: 0
+    .InstanceCounter: 0
+
+    StaticGreet: fn()
+        alert('hi')
+
+    .GreetInstance: fn()
+        alert('hi')
+```
+Classes can be defined in multiple places, and during code generation all are combined into a single class.
+```
+; This is the same:
+MyClass
+    .first, .second: 1, 2
+
+; As this:
+MyClass
+    .first: 1
+
+MyClass
+    .second: 2
+```
+You are not limited to a single class to write code for. Multiple classes can be provided, separated by commas.
+All of the classes will contain the shared code.
+```
+; Both MyClass and SecondClass will contain an x and y property, defaulted to zero.
+MyClass, SecondClass
+	.x, .y: 0, 0
+```
+In Minet, an instance of an object is constructed through **name{args}**, equivalent to the JavaScript **new name(args);**
+```
+	obj: MyClass{1, 2}
+```
 
 ; Main
 
