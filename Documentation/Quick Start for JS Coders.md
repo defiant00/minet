@@ -181,8 +181,8 @@ If **this** is used within an anonymous function, it will automatically be repla
 that **this** in event handlers works properly.
 
 ### Assignment
-Minet allows many-to-many assignments in the format **variables : values**. All values are evaluated left-to-right
-into temporary values, and then all are assigned.
+Minet allows many-to-many assignment in the form **variables : values**. All values are evaluated left-to-right
+into temporary variables, and then all are assigned.
 ```
 a, b: 1, 2    ; Assigns 1 to a and 2 to b.
 x, y: y, x    ; Since all values are evaluated before assignment, this successfully swaps x and y.
@@ -191,8 +191,9 @@ Many-to-one assignments are also accepted, with the value calculated once and th
 ```
 a, b, c: calculate()    ; calculate() is called once and then the value is assigned to a, b and c.
 ```
-Both many-to-many and many-to-one operations are also supported through the shorthand operators **+: -: *: /: %:**
-These operators correspond to the JavaScript operators **+= -= *= /= %=**
+Both many-to-many and many-to-one operations are also supported through the shorthand
+operators **+:**, **-:**, ***:**, **/:** and **%:**
+These operators correspond to the JavaScript operators **+=**, **-=**, ***=**, **/=** and **%=**
 
 The unpack operator **::** takes one or more variables and a single array, and unpacks the items of the array
 into the provided variables.
