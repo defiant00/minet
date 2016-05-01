@@ -127,11 +127,11 @@ All of the classes will contain the shared code.
 ```
 ; Both MyClass and SecondClass will contain an x and y property, defaulted to zero.
 MyClass, SecondClass
-	.x, .y: 0, 0
+    .x, .y: 0, 0
 ```
 In Minet, an instance of an object is constructed through **name{args}**, equivalent to the JavaScript **new name(args);**
 ```
-	obj: MyClass{1, 2}
+    obj: MyClass{1, 2}
 ```
 
 ; Main
