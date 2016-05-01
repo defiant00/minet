@@ -181,19 +181,39 @@ If **this** is used within an anonymous function, it will automatically be repla
 that **this** in event handlers works properly.
 
 ### Assignment
-; many-many: a, b: 3, 'hello'
+Minet allows many-to-many assignments in the format **variables : values**. All values are evaluated left-to-right
+into temporary values, and then all are assigned.
+```
+a, b: 1, 2    ; Assigns 1 to a and 2 to b.
+x, y: y, x    ; Since all values are evaluated before assignment, this successfully swaps x and y.
+```
+Many-to-one assignments are also accepted, with the value calculated once and then assigned to all variables.
+```
+a, b, c: calculate()    ; calculate() is called once and then the value is assigned to a, b and c.
+```
+Both many-to-many and many-to-one operations are also supported through the shorthand operators **+: -: *: /: %:**
+These operators correspond to the JavaScript operators **+= -= *= /= %=**
 
-; many-one: a, b: 3
+The unpack operator **::** takes one or more variables and a single array, and unpacks the items of the array
+into the provided variables.
+```
+first, second, third :: array
+```
+Generates:
+```javascript
+var _t = array;
+first = _t[0];
+second = _t[1];
+third = _t[2];
+```
+The unpack operator along with array creation using **[]** is an easy way in Minet to return multiple values.
+```
+MyClass
+    GetPersonInfo: fn()
+        ret ["first", "last", 30]
 
-; many-many: a, b +: 1, 2
-
-; many-one: a, b +: 1
-
-; all evaluated first, so can be used to swap
-
-; unpack
-
-; +:, -:, *:, /:, %:
+firstName, lastName, age :: MyClass.GetPersonInfo()
+```
 
 ### Chains
 You can chain identifiers together through indentation. All indented parts will generate code as if they were
@@ -202,11 +222,15 @@ preceded by the prior identifier and a dot.
 this
     x, y
         counter: 1
+    calculate()
+    print()
 ```
 Will produce:
 ```javascript
 this.x.counter = 1;
 this.y.counter = 1;
+this.calculate();
+this.print();
 ```
 
 ### If
