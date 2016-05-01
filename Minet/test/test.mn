@@ -3,9 +3,11 @@
 use alert
 
 Proj
+	.inst: 1
+	Static: 2
+
+Proj.Sub.Another.Thing
 	.inst
-	.Test: fn()
-		this.thing: inst
-		this
-			another
-				thing: inst
+	.test: fn()
+		inst: 3
+		Static: 4

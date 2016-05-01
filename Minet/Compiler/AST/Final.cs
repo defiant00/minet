@@ -36,7 +36,7 @@ namespace Minet.Compiler.AST
 
 		public F_Class(Position pos) { Pos = pos; }
 
-		private void BuildVarList(StringBuilder buffer)
+		private void BuildVarClassList()
 		{
 			foreach (var c in Classes)
 			{
@@ -45,7 +45,10 @@ namespace Minet.Compiler.AST
 					Status.Variables.AddItem(c.Name, new Identifier(c.Pos) { Idents = { Name, c.Name } });
 				}
 			}
+		}
 
+		private void BuildVarStmtList(bool doStatic)
+		{
 			foreach (var s in Statements)
 			{
 				if (s is PropertySet)
@@ -53,14 +56,17 @@ namespace Minet.Compiler.AST
 					var ps = s as PropertySet;
 					foreach (var prop in ps.Props)
 					{
-						string parent = prop.Static ? Name : "this";
-						if (parent != prop.Name)
+						if (doStatic == prop.Static)
 						{
-							Status.Variables.AddItem(prop.Name, new Identifier(prop.Pos) { Idents = { parent, prop.Name } });
-						}
-						else
-						{
-							Status.Variables.AddItem(parent + " constructor", prop.Pos);
+							string parent = prop.Static ? Name : "this";
+							if (parent != prop.Name)
+							{
+								Status.Variables.AddItem(prop.Name, new Identifier(prop.Pos) { Idents = { parent, prop.Name } });
+							}
+							else
+							{
+								Status.Variables.AddItem(parent + " constructor", prop.Pos);
+							}
 						}
 					}
 				}
@@ -70,7 +76,10 @@ namespace Minet.Compiler.AST
 		public void Build(StringBuilder buffer, StringBuilder staticBuffer)
 		{
 			Status.Variables.IncrementDepth();
-			BuildVarList(buffer);
+			BuildVarClassList();
+			BuildVarStmtList(true);
+			Status.Variables.IncrementDepth();
+			BuildVarStmtList(false);
 
 			string priorClass = Status.Class;
 			string priorClassChain = Status.ClassChain;
@@ -100,6 +109,10 @@ namespace Minet.Compiler.AST
 			// Statements and classes
 			//
 			foreach (var st in Statements) { st.AppendJS(consSigBuffer, consThisBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticBuffer); }
+
+			// Remove local instance variables from variable list before building child classes.
+			Status.Variables.DecrementDepth();
+
 			foreach (var c in Classes) { c.Build(classBuffer, staticBuffer); }
 
 
