@@ -196,6 +196,18 @@ that **this** in event handlers works properly.
 ; +:, -:, *:, /:, %:
 
 ### Chains
+You can chain identifiers together through indentation. All indented parts will generate code as if they were
+preceded by the prior identifier and a dot.
+```
+this
+    x, y
+        counter: 1
+```
+Will produce:
+```javascript
+this.x.counter = 1;
+this.y.counter = 1;
+```
 
 ### If
 ; normal, no arg, partial
