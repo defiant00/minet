@@ -34,7 +34,7 @@ myObj.subObject                                 myObj.subObject.first = 1;
 break                                           break;
 break myLoop                                    break myLoop;
 
-MyClass                                         var MyClass = (function () {
+MyClass                                         var MyClass = (function() {
                                                     function MyClass() {
                                                     }
                                                     return MyClass;
