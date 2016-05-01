@@ -230,6 +230,21 @@ namespace Minet.Compiler.AST
 				case TokenType.Or:
 					op = " || ";
 					break;
+				case TokenType.BAnd:
+					op = " & ";
+					break;
+				case TokenType.BOr:
+					op = " | ";
+					break;
+				case TokenType.BXOr:
+					op = " ^ ";
+					break;
+				case TokenType.BLeftShift:
+					op = " << ";
+					break;
+				case TokenType.BRightShift:
+					op = " >> ";
+					break;
 				default:
 					Status.Errors.Add(new ErrorMsg("Unknown binary operator " + Op, Pos));
 					break;
@@ -814,6 +829,10 @@ namespace Minet.Compiler.AST
 			string expr = Expr.ToJSExpr();
 			switch (Op)
 			{
+				case TokenType.Add:
+					return "+" + expr;
+				case TokenType.BNot:
+					return "~" + expr;
 				case TokenType.Not:
 					return "!" + expr;
 				case TokenType.Sub:

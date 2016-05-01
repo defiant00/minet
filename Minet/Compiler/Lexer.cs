@@ -5,7 +5,7 @@ namespace Minet.Compiler
 	public class Lexer
 	{
 		const char eof = '\0';
-		const string operatorChars = "()[]{}<>!=+-*/%,.:";
+		const string operatorChars = "()[]{}<>!=+-*/%,.:&|^~";
 		const string hexStart = "0x";
 		const string commentStart = "<;";
 		const string commentEnd = ";>";

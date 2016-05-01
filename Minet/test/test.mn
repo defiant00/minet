@@ -3,11 +3,8 @@
 use alert
 
 Proj
-	.inst: 1
-	Static: 2
-
-Proj.Sub.Another.Thing
-	.inst
 	.test: fn()
-		inst: 3
-		Static: 4
+		var x: 1
+		x: ~1
+		x: 1 & 2
+		x: ~1 & 2 | 3 ^ 4 >> 5 << 6

@@ -37,6 +37,11 @@ namespace Minet.Compiler
 		GtEqual,            // '>='
 		And,                // 'and'
 		Or,                 // 'or'
+		BAnd,               // '&'
+		BOr,                // '|'
+		BXOr,               // '^'
+		BLeftShift,         // '<<'
+		BRightShift,        // '>>'
 		bool_op_end,
 		Dot,                // '.'
 		Comma,              // ','
@@ -55,13 +60,14 @@ namespace Minet.Compiler
 		DivAssign,          // '/:'
 		ModAssign,          // '%:'
 		assign_end,
-		Add,                // '+'
 		Mul,                // '*'
 		Div,                // '/'
 		Mod,                // '%'
 		unary_op_start,
+		Add,                // '+'
 		Sub,                // '-'
 		Not,                // '!'
+		BNot,               // '~'
 		unary_op_end,
 		keyword_end
 	}
@@ -130,6 +136,11 @@ namespace Minet.Compiler
 			{">=",      TokenType.GtEqual},
 			{"and",     TokenType.And},
 			{"or",      TokenType.Or},
+			{"&",       TokenType.BAnd},
+			{"|",       TokenType.BOr},
+			{"^",       TokenType.BXOr},
+			{"<<",      TokenType.BLeftShift},
+			{">>",      TokenType.BRightShift},
 			{".",       TokenType.Dot},
 			{",",       TokenType.Comma},
 			{"(",       TokenType.LeftParen},
@@ -150,7 +161,8 @@ namespace Minet.Compiler
 			{"*",       TokenType.Mul},
 			{"/",       TokenType.Div},
 			{"%",       TokenType.Mod},
-			{"!",       TokenType.Not}
+			{"!",       TokenType.Not},
+			{"~",       TokenType.BNot}
 		};
 
 		public override string ToString()
@@ -181,9 +193,14 @@ namespace Minet.Compiler
 				case TokenType.Mul:
 				case TokenType.Div:
 				case TokenType.Mod:
+				case TokenType.BLeftShift:
+				case TokenType.BRightShift:
+				case TokenType.BAnd:
 					return 5;
 				case TokenType.Add:
 				case TokenType.Sub:
+				case TokenType.BOr:
+				case TokenType.BXOr:
 					return 4;
 				case TokenType.Equal:
 				case TokenType.NotEqual:
