@@ -18,7 +18,8 @@ Semicolons do not end lines; they do, however, start a single-line comment.
 
 Assignment in Minet is done with **:** instead of **=**
 ```
-x: 3      ; And now x is 3.
+x: 3
+; And now x is 3.
 ```
 Multi-line comments start with **<;** and end with **;>**
 
@@ -58,31 +59,63 @@ js>
 ```
 
 ### Indentation
-; spaces or tabs
-; can be used for multiple var or use
-; how to multi-line {} () []
+Minet lexes input following the off-side rule.
+Both spaces and tabs are supported; during lexing, tabs are treated as four spaces.
+Tabs are recommended, but this is not enforced by the compiler.
+
+Most statements and expressions must be on a single line.
+Those contained in **()**, **{}** or **[]** can be spread across multiple lines, if formatted properly.
+```
+; The opening bracket ends the line.
+; The values are indented over.
+; The closing bracket is on the next line and dedented.
+array: [
+    1, 2, 3,
+    4, 5, 6,
+    7, 8, 9
+]
+```
+Another goal of Minet is to avoid keyword repetition. To that end, both the **use** and **var** statements
+can be continued over multiple lines through indentation.
+```
+use one, two
+    three, four
+    five
+
+var x: 0
+    y, z: 1, 2
+```
 
 ### Classes
 ; nested, partial, multiple names for shared code, constructors
+
 ; . is inst, not is static
+
 ; Main
 
 ### Variables
 ; names are checked and expanded
+
 ; use use to add extra allowed (js functions, libraries, etc)
 
 ### Assignment
 ; many-many: a, b: 3, 'hello'
+
 ; many-one: a, b: 3
+
 ; many-many: a, b +: 1, 2
+
 ; many-one: a, b +: 1
+
 ; all evaluated first, so can be used to swap
+
 ; unpack
+
 ; +:, -:, *:, /:, %:
 
 ### Chains
 
-## If
+### If
 ; normal, no arg, partial
 
 ### Loops
