@@ -192,8 +192,8 @@ Many-to-one assignment is also accepted, with the value calculated once and then
 a, b, c: calculate()    ; calculate() is called once and then the value is assigned to a, b and c.
 ```
 Both many-to-many and many-to-one operations are also supported through the shorthand
-operators **+:, -:, *:, /: and %:**
-These operators correspond to the JavaScript operators **+=, -=, *=, /= and %=**
+operators **+:, -:, *:, /:** and **%:**
+These operators correspond to the JavaScript operators **+=, -=, *=, /=** and **%=**
 
 The unpack operator **::** takes one or more variables and a single array, and unpacks the items of the array
 into the provided variables.
