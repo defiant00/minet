@@ -52,8 +52,8 @@ MyClass{                                        new MyClass(1, 2, 3, 4);
 
 for i in 0 to 10                                for (var i = 0; i < 10; i++)
 for i in 10 to 0                                for (var i = (10) - 1; i >= 0; i--)
-for i in 0 to 10 by 2                           for (var i = 0; i < 10; i += 2) {
-myLoop for i in 0 to 10                         myLoop: for (var i = 0; i < 10; i++) {
+for i in 0 to 10 by 2                           for (var i = 0; i < 10; i += 2)
+myLoop for i in 0 to 10                         myLoop: for (var i = 0; i < 10; i++)
 
 for i in myItems                                for (var _i0 = 0; _i0 < myItems.length; _i0++) {
                                                     var i = myItems[_i0];

@@ -272,4 +272,69 @@ if x
 ```
 
 ### Loops
-; for, loop
+For loops in Minet have two main forms. The first is numeric, in which you supply the starting and ending
+values and, optionally, the step. The format is **for** i **in** start **to** end and
+**for** i **in** start **to** end **by** step.
+
+Loops are always inclusive of the smaller number and exclusive to the larger, regardless of whether
+it is an increasing or decreasing loop.
+
+A loop will default to a step of 1 or -1 if none is specified. The scenarios in which Minet is able
+to determine that -1 should be the step are when:
+- Both start and end are literal numbers, and start > end.
+- The end is 0.
+```
+for i in 0 to 10
+    alert('hi 1')
+for i in 10 to 0
+    alert('hi 2')
+for i in 0 to 10 by 2
+    alert('hi 3')
+```
+Produces:
+```javascript
+for (var i = 0; i < 10; i++) {
+    alert('hi 1');
+}
+for (var i = (10) - 1; i >= 0; i--) {
+    alert('hi 2');
+}
+for (var i = 0; i < 10; i += 2) {
+    alert('hi 3');
+}
+```
+The other for loop form in Minet is **for** i **in** object with an optional **by** step.
+This uses **object.length** to determine the iterations, creating a temporary counter which is
+used to then assign **object[counter]** to **i**.
+```
+for i in myItems
+    alert('hi ' + i)
+```
+Produces:
+```javascript
+for (var _i0 = 0; _i0 < myItems.length; _i0++) {
+    var i = myItems[_i0];
+    alert('hi ' + i);
+}
+```
+Minet also has a more general looping construct, named **loop**, that is a substitute for
+JavaScript's **while** and **do/while** loops. There are no arguments, it is merely specified
+by the keyword **loop** with the statements to be looped indented starting on the next line.
+
+The **break** statement works the same as in JavaScript, and is used to break a **loop**.
+```
+loop
+    x: doSomeLogic()
+    if x > 7
+        break
+```
+Both **for** and **loop** can be preceded by an identifier that serves as the loop's label. When
+using **break**, you can optionally include the label of the loop you want to break out of if it
+is not the innermost containing loop.
+```
+myLoop loop
+    inner loop
+        x: doSomething()
+        if x < 0
+            break myLoop
+```
