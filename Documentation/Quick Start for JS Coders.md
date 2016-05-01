@@ -15,11 +15,13 @@ it is likely because its usage is the same as in JavaScript.
 
 ### Basics
 Semicolons do not end lines; they do, however, start a single-line comment.
+
 Assignment in Minet is done with **:** instead of **=**
 ```
 x: 3      ; And now x is 3.
 ```
 Multi-line comments start with **<;** and end with **;>**
+
 Multi-line comments can be nested, so the below code is all a comment:
 ```
 <;
@@ -28,12 +30,16 @@ Multi-line comments can be nested, so the below code is all a comment:
 ;>
 ```
 The **=** operator is equivalent to JavaScript's **===** operator.
+
 There is currently no equivalent to JavaScript's **==** operator.
+
 
 The words **and** and **or** are used instead of **&&** and **||** respectively.
 
+
 In Minet both **function** and **return** have been shortened to **fn** and **ret** respectively.
-Also, assignment is the only way to create functions.
+
+Assignment is the only way to create functions.
 ```
 	mult: fn(x, y)
 		ret x * y
