@@ -117,7 +117,7 @@ namespace Minet.Compiler.AST
 
 			Helper.PrintIndented(string.IsNullOrEmpty(priorClass) ? "var " : priorClass + ".", buffer);
 			buffer.Append(Name);
-			buffer.AppendLine(" = (function () {");
+			buffer.AppendLine(" = (function() {");
 
 			buffer.Append(consSigBuffer);
 			buffer.Append(consThisBuffer);
@@ -213,7 +213,7 @@ namespace Minet.Compiler.AST
 			{
 				Buffer.AppendLine();
 				Buffer.AppendLine("// Run Main");
-				Buffer.AppendLine("window.onload = function () {");
+				Buffer.AppendLine("window.onload = function() {");
 				Helper.PrintIndented(Status.Main, 1, Buffer);
 				Buffer.AppendLine("();");
 				Buffer.AppendLine("};");

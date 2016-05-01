@@ -12,5 +12,3 @@ Proj
 		alert(name + " is " + age + " years old.")
 		name, age :: getAnother()
 		alert(name + " is " + age + " years old.")
-		name, age: 1, 2
-		name, age: 3
