@@ -246,6 +246,7 @@ namespace Minet.Compiler.AST
 	{
 		public List<string> Vars = new List<string>();
 		public ExprList Vals;
+		public bool Unpack;
 		public VarSetLine(Position pos) : base(pos) { }
 	}
 }
