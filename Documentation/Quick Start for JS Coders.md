@@ -273,8 +273,9 @@ if x
 
 ### Loops
 For loops in Minet have two main forms. The first is numeric, in which you supply the starting and ending
-values and, optionally, the step. The format is **for** i **in** start **to** end and
-**for** i **in** start **to** end **by** step.
+values and, optionally, the step. The format is:
+- **for** i **in** start **to** end
+- **for** i **in** start **to** end **by** step
 
 Loops are always inclusive of the smaller number and exclusive to the larger, regardless of whether
 it is an increasing or decreasing loop.
