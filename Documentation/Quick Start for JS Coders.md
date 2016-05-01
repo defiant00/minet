@@ -94,8 +94,8 @@ MyProject.MyClass      ; Creates a class MyProject and a class MyClass within My
     Greet: fn()
         alert('hi')
 
-MyProject              ; Adds a static property to class MyProject. The order in which they are
-	SomeProp: 3        ; defined, or even which file they are defined in, doesn't matter.
+MyProject              ; Adds a static property to class MyProject. The order in which these
+	SomeProp: 3        ; are defined, or even which files these are defined in, doesn't matter.
 ```
 Within a class, properties that start with a **.** are instance properties, and those that do not are static.
 ```
