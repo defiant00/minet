@@ -122,7 +122,7 @@ MyClass
 MyClass
     .second: 2
 ```
-You are not limited to a single class to write code for. Multiple classes can be provided, separated by commas.
+You are not limited to adding code to a single class at a time. Multiple comma-delimited class names can be provided at once.
 All of the classes will contain the shared code.
 ```
 ; Both MyClass and SecondClass will contain an x and y property, defaulted to zero.
