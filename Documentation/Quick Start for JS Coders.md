@@ -131,10 +131,16 @@ MyClass, SecondClass
 ```
 In Minet, an instance of an object is constructed through **name{args}**, equivalent to the JavaScript **new name(args);**
 ```
-    obj: MyClass{1, 2}
+obj: MyClass{1, 2}
 ```
-
-; Main
+The static **Main** method is special. If one is found in your project, a **window.onload** block
+will be added to the end of the generated output:
+```javascript
+// Run Main
+window.onload = function() {
+    Project.Main();
+};
+```
 
 ### Variables
 ; names are checked and expanded
