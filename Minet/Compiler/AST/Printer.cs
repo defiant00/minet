@@ -236,6 +236,15 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class PostOperator
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndentLine(Op.ToString() + " (post)", indent, buf);
+			Expr.AppendPrint(indent + 1, buf);
+		}
+	}
+
 	public partial class Property
 	{
 		public override string ToString()

@@ -190,6 +190,13 @@ namespace Minet.Compiler.AST
 		public ObjectConstructor(Position pos) : base(pos) { }
 	}
 
+	public partial class PostOperator : AST, IExpression
+	{
+		public IExpression Expr;
+		public TokenType Op;
+		public PostOperator(Position pos) : base(pos) { }
+	}
+
 	public partial class Property : AST
 	{
 		public bool Static;

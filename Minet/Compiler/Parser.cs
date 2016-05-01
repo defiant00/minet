@@ -809,6 +809,13 @@ namespace Minet.Compiler
 			return expr;
 		}
 
+		private ParseResult<IExpression> parsePostOp(IExpression lhs)
+		{
+			var op = next().Type;
+			var po = new PostOperator(lhs.Pos) { Expr = lhs, Op = op };
+			return new ParseResult<IExpression>(po, false);
+		}
+
 		private ParseResult<IExpression> parsePrimaryExpr()
 		{
 			IExpression lhs = null;
@@ -849,19 +856,26 @@ namespace Minet.Compiler
 
 			if (lhs != null)
 			{
-				while (peek.Type == TokenType.LeftBracket || peek.Type == TokenType.LeftCurly || peek.Type == TokenType.LeftParen)
+				while (peek.Type.IsOpeningBracket() || peek.Type.IsPostOp())
 				{
-					switch (peek.Type)
+					if (peek.Type.IsPostOp())
 					{
-						case TokenType.LeftBracket:
-							lhs = parseAccessor(lhs).Result;
-							break;
-						case TokenType.LeftCurly:
-							lhs = parseConstructor(lhs).Result;
-							break;
-						case TokenType.LeftParen:
-							lhs = parseFunctionCall(lhs).Result;
-							break;
+						lhs = parsePostOp(lhs).Result;
+					}
+					else
+					{
+						switch (peek.Type)
+						{
+							case TokenType.LeftBracket:
+								lhs = parseAccessor(lhs).Result;
+								break;
+							case TokenType.LeftCurly:
+								lhs = parseConstructor(lhs).Result;
+								break;
+							case TokenType.LeftParen:
+								lhs = parseFunctionCall(lhs).Result;
+								break;
+						}
 					}
 				}
 				return new ParseResult<IExpression>(lhs, false);

@@ -245,6 +245,12 @@ namespace Minet.Compiler.AST
 				case TokenType.BRightShift:
 					op = " >> ";
 					break;
+				case TokenType.In:
+					op = " in ";
+					break;
+				case TokenType.InstanceOf:
+					op = " instanceof ";
+					break;
 				default:
 					Status.Errors.Add(new ErrorMsg("Unknown binary operator " + Op, Pos));
 					break;
@@ -659,6 +665,24 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class PostOperator
+	{
+		public string ToJSExpr()
+		{
+			string expr = Expr.ToJSExpr();
+			switch (Op)
+			{
+				case TokenType.Decrement:
+					return expr + "--";
+				case TokenType.Increment:
+					return expr + "++";
+				default:
+					Status.Errors.Add(new ErrorMsg("Unknown post operator " + Op, Pos));
+					return "/* ERROR: Unknown post operator " + Op + " */";
+			}
+		}
+	}
+
 	public partial class PropertySet
 	{
 		public void AppendJSStmt(StringBuilder buf)
@@ -833,10 +857,18 @@ namespace Minet.Compiler.AST
 					return "+" + expr;
 				case TokenType.BNot:
 					return "~" + expr;
+				case TokenType.Decrement:
+					return "--" + expr;
+				case TokenType.Delete:
+					return "delete " + expr;
+				case TokenType.Increment:
+					return "++" + expr;
 				case TokenType.Not:
 					return "!" + expr;
 				case TokenType.Sub:
 					return "-" + expr;
+				case TokenType.TypeOf:
+					return "typeof " + expr;
 				default:
 					Status.Errors.Add(new ErrorMsg("Unknown unary operator " + Op, Pos));
 					return "/* ERROR: Unknown unary " + Op + " */";

@@ -38,7 +38,10 @@ There is currently no equivalent to JavaScript's **==** operator.
 The words **and** and **or** are used instead of **&&** and **||** respectively.
 
 
-In Minet both **function** and **return** have been shortened to **fn** and **ret** respectively.
+In Minet a number of JavaScript keywords have been shortened.
+- **function** is **fn**
+- **return** is **ret**
+- **delete** is **del**
 
 Assignment is the only way to create functions.
 ```

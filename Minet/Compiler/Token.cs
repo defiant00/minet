@@ -37,12 +37,12 @@ namespace Minet.Compiler
 		GtEqual,            // '>='
 		And,                // 'and'
 		Or,                 // 'or'
+		bool_op_end,
 		BAnd,               // '&'
 		BOr,                // '|'
 		BXOr,               // '^'
 		BLeftShift,         // '<<'
 		BRightShift,        // '>>'
-		bool_op_end,
 		Dot,                // '.'
 		Comma,              // ','
 		LeftParen,          // '('
@@ -68,6 +68,13 @@ namespace Minet.Compiler
 		Sub,                // '-'
 		Not,                // '!'
 		BNot,               // '~'
+		TypeOf,             // 'typeof'
+		InstanceOf,         // 'instanceof'
+		Delete,             // 'del'
+		post_op_start,
+		Increment,          // '++'
+		Decrement,          // '--'
+		post_op_end,
 		unary_op_end,
 		keyword_end
 	}
@@ -103,6 +110,17 @@ namespace Minet.Compiler
 		{
 			return type == TokenType.Dedent || type == TokenType.EOF;
 		}
+
+		public static bool IsPostOp(this TokenType type)
+		{
+			return type > TokenType.post_op_start && type < TokenType.post_op_end;
+
+		}
+
+		public static bool IsOpeningBracket(this TokenType type)
+		{
+			return type == TokenType.LeftBracket || type == TokenType.LeftCurly || type == TokenType.LeftParen;
+		}
 	}
 
 	public class Token
@@ -116,53 +134,58 @@ namespace Minet.Compiler
 
 		public readonly static Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType>
 		{
-			{"use",     TokenType.Use},
-			{"if",      TokenType.If},
-			{"else",    TokenType.Else},
-			{"fn",      TokenType.Function},
-			{"var",     TokenType.Var},
-			{"ret",     TokenType.Return},
-			{"for",     TokenType.For},
-			{"in",      TokenType.In},
-			{"loop",    TokenType.Loop},
-			{"break",   TokenType.Break},
-			{"true",    TokenType.True},
-			{"false",   TokenType.False},
-			{"=",       TokenType.Equal},
-			{"!=",      TokenType.NotEqual},
-			{"<",       TokenType.LessThan},
-			{">",       TokenType.GreaterThan},
-			{"<=",      TokenType.LtEqual},
-			{">=",      TokenType.GtEqual},
-			{"and",     TokenType.And},
-			{"or",      TokenType.Or},
-			{"&",       TokenType.BAnd},
-			{"|",       TokenType.BOr},
-			{"^",       TokenType.BXOr},
-			{"<<",      TokenType.BLeftShift},
-			{">>",      TokenType.BRightShift},
-			{".",       TokenType.Dot},
-			{",",       TokenType.Comma},
-			{"(",       TokenType.LeftParen},
-			{")",       TokenType.RightParen},
-			{"[",       TokenType.LeftBracket},
-			{"]",       TokenType.RightBracket},
-			{"{",       TokenType.LeftCurly},
-			{"}",       TokenType.RightCurly},
-			{":",       TokenType.Assign},
-			{"::",      TokenType.Unpack},
-			{"+:",      TokenType.AddAssign},
-			{"-:",      TokenType.SubAssign},
-			{"*:",      TokenType.MulAssign},
-			{"/:",      TokenType.DivAssign},
-			{"%:",      TokenType.ModAssign},
-			{"+",       TokenType.Add},
-			{"-",       TokenType.Sub},
-			{"*",       TokenType.Mul},
-			{"/",       TokenType.Div},
-			{"%",       TokenType.Mod},
-			{"!",       TokenType.Not},
-			{"~",       TokenType.BNot}
+			{"use",        TokenType.Use},
+			{"if",         TokenType.If},
+			{"else",       TokenType.Else},
+			{"fn",         TokenType.Function},
+			{"var",        TokenType.Var},
+			{"ret",        TokenType.Return},
+			{"for",        TokenType.For},
+			{"in",         TokenType.In},
+			{"loop",       TokenType.Loop},
+			{"break",      TokenType.Break},
+			{"true",       TokenType.True},
+			{"false",      TokenType.False},
+			{"=",          TokenType.Equal},
+			{"!=",         TokenType.NotEqual},
+			{"<",          TokenType.LessThan},
+			{">",          TokenType.GreaterThan},
+			{"<=",         TokenType.LtEqual},
+			{">=",         TokenType.GtEqual},
+			{"and",        TokenType.And},
+			{"or",         TokenType.Or},
+			{"&",          TokenType.BAnd},
+			{"|",          TokenType.BOr},
+			{"^",          TokenType.BXOr},
+			{"<<",         TokenType.BLeftShift},
+			{">>",         TokenType.BRightShift},
+			{".",          TokenType.Dot},
+			{",",          TokenType.Comma},
+			{"(",          TokenType.LeftParen},
+			{")",          TokenType.RightParen},
+			{"[",          TokenType.LeftBracket},
+			{"]",          TokenType.RightBracket},
+			{"{",          TokenType.LeftCurly},
+			{"}",          TokenType.RightCurly},
+			{":",          TokenType.Assign},
+			{"::",         TokenType.Unpack},
+			{"+:",         TokenType.AddAssign},
+			{"-:",         TokenType.SubAssign},
+			{"*:",         TokenType.MulAssign},
+			{"/:",         TokenType.DivAssign},
+			{"%:",         TokenType.ModAssign},
+			{"+",          TokenType.Add},
+			{"-",          TokenType.Sub},
+			{"*",          TokenType.Mul},
+			{"/",          TokenType.Div},
+			{"%",          TokenType.Mod},
+			{"!",          TokenType.Not},
+			{"~",          TokenType.BNot},
+			{"typeof",     TokenType.TypeOf},
+			{"instanceof", TokenType.InstanceOf},
+			{"del",        TokenType.Delete},
+			{"++",         TokenType.Increment},
+			{"--",         TokenType.Decrement}
 		};
 
 		public override string ToString()
@@ -189,6 +212,8 @@ namespace Minet.Compiler
 			switch (Type)
 			{
 				case TokenType.Dot:
+				case TokenType.In:
+				case TokenType.InstanceOf:
 					return 6;
 				case TokenType.Mul:
 				case TokenType.Div:
