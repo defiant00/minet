@@ -146,9 +146,39 @@ window.onload = function() {
 ```
 
 ### Variables
-; names are checked and expanded
+In Minet variables must be declared before use, and are available as appropriate at the current or any child scopes.
+During code generation variables and their relationships are tracked, so that variables can be referenced
+by just the last part of their name, and behind the scenes they will be expanded to their fully-qualified name.
+```
+MyClass
+    Static: 1
+    .Inst: 2
 
-; use use to add extra allowed (js functions, libraries, etc)
+    .Func: fn()
+        Inst: 3        ; This is recognized and replaced with this.Inst
+        Static: 4      ; This is replaced with MyClass.Static
+```
+Static variables are also available to a class' subclasses.
+```
+MyClass
+    Static: 1
+
+MyClass.Sub
+    .Func: fn()
+        Static: 2      ; This is replaced with MyClass.Static
+```
+The **use** statement is used to provide Minet a list of extra allowed variable names.
+This is primarily used to allow the use of existing JavaScript functions, such as **alert**.
+```
+use alert, console
+
+Proj
+    Print: fn()
+        alert('hello')            ; Without the use statement, both of these statements
+        console.log('hello')      ; would return errors for use of undefined variables.
+```
+If **this** is used within an anonymous function, it will automatically be replaced with **_this** so
+that **this** in event handlers works properly.
 
 ### Assignment
 ; many-many: a, b: 3, 'hello'
