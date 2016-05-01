@@ -1,6 +1,6 @@
 ### Minet to JS Guide
 ```javascript
-Minet                                           Javascript
+Minet                                           JavaScript
 
 v: myArr[3]                                     v = myArr[3];
 
