@@ -48,6 +48,7 @@ namespace Minet.Compiler
 		RightCurly,         // '}'
 		assign_start,
 		Assign,             // ':'
+		Unpack,             // '::'
 		AddAssign,          // '+:'
 		SubAssign,          // '-:'
 		MulAssign,          // '*:'
@@ -138,6 +139,7 @@ namespace Minet.Compiler
 			{"{",       TokenType.LeftCurly},
 			{"}",       TokenType.RightCurly},
 			{":",       TokenType.Assign},
+			{"::",      TokenType.Unpack},
 			{"+:",      TokenType.AddAssign},
 			{"-:",      TokenType.SubAssign},
 			{"*:",      TokenType.MulAssign},

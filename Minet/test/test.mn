@@ -3,9 +3,14 @@
 use alert
 
 Proj
-	.inst
-	.Test: fn()
-		this.thing: inst
-		this
-			another
-				thing: inst
+	getArr: fn()
+		ret ["Someone", 32]
+	getAnother: fn()
+		ret ["Else", 50]
+	Main: fn()
+		var name, age :: getArr()
+		alert(name + " is " + age + " years old.")
+		name, age :: getAnother()
+		alert(name + " is " + age + " years old.")
+		name, age: 1, 2
+		name, age: 3

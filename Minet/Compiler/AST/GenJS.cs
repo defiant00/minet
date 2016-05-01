@@ -39,6 +39,9 @@ namespace Minet.Compiler.AST
 				case TokenType.Assign:
 					op = " = ";
 					break;
+				case TokenType.Unpack:
+					DoUnpack(buf);
+					return;
 				case TokenType.AddAssign:
 					op = " += ";
 					mulOp = " + ";
@@ -141,6 +144,39 @@ namespace Minet.Compiler.AST
 			else
 			{
 				Status.Errors.Add(new ErrorMsg("Mismatched expression count, " + Left.Expressions.Count + " != " + Right.Expressions.Count, Pos));
+			}
+		}
+
+		private void DoUnpack(StringBuilder buf)
+		{
+			if (Right.Expressions.Count == 1)
+			{
+				var r = Right.Expressions[0];
+				Helper.PrintIndented("var ", buf);
+				buf.Append(Constants.InternalVarPrefix);
+				buf.Append("t = ");
+
+				// Reset chain temporarily so value is calculated properly.
+				string chain = Status.Chain;
+				Status.Chain = "";
+				buf.Append(r.ToJSExpr());
+				Status.Chain = chain;
+
+				buf.AppendLine(";");
+				for (int i = 0; i < Left.Expressions.Count; i++)
+				{
+					var l = Left.Expressions[i];
+					Helper.PrintIndented(Status.ChainName(l.ToJSExpr()), buf);
+					buf.Append(" = ");
+					buf.Append(Constants.InternalVarPrefix);
+					buf.Append("t[");
+					buf.Append(i);
+					buf.AppendLine("];");
+				}
+			}
+			else
+			{
+				Status.Errors.Add(new ErrorMsg("Must have a single expression to unpack.", Pos));
 			}
 		}
 	}
@@ -813,7 +849,35 @@ namespace Minet.Compiler.AST
 
 			if (Vals != null)
 			{
-				if (Vars.Count == Vals.Expressions.Count)
+				if (Unpack)
+				{
+					if (Vals.Expressions.Count == 1)
+					{
+						Helper.PrintIndented("var ", buf);
+						buf.Append(Constants.InternalVarPrefix);
+						buf.Append("t = ");
+						buf.Append(Vals.Expressions[0].ToJSExpr());
+						buf.AppendLine(";");
+						Helper.PrintIndented("var ", buf);
+						for (int i = 0; i < Vars.Count; i++)
+						{
+							buf.Append(Vars[i]);
+							buf.Append(" = ");
+							buf.Append(Constants.InternalVarPrefix);
+							buf.Append("t");
+							buf.Append("[");
+							buf.Append(i);
+							buf.Append("]");
+							if (i + 1 < Vars.Count) { buf.Append(", "); }
+						}
+						buf.AppendLine(";");
+					}
+					else
+					{
+						Status.Errors.Add(new ErrorMsg("Must have a single expression to unpack.", Pos));
+					}
+				}
+				else if (Vars.Count == Vals.Expressions.Count)
 				{
 					Helper.PrintIndented("var ", buf);
 					for (int i = 0; i < Vars.Count; i++)

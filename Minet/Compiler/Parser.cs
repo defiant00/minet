@@ -989,6 +989,12 @@ namespace Minet.Compiler
 
 			if (accept(TokenType.Assign).Success)
 			{
+				v.Unpack = false;
+				v.Vals = parseExprList().Result;
+			}
+			else if (accept(TokenType.Unpack).Success)
+			{
+				v.Unpack = true;
 				v.Vals = parseExprList().Result;
 			}
 
