@@ -238,7 +238,7 @@ this.print();
 If statements have multiple formats, and serve as Minet's equivalent to both the JavaScript **if**
 and **switch** statements.
 
-A normal if has a condition and an optional else. There is no **else if** as that is covered by the next form.
+A normal **if** has a condition and an optional **else**. There is no **else if** as that is covered by the next form.
 ```
 if x > 3
     alert('> 3')
@@ -256,11 +256,11 @@ if
     else
         alert('something else')
 ```
-A partial if is an if containing an expression, but the comparison operator and value(s) are on their own
+A partial if is an **if** containing an expression, but the comparison operator and value(s) are on their own
 indented lines. This is Minet's equivalent to JavaScript's **switch** statement, but with the added flexibility
 of allowing any comparision operator and multiple potential comma-separated values.
 
-The expression in a partial if is evaluated once and stored in a temporary variable;
+The expression in a partial if is evaluated once and stored in a temporary variable.
 ```
 if x
     = 1, 2
