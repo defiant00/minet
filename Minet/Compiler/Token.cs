@@ -14,6 +14,7 @@ namespace Minet.Compiler
 		JSBlock,            // a block of Javascript
 		String,             // a literal string
 		Number,             // a literal number
+		Regex,              // a literal regular expression
 		Literal,            // a literal
 		keyword_start,
 		Use,                // 'use'

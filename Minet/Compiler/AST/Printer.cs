@@ -272,6 +272,14 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class RegularExpr
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndentLine("regex " + Val, indent, buf);
+		}
+	}
+
 	public partial class Return
 	{
 		public void AppendPrint(int indent, StringBuilder buf)

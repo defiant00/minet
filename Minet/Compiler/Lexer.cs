@@ -7,6 +7,8 @@ namespace Minet.Compiler
 		const char eof = '\0';
 		const string operatorChars = "()[]{}<>!=+-*/%,.:&|^~";
 		const string hexStart = "0x";
+		const string regexStart = "//";
+		const string regexFlags = "gimuy";
 		const string commentStart = "<;";
 		const string commentEnd = ";>";
 		const string jsStart = "<js";
@@ -213,6 +215,11 @@ namespace Minet.Compiler
 					inStmt = true;
 					return lexJSBlock;
 				}
+				else if (currentPosStartsWith(regexStart))
+				{
+					inStmt = true;
+					return lexRegex;
+				}
 				else if (c == eof)
 				{
 					if (inStmt) { emit(TokenType.EOL); }
@@ -377,6 +384,30 @@ namespace Minet.Compiler
 				else if (!inEsc && c == quote)
 				{
 					emit(TokenType.String);
+					return lexStatement;
+				}
+				else if (inEsc) { inEsc = false; }
+			}
+		}
+
+		private stateFn lexRegex()
+		{
+			next();
+			discard(); // Eat the first '/' so the pattern matches JavaScript regexes.
+			next();
+			bool inEsc = false;
+			while (true)
+			{
+				char c = next();
+				if (c == eof || c == '\r' || c == '\n')
+				{
+					return error("Unclosed regex /");
+				}
+				else if (!inEsc && c == '\\') { inEsc = true; }
+				else if (!inEsc && c == '/')
+				{
+					acceptRun(regexFlags);
+					emit(TokenType.Regex);
 					return lexStatement;
 				}
 				else if (inEsc) { inEsc = false; }

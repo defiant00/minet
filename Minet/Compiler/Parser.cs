@@ -856,6 +856,9 @@ namespace Minet.Compiler
 				case TokenType.Number:
 					lhs = parseNumberExpr().Result;
 					break;
+				case TokenType.Regex:
+					lhs = parseRegexExpr().Result;
+					break;
 				case TokenType.String:
 					lhs = parseStringExpr().Result;
 					break;
@@ -895,6 +898,12 @@ namespace Minet.Compiler
 				return new ParseResult<IExpression>(lhs, false);
 			}
 			return error<IExpression>(true, "Token is not an expression: " + peek, peek.Pos);
+		}
+
+		private ParseResult<IExpression> parseRegexExpr()
+		{
+			var val = next();
+			return new ParseResult<IExpression>(new RegularExpr(val.Pos) { Val = val.Val }, false);
 		}
 
 		private ParseResult<IStatement> parseReturn()

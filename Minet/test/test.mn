@@ -4,9 +4,4 @@ use alert
 
 Proj
 	Main: fn()
-		var i, x: 3, {a, b: 1, 2}
-		if i
-			in x
-				alert('in')
-			instanceof x
-				alert('instanceof')
+		var arr: //d(b+)d/g.exec('argle bargle')

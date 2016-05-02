@@ -34,10 +34,13 @@ The **=** operator is equivalent to JavaScript's **===** operator.
 
 There is currently no equivalent to JavaScript's **==** operator.
 
-
 The words **and** and **or** are used instead of **&&** and **||** respectively.
 
-
+Regular expressions are started with **//** instead of a single **/**, but are otherwise declared
+and used the same as in JavaScript. This is to prevent ambiguity with the **/** operator.
+```
+var r: //hello/i
+```
 In Minet a number of JavaScript keywords have been shortened.
 - **function** is **fn**
 - **return** is **ret**

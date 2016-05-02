@@ -762,6 +762,8 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class RegularExpr { public string ToJSExpr(bool expandIds) { return Val; } }
+
 	public partial class Return
 	{
 		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
