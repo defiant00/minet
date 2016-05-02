@@ -367,18 +367,33 @@ namespace Minet.Compiler.AST
 				asc = false;
 			}
 
-			Helper.PrintIndented(string.IsNullOrEmpty(Label) ? "" : Label + ":", buf);
-
 			string var = Var;
+			string valVar = string.Empty;
+			string lengthVar = string.Empty;
 			if (iterator)
 			{
 				var = Constants.InternalVarPrefix + "i" + Status.ForCounter;
+				valVar = Constants.InternalVarPrefix + "v" + Status.ForCounter;
+				lengthVar = Constants.InternalVarPrefix + "l" + Status.ForCounter;
+
+				Helper.PrintIndented("var ", buf);
+				buf.Append(valVar);
+				buf.Append(" = ");
+				buf.Append(From.ToJSExpr(true));
+				buf.AppendLine(";");
+
+				Helper.PrintIndented("var ", buf);
+				buf.Append(lengthVar);
+				buf.Append(" = ");
+				buf.Append(valVar);
+				buf.AppendLine(".length;");
 				Status.ForCounter++;
 			}
 
-			string startStr = iterator ? (asc ? "0" : From.ToJSExpr(true) + ".length") : From.ToJSExpr(true);
-			string compStr = iterator ? (asc ? From.ToJSExpr(true) + ".length" : "0") : To.ToJSExpr(true);
+			string startStr = iterator ? (asc ? "0" : lengthVar) : From.ToJSExpr(true);
+			string compStr = iterator ? (asc ? lengthVar : "0") : To.ToJSExpr(true);
 
+			Helper.PrintIndented(string.IsNullOrEmpty(Label) ? "" : Label + ":", buf);
 			buf.Append("for (var ");
 			buf.Append(var);
 			buf.Append(" = ");
@@ -412,7 +427,7 @@ namespace Minet.Compiler.AST
 				Helper.PrintIndented("var ", buf);
 				buf.Append(Var);
 				buf.Append(" = ");
-				buf.Append(From.ToJSExpr(true));
+				buf.Append(valVar);
 				buf.Append("[");
 				buf.Append(var);
 				buf.AppendLine("];");

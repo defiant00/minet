@@ -1,7 +1,18 @@
 ; Minet Test Project
 
-use alert
+use console
+
+; todo - for loops should calc length into _l0
+; add try, catch, throw 
 
 Proj
 	Main: fn()
-		var arr: //d(b+)d/g.exec('argle bargle')
+		l1 for c in "abc"
+			for d in "de"
+				console.log(c + d)
+		for i in 0 to 5
+			console.log(i)
+		for i in 5 to 0
+			console.log(i)
+		for c in "abc" by -1
+			console.log(c)
