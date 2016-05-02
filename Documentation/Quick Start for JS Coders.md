@@ -41,7 +41,8 @@ and used the same as in JavaScript. This is to prevent ambiguity with the **/** 
 ```
 var r: //hello/i
 ```
-In Minet a number of JavaScript keywords have been shortened.
+In Minet a number of JavaScript keywords can be (optionally) shortened. You can use either the original
+JavaScript keywords or the shortened Minet keywords interchangeably.
 - **function** is **fn**
 - **return** is **ret**
 - **delete** is **del**

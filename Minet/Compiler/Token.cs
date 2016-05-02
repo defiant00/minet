@@ -20,9 +20,9 @@ namespace Minet.Compiler
 		Use,                // 'use'
 		If,                 // 'if'
 		Else,               // 'else'
-		Function,           // 'fn'
+		Function,           // 'fn' or 'function'
 		Var,                // 'var'
-		Return,             // 'ret'
+		Return,             // 'ret' or 'return'
 		For,                // 'for'
 		Loop,               // 'loop'
 		Break,              // 'break'
@@ -71,7 +71,7 @@ namespace Minet.Compiler
 		Not,                // '!'
 		BNot,               // '~'
 		TypeOf,             // 'typeof'
-		Delete,             // 'del'
+		Delete,             // 'del' or 'delete'
 		post_op_start,
 		Increment,          // '++'
 		Decrement,          // '--'
@@ -139,8 +139,10 @@ namespace Minet.Compiler
 			{"if",         TokenType.If},
 			{"else",       TokenType.Else},
 			{"fn",         TokenType.Function},
+			{"function",   TokenType.Function},
 			{"var",        TokenType.Var},
 			{"ret",        TokenType.Return},
+			{"return",     TokenType.Return},
 			{"for",        TokenType.For},
 			{"loop",       TokenType.Loop},
 			{"break",      TokenType.Break},
@@ -185,6 +187,7 @@ namespace Minet.Compiler
 			{"~",          TokenType.BNot},
 			{"typeof",     TokenType.TypeOf},
 			{"del",        TokenType.Delete},
+			{"delete",     TokenType.Delete},
 			{"++",         TokenType.Increment},
 			{"--",         TokenType.Decrement}
 		};
