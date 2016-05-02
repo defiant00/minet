@@ -4,11 +4,9 @@ use alert
 
 Proj
 	Main: fn()
-		var i: 3
+		var i, x: 3, {a, b: 1, 2}
 		if i
-			> 1
-				if i
-					= 3
-						if i
-							< 7
-								alert('yup')
+			in x
+				alert('in')
+			instanceof x
+				alert('instanceof')

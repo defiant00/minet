@@ -23,7 +23,6 @@ namespace Minet.Compiler
 		Var,                // 'var'
 		Return,             // 'ret'
 		For,                // 'for'
-		In,                 // 'in'
 		Loop,               // 'loop'
 		Break,              // 'break'
 		True,               // 'true'
@@ -37,6 +36,8 @@ namespace Minet.Compiler
 		GtEqual,            // '>='
 		And,                // 'and'
 		Or,                 // 'or'
+		In,                 // 'in'
+		InstanceOf,         // 'instanceof'
 		bool_op_end,
 		BAnd,               // '&'
 		BOr,                // '|'
@@ -69,7 +70,6 @@ namespace Minet.Compiler
 		Not,                // '!'
 		BNot,               // '~'
 		TypeOf,             // 'typeof'
-		InstanceOf,         // 'instanceof'
 		Delete,             // 'del'
 		post_op_start,
 		Increment,          // '++'
@@ -141,7 +141,6 @@ namespace Minet.Compiler
 			{"var",        TokenType.Var},
 			{"ret",        TokenType.Return},
 			{"for",        TokenType.For},
-			{"in",         TokenType.In},
 			{"loop",       TokenType.Loop},
 			{"break",      TokenType.Break},
 			{"true",       TokenType.True},
@@ -154,6 +153,8 @@ namespace Minet.Compiler
 			{">=",         TokenType.GtEqual},
 			{"and",        TokenType.And},
 			{"or",         TokenType.Or},
+			{"in",         TokenType.In},
+			{"instanceof", TokenType.InstanceOf},
 			{"&",          TokenType.BAnd},
 			{"|",          TokenType.BOr},
 			{"^",          TokenType.BXOr},
@@ -182,7 +183,6 @@ namespace Minet.Compiler
 			{"!",          TokenType.Not},
 			{"~",          TokenType.BNot},
 			{"typeof",     TokenType.TypeOf},
-			{"instanceof", TokenType.InstanceOf},
 			{"del",        TokenType.Delete},
 			{"++",         TokenType.Increment},
 			{"--",         TokenType.Decrement}
