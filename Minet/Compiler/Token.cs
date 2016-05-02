@@ -23,6 +23,10 @@ namespace Minet.Compiler
 		Function,           // 'fn' or 'function'
 		Var,                // 'var'
 		Return,             // 'ret' or 'return'
+		Try,                // 'try'
+		Catch,              // 'catch'
+		Throw,              // 'throw'
+		Finally,            // 'fin' or 'finally'
 		For,                // 'for'
 		Loop,               // 'loop'
 		Break,              // 'break'
@@ -38,7 +42,7 @@ namespace Minet.Compiler
 		And,                // 'and'
 		Or,                 // 'or'
 		In,                 // 'in'
-		InstanceOf,         // 'instanceof'
+		InstanceOf,         // 'instof' or 'instanceof'
 		bool_op_end,
 		BAnd,               // '&'
 		BOr,                // '|'
@@ -143,6 +147,11 @@ namespace Minet.Compiler
 			{"var",        TokenType.Var},
 			{"ret",        TokenType.Return},
 			{"return",     TokenType.Return},
+			{"try",        TokenType.Try},
+			{"catch",      TokenType.Catch},
+			{"throw",      TokenType.Throw},
+			{"fin",        TokenType.Finally},
+			{"finally",    TokenType.Finally},
 			{"for",        TokenType.For},
 			{"loop",       TokenType.Loop},
 			{"break",      TokenType.Break},
@@ -157,6 +166,7 @@ namespace Minet.Compiler
 			{"and",        TokenType.And},
 			{"or",         TokenType.Or},
 			{"in",         TokenType.In},
+			{"instof",     TokenType.InstanceOf},
 			{"instanceof", TokenType.InstanceOf},
 			{"&",          TokenType.BAnd},
 			{"|",          TokenType.BOr},

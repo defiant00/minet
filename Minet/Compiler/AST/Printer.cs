@@ -306,6 +306,34 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class Throw
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndentLine("throw", indent, buf);
+			Val.AppendPrint(indent + 1, buf);
+		}
+	}
+
+	public partial class Try
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndentLine("try", indent, buf);
+			foreach(var s in TryStmts) { s.AppendPrint(indent + 1, buf); }
+			if (CatchStmts.Count > 0)
+			{
+				Helper.PrintASTIndentLine("catch " + CatchVar, indent, buf);
+				foreach (var s in CatchStmts) { s.AppendPrint(indent + 1, buf); }
+			}
+			if (FinallyStmts.Count > 0)
+			{
+				Helper.PrintASTIndentLine("finally", indent, buf);
+				foreach (var s in FinallyStmts) { s.AppendPrint(indent + 1, buf); }
+			}
+		}
+	}
+
 	public partial class Unary
 	{
 		public void AppendPrint(int indent, StringBuilder buf)

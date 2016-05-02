@@ -541,6 +541,10 @@ namespace Minet.Compiler
 					return parseJSBlock();
 				case TokenType.Return:
 					return parseReturn();
+				case TokenType.Throw:
+					return parseThrow();
+				case TokenType.Try:
+					return parseTry();
 				case TokenType.Var:
 					return parseVar();
 				default:
@@ -941,6 +945,79 @@ namespace Minet.Compiler
 			var val = next();
 			var s = new AST.String(val.Pos) { Val = val.Val };
 			return new ParseResult<IExpression>(s, false);
+		}
+
+		private ParseResult<IStatement> parseThrow()
+		{
+			var start = next(); // eat throw
+			var r = new Throw(start.Pos);
+			var val = parseExpr();
+			if (val.Error) { return new ParseResult<IStatement>(val.Result as IStatement, true); }
+
+			r.Val = val.Result;
+			var res = accept(TokenType.EOL);
+			if (!res.Success)
+			{
+				r.Val = error<IExpression>(true, "Invalid token in throw: " + res.LastToken, res.LastToken.Pos).Result;
+			}
+			return new ParseResult<IStatement>(r, false);
+		}
+
+		private ParseResult<IStatement> parseTry()
+		{
+			var res = accept(TokenType.Try, TokenType.EOL, TokenType.Indent);
+			if (!res.Success)
+			{
+				return error<IStatement>(true, "Invalid token in try: " + res.LastToken, res.LastToken.Pos);
+			}
+
+			var t = new Try(res[0].Pos);
+
+			while (!peek.Type.IsDedentStop())
+			{
+				t.TryStmts.Add(parseFunctionStmt().Result);
+			}
+
+			res = accept(TokenType.Dedent, TokenType.EOL);
+			if (!res.Success)
+			{
+				t.TryStmts.Add(error<IStatement>(true, "Invalid token in try: " + res.LastToken, res.LastToken.Pos).Result);
+			}
+
+			res = accept(TokenType.Catch, TokenType.Literal, TokenType.EOL, TokenType.Indent);
+			if (res.Success)
+			{
+				t.CatchVar = res[1].Val;
+				t.CatchPos = res[1].Pos;
+
+				while (!peek.Type.IsDedentStop())
+				{
+					t.CatchStmts.Add(parseFunctionStmt().Result);
+				}
+
+				res = accept(TokenType.Dedent, TokenType.EOL);
+				if (!res.Success)
+				{
+					t.CatchStmts.Add(error<IStatement>(true, "Invalid token in catch: " + res.LastToken, res.LastToken.Pos).Result);
+				}
+			}
+
+			res = accept(TokenType.Finally, TokenType.EOL, TokenType.Indent);
+			if (res.Success)
+			{
+				while (!peek.Type.IsDedentStop())
+				{
+					t.FinallyStmts.Add(parseFunctionStmt().Result);
+				}
+
+				res = accept(TokenType.Dedent, TokenType.EOL);
+				if (!res.Success)
+				{
+					t.FinallyStmts.Add(error<IStatement>(true, "Invalid token in finally: " + res.LastToken, res.LastToken.Pos).Result);
+				}
+			}
+
+			return new ParseResult<IStatement>(t, false);
 		}
 
 		private ParseResult<IExpression> parseUnaryExpr()

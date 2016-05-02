@@ -237,6 +237,22 @@ namespace Minet.Compiler.AST
 		public String(Position pos) : base(pos) { }
 	}
 
+	public partial class Throw : AST, IStatement
+	{
+		public IExpression Val;
+		public Throw(Position pos) : base(pos) { }
+	}
+
+	public partial class Try : AST, IStatement
+	{
+		public List<IStatement> TryStmts = new List<IStatement>();
+		public string CatchVar;
+		public Position CatchPos;
+		public List<IStatement> CatchStmts = new List<IStatement>();
+		public List<IStatement> FinallyStmts = new List<IStatement>();
+		public Try(Position pos) : base(pos) { }
+	}
+
 	public partial class Unary : AST, IExpression
 	{
 		public IExpression Expr;

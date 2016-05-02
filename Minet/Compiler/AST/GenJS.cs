@@ -832,6 +832,57 @@ namespace Minet.Compiler.AST
 
 	public partial class String { public string ToJSExpr(bool expandIds) { return Val; } }
 
+	public partial class Throw
+	{
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
+		{
+			Helper.PrintIndented("throw ", buf);
+			buf.Append(Val.ToJSExpr(true));
+			buf.AppendLine(";");
+		}
+	}
+
+	public partial class Try
+	{
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
+		{
+			Helper.PrintIndentedLine("try {", buf);
+
+			Status.Variables.IncrementDepth();
+			Status.Indent++;
+			foreach (var s in TryStmts) { s.AppendJSStmt(buf, "", true); }
+			Status.Indent--;
+			Status.Variables.DecrementDepth();
+
+			if (CatchStmts.Count > 0)
+			{
+				Helper.PrintIndented("} catch(", buf);
+				buf.Append(CatchVar);
+				buf.AppendLine(") {");
+
+				Status.Variables.IncrementDepth();
+				Status.Variables.AddItem(CatchVar, CatchPos);
+				Status.Indent++;
+				foreach (var s in CatchStmts) { s.AppendJSStmt(buf, "", true); }
+				Status.Indent--;
+				Status.Variables.DecrementDepth();
+			}
+
+			if (FinallyStmts.Count > 0)
+			{
+				Helper.PrintIndentedLine("} finally {", buf);
+
+				Status.Variables.IncrementDepth();
+				Status.Indent++;
+				foreach (var s in FinallyStmts) { s.AppendJSStmt(buf, "", true); }
+				Status.Indent--;
+				Status.Variables.DecrementDepth();
+			}
+
+			Helper.PrintIndentedLine("}", buf);
+		}
+	}
+
 	public partial class Unary
 	{
 		public string ToJSExpr(bool expandIds)
