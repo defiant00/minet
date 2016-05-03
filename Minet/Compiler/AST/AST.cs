@@ -212,6 +212,11 @@ namespace Minet.Compiler.AST
 		public PropertySet(Position pos) : base(pos) { }
 	}
 
+	//public partial class PropGetterSetter : AST, IStatement
+	//{
+	//	public PropGetterSetter(Position pos) : base(pos) { }
+	//}
+
 	public partial class RegularExpr : AST, IExpression
 	{
 		public string Val;

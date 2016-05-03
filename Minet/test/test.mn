@@ -3,10 +3,63 @@
 use console
 
 Proj
+	_Thing, ._Counter: 1, 10
+	Thing
+		get
+			ret _Thing
+		set val
+			_Thing: val
+
+	.Counter
+		get
+			ret _Counter
+		set val
+			_Counter: val
+
 	Main: fn()
-		try
-			throw "cow"
-		catch ex
-			console.log(ex)
-		fin
-			console.log('finally')
+		console.log(Thing)
+		Thing++
+		console.log(Thing)
+		var p: Proj{}
+		console.log(p.Counter)
+		p.Counter++
+		console.log(p.Counter)
+
+<;
+var Proj = (function() {
+	function Proj() {
+		this._Counter = 10;
+	}
+
+	Object.defineProperty(Proj.prototype, "Counter", {
+		get: function () {
+			return this._Counter;
+		},
+		set: function (val) {
+			this._Counter = val;
+		}
+	});
+
+	Proj.Main = function () {
+		console.log(Proj.Thing);
+		Proj.Thing++;
+		console.log(Proj.Thing);
+
+		var p = new Proj();
+		console.log(p.Counter);
+		p.Counter++;
+		console.log(p.Counter);
+	};
+	return Proj;
+})();
+
+Proj._Thing = 1;
+Object.defineProperty(Proj, "Thing", {
+	get: function () {
+		return Proj._Thing;
+	},
+	set: function (val) {
+		Proj._Thing = val;
+	}
+});
+;>
