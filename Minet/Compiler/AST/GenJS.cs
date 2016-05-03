@@ -305,6 +305,9 @@ namespace Minet.Compiler.AST
 		{
 			Helper.PrintIndentedLine("// Error: " + Val, buf);
 		}
+
+		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
+		{ }
 	}
 
 	public partial class ExprList
@@ -774,6 +777,51 @@ namespace Minet.Compiler.AST
 					Status.Errors.Add(new ErrorMsg("Mismatched property / value counts, " + Props.Count + " != " + Vals.Expressions.Count, Pos));
 				}
 			}
+		}
+	}
+
+	public partial class PropGetSet
+	{
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
+		{
+			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a property getter/setter.", Pos));
+		}
+
+		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
+		{
+			var buf = funcBuf;
+			int oldIndent = Status.Indent;
+			string namePrefix = Status.Class + ".prototype";
+			if (Prop.Static)
+			{
+				buf = sPropBuf;
+				Status.Indent = 0;
+				namePrefix = Status.ClassChain;
+			}
+			Helper.PrintIndented("Object.defineProperty(", buf);
+			buf.Append(namePrefix);
+			buf.Append(", '");
+			buf.Append(Prop.Name);
+			buf.AppendLine("', {");
+
+			Status.Indent++;
+
+			if (Get != null)
+			{
+				Helper.PrintIndented("get: ", buf);
+				buf.Append(Get.ToJSExpr(true));
+				buf.AppendLine(Set != null ? "," : "");
+			}
+			if (Set != null)
+			{
+				Helper.PrintIndented("set: ", buf);
+				buf.AppendLine(Set.ToJSExpr(true));
+			}
+
+			Status.Indent--;
+
+			Helper.PrintIndentedLine("});", buf);
+			Status.Indent = oldIndent;
 		}
 	}
 

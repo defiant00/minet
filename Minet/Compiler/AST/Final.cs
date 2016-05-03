@@ -70,6 +70,18 @@ namespace Minet.Compiler.AST
 						}
 					}
 				}
+				else if (s is PropGetSet)
+				{
+					var gs = s as PropGetSet;
+					if (doStatic == gs.Prop.Static)
+					{
+						string parent = gs.Prop.Static ? Name : "this";
+						if (parent != gs.Prop.Name)
+						{
+							Status.Variables.AddItem(gs.Prop.Name, new Identifier(gs.Pos) { Idents = { parent, gs.Prop.Name } });
+						}
+					}
+				}
 			}
 		}
 

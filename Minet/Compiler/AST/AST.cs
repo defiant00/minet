@@ -92,7 +92,7 @@ namespace Minet.Compiler.AST
 		public Else(Position pos) : base(pos) { }
 	}
 
-	public partial class Error : AST, IExpression, IStatement
+	public partial class Error : AST, IExpression, IClassStatement
 	{
 		public string Val;
 		public Error(Position pos) : base(pos) { }
@@ -212,10 +212,12 @@ namespace Minet.Compiler.AST
 		public PropertySet(Position pos) : base(pos) { }
 	}
 
-	//public partial class PropGetterSetter : AST, IStatement
-	//{
-	//	public PropGetterSetter(Position pos) : base(pos) { }
-	//}
+	public partial class PropGetSet : AST, IClassStatement
+	{
+		public Property Prop;
+		public FunctionDef Get, Set;
+		public PropGetSet(Position pos) : base(pos) { }
+	}
 
 	public partial class RegularExpr : AST, IExpression
 	{

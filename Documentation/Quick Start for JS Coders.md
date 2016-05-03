@@ -8,10 +8,11 @@ it is likely because its usage is the same as in JavaScript.
 2. [Indentation](#indentation)
 3. [Classes](#classes)
 4. [Variables](#variables)
-5. [Assignment](#assignment)
-6. [Chains](#chains)
-7. [If](#if)
-8. [Loops](#loops)
+5. [Getters and Setters](#getters-and-setters)
+6. [Assignment](#assignment)
+7. [Chains](#chains)
+8. [If](#if)
+9. [Loops](#loops)
 
 ### Basics
 Semicolons do not end lines; they do, however, start a single-line comment.
@@ -185,6 +186,9 @@ Proj
 ```
 If **this** is used within an anonymous function, it will automatically be replaced with **_this** so
 that **this** in event handlers works properly.
+
+### Getters and Setters
+
 
 ### Assignment
 Minet allows many-to-many assignment in the form **variables : values**. All values are evaluated left-to-right

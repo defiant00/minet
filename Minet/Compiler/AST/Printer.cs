@@ -272,6 +272,24 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class PropGetSet
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndentLine(Prop.ToString(), indent, buf);
+			if (Get != null)
+			{
+				Helper.PrintASTIndentLine("get", indent + 1, buf);
+				Get.AppendPrint(indent + 2, buf);
+			}
+			if (Set != null)
+			{
+				Helper.PrintASTIndentLine("set", indent + 1, buf);
+				Set.AppendPrint(indent + 2, buf);
+			}
+		}
+	}
+
 	public partial class RegularExpr
 	{
 		public void AppendPrint(int indent, StringBuilder buf)

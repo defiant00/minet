@@ -1,14 +1,14 @@
 ; Minet Test Project
 
-use console
+use console, alert
 
 Proj
-	_Thing, ._Counter: 1, 10
+	_Thing, ._Counter: 1, 50
 	Thing
-		get
-			ret _Thing
 		set val
 			_Thing: val
+		get
+			ret _Thing
 
 	.Counter
 		get
@@ -24,42 +24,3 @@ Proj
 		console.log(p.Counter)
 		p.Counter++
 		console.log(p.Counter)
-
-<;
-var Proj = (function() {
-	function Proj() {
-		this._Counter = 10;
-	}
-
-	Object.defineProperty(Proj.prototype, "Counter", {
-		get: function () {
-			return this._Counter;
-		},
-		set: function (val) {
-			this._Counter = val;
-		}
-	});
-
-	Proj.Main = function () {
-		console.log(Proj.Thing);
-		Proj.Thing++;
-		console.log(Proj.Thing);
-
-		var p = new Proj();
-		console.log(p.Counter);
-		p.Counter++;
-		console.log(p.Counter);
-	};
-	return Proj;
-})();
-
-Proj._Thing = 1;
-Object.defineProperty(Proj, "Thing", {
-	get: function () {
-		return Proj._Thing;
-	},
-	set: function (val) {
-		Proj._Thing = val;
-	}
-});
-;>

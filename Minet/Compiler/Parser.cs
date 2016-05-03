@@ -288,6 +288,7 @@ namespace Minet.Compiler
 
 			var ps = new PropertySet(peek.Pos);
 
+			bool first = true;
 			while (true)
 			{
 				bool dotted = accept(TokenType.Dot).Success;
@@ -296,8 +297,16 @@ namespace Minet.Compiler
 				{
 					return error<IClassStatement>(true, "Invalid token in class statement: " + r.LastToken, r.LastToken.Pos);
 				}
+
+				// If the first time through, check for a getter/setter.
+				if (first && accept(TokenType.EOL, TokenType.Indent).Success)
+				{
+					return parsePropGetSet(dotted, r[0].Val, r[0].Pos);
+				}
+
 				ps.Props.Add(new Property(r[0].Pos) { Static = !dotted, Name = r[0].Val });
 				if (!accept(TokenType.Comma).Success) { break; }
+				first = false;
 			}
 
 			if (accept(TokenType.Assign).Success) { ps.Vals = parseExprList().Result; }
@@ -902,6 +911,84 @@ namespace Minet.Compiler
 				return new ParseResult<IExpression>(lhs, false);
 			}
 			return error<IExpression>(true, "Token is not an expression: " + peek, peek.Pos);
+		}
+
+		private ParseResult<IClassStatement> parsePropGetSet(bool dotted, string name, Position pos)
+		{
+			// Property name, EOL and Indent have already been consumed.
+
+			AcceptResult res;
+			var p = new PropGetSet(pos) { Prop = new Property(pos) { Name = name, Static = !dotted } };
+
+			while (!peek.Type.IsDedentStop())
+			{
+				FunctionDef fn = null;
+				if (peek.Type == TokenType.Get)
+				{
+					if (p.Get == null)
+					{
+						res = accept(TokenType.Get, TokenType.EOL, TokenType.Indent);
+						if (res.Success)
+						{
+							p.Get = new FunctionDef(peek.Pos);
+							fn = p.Get;
+						}
+						else
+						{
+							return error<IClassStatement>(true, "Invalid token in " + name + " getter: " + res.LastToken, res.LastToken.Pos);
+						}
+					}
+					else
+					{
+						return error<IClassStatement>(true, "Get already defined for " + name, peek.Pos);
+					}
+				}
+				else if (peek.Type == TokenType.Set)
+				{
+					if (p.Set == null)
+					{
+						res = accept(TokenType.Set, TokenType.Literal, TokenType.EOL, TokenType.Indent);
+						if (res.Success)
+						{
+							p.Set = new FunctionDef(peek.Pos) { Params = { res[1].Val } };
+							fn = p.Set;
+						}
+						else
+						{
+							return error<IClassStatement>(true, "Invalid token in " + name + " setter: " + res.LastToken, res.LastToken.Pos);
+						}
+					}
+					else
+					{
+						return error<IClassStatement>(true, "Set already defined for " + name, peek.Pos);
+					}
+				}
+				else
+				{
+					return error<IClassStatement>(true, "Invalid token in " + name + " getter/setter: " + peek, peek.Pos);
+				}
+				if (fn != null)
+				{
+					while (!peek.Type.IsDedentStop())
+					{
+						fn.Statements.Add(parseFunctionStmt().Result);
+					}
+
+					res = accept(TokenType.Dedent, TokenType.EOL);
+					if (!res.Success)
+					{
+						return error<IClassStatement>(true, "Invalid token in " + name + " getter/setter: " + res.LastToken, res.LastToken.Pos);
+					}
+				}
+			}
+
+			res = accept(TokenType.Dedent, TokenType.EOL);
+			if (!res.Success)
+			{
+				return error<IClassStatement>(true, "Invalid token in property getter/setter: " + res.LastToken, res.LastToken.Pos);
+			}
+
+			return new ParseResult<IClassStatement>(p, false);
 		}
 
 		private ParseResult<IExpression> parseRegexExpr()
