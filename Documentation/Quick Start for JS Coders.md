@@ -60,14 +60,6 @@ of **{property names : values}**
 ```
 var obj: {firstVal, secondVal: 1, 2}
 ```
-The conditional operator **?:** in JavaScript is spelled out in Minet as an **if then else** expression.
-```
-val: if x < 3 then "small" else "large"
-```
-Generates:
-```javascript
-val = (x < 3 ? "small" : "large");
-```
 Since Minet compiles to JavaScript, you may find times where you want to be able to directly inject
 JavaScript. You can do so using the **<js** and **js>** start and end tags.
 ```
@@ -301,6 +293,15 @@ if x
         alert('> 5')
     else
         alert('something else')
+```
+Minet also has its own version of the JavaScript conditional operator **?:** which is spelled out as
+an **if then else** expression.
+```
+val: if x < 3 then "small" else "large"
+```
+Generates:
+```javascript
+val = (x < 3 ? "small" : "large");
 ```
 
 ### Loops
