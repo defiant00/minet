@@ -321,7 +321,7 @@ namespace Minet.Compiler.AST
 			Helper.PrintIndentedLine("// Error: " + Val, buf);
 		}
 
-		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
+		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
 		{ }
 	}
 
@@ -627,7 +627,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds) { Helper.PrintIndentedLine(Val, buf); }
 
-		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
+		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
 		{
 			Helper.PrintIndentedLine(Val, funcBuf);
 		}
@@ -692,7 +692,7 @@ namespace Minet.Compiler.AST
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a property set.", Pos));
 		}
 
-		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
+		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
 		{
 			if (Vals != null)
 			{
@@ -742,24 +742,23 @@ namespace Minet.Compiler.AST
 							}
 							else
 							{
+								var buf = sPropBuf;
 								if (fn != null)
 								{
-									if (p.Name == "Main") { Status.Main = Status.ChainClassName(p.Name); }
-
-									Helper.PrintIndented(Status.Class, funcBuf);
-									funcBuf.Append(".");
-									funcBuf.Append(p.Name);
-									funcBuf.Append(" = ");
-									funcBuf.Append(v.ToJSExpr(true));
-									funcBuf.AppendLine(";");
+									if (p.Name == Token.KeywordMain) { Status.Main = Status.ChainClassName(p.Name); }
+									if (p.Name == Token.KeywordInit)
+									{
+										initBuffer.Append(Status.ChainClassName(p.Name));
+										initBuffer.AppendLine("();");
+									}
+									buf = funcBuf;
 								}
-								else
-								{
-									sPropBuf.Append(Status.ChainClassName(p.Name));
-									sPropBuf.Append(" = ");
-									sPropBuf.Append(v.ToJSExpr(true));
-									sPropBuf.AppendLine(";");
-								}
+								Helper.PrintIndented(Status.Class, buf);
+								buf.Append(".");
+								buf.Append(p.Name);
+								buf.Append(" = ");
+								buf.Append(v.ToJSExpr(true));
+								buf.AppendLine(";");
 							}
 						}
 						else
@@ -802,17 +801,16 @@ namespace Minet.Compiler.AST
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a property getter/setter.", Pos));
 		}
 
-		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf)
+		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
 		{
-			var buf = funcBuf;
-			int oldIndent = Status.Indent;
-			string namePrefix = Status.Class + ".prototype";
-			if (Prop.Static)
+			var buf = sPropBuf;
+			string namePrefix = Status.Class;
+			if (!Prop.Static)
 			{
-				buf = sPropBuf;
-				Status.Indent = 0;
-				namePrefix = Status.ClassChain;
+				buf = funcBuf;
+				namePrefix += ".prototype";
 			}
+
 			Helper.PrintIndented("Object.defineProperty(", buf);
 			buf.Append(namePrefix);
 			buf.Append(", '");
@@ -836,7 +834,6 @@ namespace Minet.Compiler.AST
 			Status.Indent--;
 
 			Helper.PrintIndentedLine("});", buf);
-			Status.Indent = oldIndent;
 		}
 	}
 

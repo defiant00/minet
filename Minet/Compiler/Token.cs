@@ -137,6 +137,8 @@ namespace Minet.Compiler
 		public string Val;
 
 		public const string KeywordBy = "by";
+		public const string KeywordInit = "Init";
+		public const string KeywordMain = "Main";
 		public const string KeywordThen = "then";
 		public const string KeywordTo = "to";
 

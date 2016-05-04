@@ -104,7 +104,7 @@ MyProject.MyClass      ; Creates a class MyProject and a class MyClass within My
     Greet: fn()
         alert('hi')
 
-MyProject              ; Adds a static property to class MyProject. The order in which these
+MyProject              ; Adds a static variable to class MyProject. The order in which these
     SomeProp: 3        ; are defined, or even which files these are defined in, doesn't matter.
 ```
 Within a class, properties that start with a **.** are instance properties, and those that do not are static.
@@ -135,7 +135,7 @@ MyClass
 You are not limited to adding code to a single class at a time, multiple comma-delimited class names can be provided at once.
 All of the classes will contain the shared code.
 ```
-; Both MyClass and SecondClass will contain an x and y property, defaulted to zero.
+; Both MyClass and SecondClass will contain an x and y variable, defaulted to zero.
 MyClass, SecondClass
     .x, .y: 0, 0
 ```
@@ -143,7 +143,7 @@ In Minet, an instance of an object is constructed through **name{args}**, equiva
 ```
 obj: MyClass{1, 2}
 ```
-The static **Main** method is special. If one is found in your project, a **window.onload** block
+The static **Main** function is special. If one is found in your project, a **window.onload** block
 will be added to the end of the generated output:
 ```javascript
 // Run Main
@@ -151,6 +151,8 @@ window.onload = function() {
     Project.Main();
 };
 ```
+The second special static function is **Init**, which is automatically called at the end of all class creation, but before
+the **Main** function is run.
 
 ### Variables
 In Minet variables must be declared before use, and are available as appropriate at the current or any child scopes.
@@ -164,15 +166,6 @@ MyClass
     .Func: fn()
         Inst: 3        ; This is recognized and replaced with this.Inst
         Static: 4      ; This is replaced with MyClass.Static
-```
-Static variables are also available to a class' subclasses.
-```
-MyClass
-    Static: 1
-
-MyClass.Sub
-    .Func: fn()
-        Static: 2      ; This is replaced with MyClass.Static
 ```
 The **use** statement is used to provide Minet a list of extra allowed variable names.
 This is primarily used to allow the use of existing JavaScript functions, such as **alert**.

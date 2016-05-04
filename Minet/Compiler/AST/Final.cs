@@ -47,7 +47,7 @@ namespace Minet.Compiler.AST
 			}
 		}
 
-		private void BuildVarStmtList(bool doStatic)
+		private void BuildVarStmtList()
 		{
 			foreach (var s in Statements)
 			{
@@ -56,42 +56,35 @@ namespace Minet.Compiler.AST
 					var ps = s as PropertySet;
 					foreach (var prop in ps.Props)
 					{
-						if (doStatic == prop.Static)
+						string parent = prop.Static ? Name : "this";
+						if (parent != prop.Name)
 						{
-							string parent = prop.Static ? Name : "this";
-							if (parent != prop.Name)
-							{
-								Status.Variables.AddItem(prop.Name, new Identifier(prop.Pos) { Idents = { parent, prop.Name } });
-							}
-							else
-							{
-								Status.Variables.AddItem(parent + " constructor", prop.Pos);
-							}
+							Status.Variables.AddItem(prop.Name, new Identifier(prop.Pos) { Idents = { parent, prop.Name } });
+						}
+						else
+						{
+							Status.Variables.AddItem(parent + " constructor", prop.Pos);
 						}
 					}
 				}
 				else if (s is PropGetSet)
 				{
 					var gs = s as PropGetSet;
-					if (doStatic == gs.Prop.Static)
+					string parent = gs.Prop.Static ? Name : "this";
+					if (parent != gs.Prop.Name)
 					{
-						string parent = gs.Prop.Static ? Name : "this";
-						if (parent != gs.Prop.Name)
-						{
-							Status.Variables.AddItem(gs.Prop.Name, new Identifier(gs.Pos) { Idents = { parent, gs.Prop.Name } });
-						}
+						Status.Variables.AddItem(gs.Prop.Name, new Identifier(gs.Pos) { Idents = { parent, gs.Prop.Name } });
 					}
 				}
 			}
 		}
 
-		public void Build(StringBuilder buffer, StringBuilder staticBuffer)
+		public void Build(StringBuilder buffer, StringBuilder initBuffer)
 		{
 			Status.Variables.IncrementDepth();
 			BuildVarClassList();
-			BuildVarStmtList(true);
 			Status.Variables.IncrementDepth();
-			BuildVarStmtList(false);
+			BuildVarStmtList();
 
 			string priorClass = Status.Class;
 			string priorClassChain = Status.ClassChain;
@@ -104,6 +97,7 @@ namespace Minet.Compiler.AST
 			var consCodeBuffer = new StringBuilder();       // Constructor code
 			var funcBuffer = new StringBuilder();           // Functions
 			var classBuffer = new StringBuilder();          // Classes
+			var staticBuffer = new StringBuilder();         // Static variables
 
 
 			//
@@ -120,12 +114,12 @@ namespace Minet.Compiler.AST
 			//
 			// Statements and classes
 			//
-			foreach (var st in Statements) { st.AppendJS(consSigBuffer, consThisBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticBuffer); }
+			foreach (var st in Statements) { st.AppendJS(consSigBuffer, consThisBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticBuffer, initBuffer); }
 
 			// Remove local instance variables from variable list before building child classes.
 			Status.Variables.DecrementDepth();
 
-			foreach (var c in Classes) { c.Build(classBuffer, staticBuffer); }
+			foreach (var c in Classes) { c.Build(classBuffer, initBuffer); }
 
 
 			//
@@ -150,6 +144,7 @@ namespace Minet.Compiler.AST
 			buffer.Append(consCodeBuffer);
 			buffer.Append(funcBuffer);
 			buffer.Append(classBuffer);
+			buffer.Append(staticBuffer);
 
 			Helper.PrintIndented("return ", Status.Indent + 1, buffer);
 			buffer.Append(Name);
@@ -166,7 +161,7 @@ namespace Minet.Compiler.AST
 	{
 		public List<JSBlock> JSBlocks = new List<JSBlock>();
 		public StringBuilder Buffer = new StringBuilder();
-		public StringBuilder StaticBuffer = new StringBuilder();
+		public StringBuilder InitBuffer = new StringBuilder();
 
 		public F_Project(List<File> files)
 		{
@@ -217,14 +212,14 @@ namespace Minet.Compiler.AST
 			{
 				Buffer.AppendLine();
 				Buffer.AppendLine("// Classes");
-				foreach (var c in Classes) { c.Build(Buffer, StaticBuffer); }
+				foreach (var c in Classes) { c.Build(Buffer, InitBuffer); }
 			}
 
-			if (StaticBuffer.Length > 0)
+			if (InitBuffer.Length > 0)
 			{
 				Buffer.AppendLine();
-				Buffer.AppendLine("// Static Variables");
-				Buffer.Append(StaticBuffer);
+				Buffer.AppendLine("// Call Init");
+				Buffer.Append(InitBuffer);
 			}
 
 			if (JSBlocks.Count > 0)
