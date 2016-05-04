@@ -188,7 +188,20 @@ If **this** is used within an anonymous function, it will automatically be repla
 that **this** in event handlers works properly.
 
 ### Getters and Setters
-
+Getters and setters can be defined on class variables, both static and instance, and will be created
+behind the scenes with **Object.defineProperty**.
+```
+MyClass
+    _Val: 1
+    Val
+        get
+            ret _Val
+        set v
+            _Val: v
+```
+**Get** and **set** can be declared in either order, and only one is required to create a getter and/or
+setter for a property. **Get** is used alone on an indented line, **set** is followed by the name of
+the variable passed into the **set**.
 
 ### Assignment
 Minet allows many-to-many assignment in the form **variables : values**. All values are evaluated left-to-right
