@@ -119,6 +119,14 @@ MyClass
     .GreetInstance: fn()
         alert('hi')
 ```
+A constructor is defined by creating an instance function with the same name as the class.
+```
+MyClass
+    .xVal
+
+    .MyClass: fn(x)
+        xVal: x
+```
 Classes can be defined in multiple places, and during code generation all are combined into a single class.
 ```
 ; This is the same:
@@ -177,8 +185,6 @@ Proj
         alert('hello')            ; Without the use statement, both of these statements
         console.log('hello')      ; would return errors for use of undefined variables.
 ```
-If **this** is used within an anonymous function, it will automatically be replaced with **_this** so
-that **this** in event handlers works properly.
 
 ### Getters and Setters
 Getters and setters can be defined on class variables, both static and instance, and will be created

@@ -47,7 +47,7 @@ namespace Minet.Compiler.AST
 			}
 		}
 
-		private void BuildVarStmtList()
+		private void BuildVarStmtList(bool doStatic)
 		{
 			foreach (var s in Statements)
 			{
@@ -56,24 +56,30 @@ namespace Minet.Compiler.AST
 					var ps = s as PropertySet;
 					foreach (var prop in ps.Props)
 					{
-						string parent = prop.Static ? Name : "this";
-						if (parent != prop.Name)
+						if (doStatic == prop.Static)
 						{
-							Status.Variables.AddItem(prop.Name, new Identifier(prop.Pos) { Idents = { parent, prop.Name } });
-						}
-						else
-						{
-							Status.Variables.AddItem(parent + " constructor", prop.Pos);
+							if (Name == prop.Name)
+							{
+								Status.Variables.AddItem(Name + " constructor", prop.Pos);
+							}
+							else
+							{
+								string parent = prop.Static ? Name : "this";
+								Status.Variables.AddItem(prop.Name, new Identifier(prop.Pos) { Idents = { parent, prop.Name } });
+							}
 						}
 					}
 				}
 				else if (s is PropGetSet)
 				{
 					var gs = s as PropGetSet;
-					string parent = gs.Prop.Static ? Name : "this";
-					if (parent != gs.Prop.Name)
+					if (doStatic == gs.Prop.Static)
 					{
-						Status.Variables.AddItem(gs.Prop.Name, new Identifier(gs.Pos) { Idents = { parent, gs.Prop.Name } });
+						string parent = gs.Prop.Static ? Name : "this";
+						if (parent != gs.Prop.Name)
+						{
+							Status.Variables.AddItem(gs.Prop.Name, new Identifier(gs.Pos) { Idents = { parent, gs.Prop.Name } });
+						}
 					}
 				}
 			}
@@ -81,28 +87,17 @@ namespace Minet.Compiler.AST
 
 		public void Build(StringBuilder buffer, StringBuilder initBuffer)
 		{
-			Status.Variables.IncrementDepth();
-			BuildVarClassList();
-			Status.Variables.IncrementDepth();
-			BuildVarStmtList();
-
-			string priorClass = Status.Class;
-			string priorClassChain = Status.ClassChain;
-			Status.Class = Name;
-			Status.ClassChain = Status.ChainClassName(Name);
-
 			var consSigBuffer = new StringBuilder();        // Constructor signature
-			var consThisBuffer = new StringBuilder();       // Constructor _this line if necessary
 			var consDefBuffer = new StringBuilder();        // Constructor defaults
 			var consCodeBuffer = new StringBuilder();       // Constructor code
 			var funcBuffer = new StringBuilder();           // Functions
 			var classBuffer = new StringBuilder();          // Classes
 			var staticBuffer = new StringBuilder();         // Static variables
 
-
-			//
-			// Initialize buffers
-			//
+			string priorClass = Status.Class;
+			string priorClassChain = Status.ClassChain;
+			Status.Class = Name;
+			Status.ClassChain = Status.ChainClassName(Name);
 
 			Status.Indent++;
 
@@ -111,20 +106,30 @@ namespace Minet.Compiler.AST
 			consSigBuffer.Append(Name);
 			consSigBuffer.Append("(");
 
-			//
-			// Statements and classes
-			//
-			foreach (var st in Statements) { st.AppendJS(consSigBuffer, consThisBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticBuffer, initBuffer); }
+			// Add class names
+			Status.Variables.IncrementDepth();
+			BuildVarClassList();
 
-			// Remove local instance variables from variable list before building child classes.
+			// Add static variables
+			Status.Variables.IncrementDepth();
+			BuildVarStmtList(true);
+
+			// Static statements
+			foreach (var st in Statements) { st.AppendJS(true, consSigBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticBuffer, initBuffer); }
+
+			// Add instance variables
+			BuildVarStmtList(false);
+
+			// Instance statements
+			foreach (var st in Statements) { st.AppendJS(false, consSigBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticBuffer, initBuffer); }
+
+			// Remove variables before building classes
 			Status.Variables.DecrementDepth();
 
 			foreach (var c in Classes) { c.Build(classBuffer, initBuffer); }
 
-
-			//
-			// Finish buffers
-			//
+			// Remove classes
+			Status.Variables.DecrementDepth();
 
 			// Constructor signature
 			consSigBuffer.AppendLine(") {");
@@ -139,7 +144,6 @@ namespace Minet.Compiler.AST
 			buffer.AppendLine(" = (function() {");
 
 			buffer.Append(consSigBuffer);
-			buffer.Append(consThisBuffer);
 			buffer.Append(consDefBuffer);
 			buffer.Append(consCodeBuffer);
 			buffer.Append(funcBuffer);
@@ -153,7 +157,6 @@ namespace Minet.Compiler.AST
 
 			Status.Class = priorClass;
 			Status.ClassChain = priorClassChain;
-			Status.Variables.DecrementDepth();
 		}
 	}
 
@@ -172,6 +175,8 @@ namespace Minet.Compiler.AST
 			Buffer.Append(" * Input Files: ");
 			Buffer.AppendLine(string.Join(", ", files.Select(f => f.Name)));
 			Buffer.AppendLine(" */");
+
+			Status.Variables.AddItem("this", new Position("", 0, 0));
 
 			foreach (var f in files)
 			{

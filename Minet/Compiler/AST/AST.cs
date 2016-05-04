@@ -21,7 +21,7 @@ namespace Minet.Compiler.AST
 
 	public interface IClassStatement : IStatement
 	{
-		void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer);
+		void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer);
 	}
 
 	public class AST

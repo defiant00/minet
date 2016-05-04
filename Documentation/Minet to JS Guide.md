@@ -55,8 +55,10 @@ for i in 10 to 0                                for (var i = (10) - 1; i >= 0; i
 for i in 0 to 10 by 2                           for (var i = 0; i < 10; i += 2)
 myLoop for i in 0 to 10                         myLoop: for (var i = 0; i < 10; i++)
 
-for i in myItems                                for (var _i0 = 0; _i0 < myItems.length; _i0++) {
-                                                    var i = myItems[_i0];
+for i in myItems                                var _v0 = myItems;
+                                                var _l0 = _v0.length;
+                                                for (var _i0 = 0; _i0 < _l0; _i0++) {
+                                                    var i = _v0[_i0];
 
 myObj.doThing(1, 2, 3)                          myObj.doThing(1, 2, 3);
 

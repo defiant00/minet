@@ -321,7 +321,7 @@ namespace Minet.Compiler.AST
 			Helper.PrintIndentedLine("// Error: " + Val, buf);
 		}
 
-		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
+		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
 		{ }
 	}
 
@@ -477,41 +477,19 @@ namespace Minet.Compiler.AST
 	{
 		public string ToJSExpr(bool expandIds)
 		{
-			Status.FnCounter++;
 			Status.Variables.IncrementDepth();
 
 			var buf = new StringBuilder("function(");
-			var stmtBuf = new StringBuilder();
 			BuildAndAppendParams(buf);
 			buf.AppendLine(") {");
 
-			if (Status.FnCounter == 1)
-			{
-				Status.NeedsThisVar = false;
-
-				if (!Status.CurrentFnStatic)
-				{
-					Status.Variables.AddItem("this", Pos);
-				}
-			}
-
 			Status.Indent++;
-			AppendStatements(stmtBuf);
-
-			if (Status.NeedsThisVar && Status.FnCounter == 1)
-			{
-				Helper.PrintIndented("var ", buf);
-				buf.Append(Constants.InternalVarPrefix);
-				buf.AppendLine("this = this;");
-			}
-			buf.Append(stmtBuf);
-
+			AppendStatements(buf);
 			Status.Indent--;
 
 			Helper.PrintIndented("}", buf);
 
 			Status.Variables.DecrementDepth();
-			Status.FnCounter--;
 			return buf.ToString();
 		}
 
@@ -557,13 +535,7 @@ namespace Minet.Compiler.AST
 					var repl = Status.Variables.GetItem(val);
 					if (repl != null)
 					{
-						if (Status.FnCounter > 1 && val == "this")
-						{
-							Status.NeedsThisVar = true;
-							idents[0] = Constants.InternalVarPrefix + "this";
-							success = true;
-						}
-						else if (repl.Idents.Count > 1 || repl.Idents[0] != val)
+						if (repl.Idents.Count > 1 || repl.Idents[0] != val)
 						{
 
 							idents.RemoveAt(0);
@@ -627,9 +599,9 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds) { Helper.PrintIndentedLine(Val, buf); }
 
-		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
+		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
 		{
-			Helper.PrintIndentedLine(Val, funcBuf);
+			if (doStatic) { Helper.PrintIndentedLine(Val, funcBuf); }
 		}
 	}
 
@@ -692,7 +664,7 @@ namespace Minet.Compiler.AST
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a property set.", Pos));
 		}
 
-		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
+		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
 		{
 			if (Vals != null)
 			{
@@ -701,39 +673,53 @@ namespace Minet.Compiler.AST
 					for (int i = 0; i < Props.Count; i++)
 					{
 						var p = Props[i];
-						var v = Vals.Expressions.Count == 1 ? Vals.Expressions[0] : Vals.Expressions[i];
-						var fn = v as FunctionDef;
 
-						Status.CurrentFnStatic = p.Static;
-
-						if (p.Static)
+						if (doStatic == p.Static)
 						{
-							if (p.Name == Status.Class)      // Constructor
+							var v = Vals.Expressions.Count == 1 ? Vals.Expressions[0] : Vals.Expressions[i];
+							var fn = v as FunctionDef;
+
+							bool constructor = p.Name == Status.Class;
+
+							if (p.Static)
+							{
+								if (constructor)
+								{
+									Status.Errors.Add(new ErrorMsg("Constructor for " + p.Name + " cannot be static.", Pos));
+								}
+								else
+								{
+									var buf = sPropBuf;
+									if (fn != null)
+									{
+										if (p.Name == Token.KeywordMain) { Status.Main = Status.ChainClassName(p.Name); }
+										if (p.Name == Token.KeywordInit)
+										{
+											initBuffer.Append(Status.ChainClassName(p.Name));
+											initBuffer.AppendLine("();");
+										}
+										buf = funcBuf;
+									}
+									Helper.PrintIndented(Status.Class, buf);
+									buf.Append(".");
+									buf.Append(p.Name);
+									buf.Append(" = ");
+									buf.Append(v.ToJSExpr(true));
+									buf.AppendLine(";");
+								}
+							}
+							else if (constructor)
 							{
 								if (fn != null)
 								{
-									Status.FnCounter++;
 									Status.Variables.IncrementDepth();
-									if (Status.FnCounter == 1)
-									{
-										Status.NeedsThisVar = false;
-										Status.Variables.AddItem("this", Pos);
-									}
-
 									fn.BuildAndAppendParams(cSigBuf);
+
 									Status.Indent++;
 									fn.AppendStatements(cCodeBuf);
-
-									if (Status.NeedsThisVar && Status.FnCounter == 1)
-									{
-										Helper.PrintIndented("var ", cThisBuf);
-										cThisBuf.Append(Constants.InternalVarPrefix);
-										cThisBuf.AppendLine("this = this;");
-									}
-
 									Status.Indent--;
+
 									Status.Variables.DecrementDepth();
-									Status.FnCounter--;
 								}
 								else
 								{
@@ -742,51 +728,31 @@ namespace Minet.Compiler.AST
 							}
 							else
 							{
-								var buf = sPropBuf;
-								if (fn != null)
+								var buf = funcBuf;
+								if (fn == null)
 								{
-									if (p.Name == Token.KeywordMain) { Status.Main = Status.ChainClassName(p.Name); }
-									if (p.Name == Token.KeywordInit)
-									{
-										initBuffer.Append(Status.ChainClassName(p.Name));
-										initBuffer.AppendLine("();");
-									}
-									buf = funcBuf;
+									Status.Indent++;
+
+									buf = cDefBuf;
+									Helper.PrintIndented("this.", buf);
 								}
-								Helper.PrintIndented(Status.Class, buf);
-								buf.Append(".");
+								else
+								{
+									Helper.PrintIndented(Status.Class, buf);
+									buf.Append(".prototype.");
+								}
+
 								buf.Append(p.Name);
 								buf.Append(" = ");
 								buf.Append(v.ToJSExpr(true));
 								buf.AppendLine(";");
-							}
-						}
-						else
-						{
-							var buf = funcBuf;
-							if (fn == null)
-							{
-								Status.Indent++;
 
-								buf = cDefBuf;
-								Helper.PrintIndented("this.", buf);
+								if (fn == null) { Status.Indent--; }
 							}
-							else
-							{
-								Helper.PrintIndented(Status.Class, buf);
-								buf.Append(".prototype.");
-							}
-
-							buf.Append(p.Name);
-							buf.Append(" = ");
-							buf.Append(v.ToJSExpr(true));
-							buf.AppendLine(";");
-
-							if (fn == null) { Status.Indent--; }
 						}
 					}
 				}
-				else
+				else if (doStatic)      // Only add the error message once.
 				{
 					Status.Errors.Add(new ErrorMsg("Mismatched property / value counts, " + Props.Count + " != " + Vals.Expressions.Count, Pos));
 				}
@@ -801,41 +767,42 @@ namespace Minet.Compiler.AST
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a property getter/setter.", Pos));
 		}
 
-		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
+		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
 		{
-			Status.CurrentFnStatic = Prop.Static;
-
-			var buf = sPropBuf;
-			string namePrefix = Status.Class;
-			if (!Prop.Static)
+			if (doStatic == Prop.Static)
 			{
-				buf = funcBuf;
-				namePrefix += ".prototype";
+				var buf = sPropBuf;
+				string namePrefix = Status.Class;
+				if (!Prop.Static)
+				{
+					buf = funcBuf;
+					namePrefix += ".prototype";
+				}
+
+				Helper.PrintIndented("Object.defineProperty(", buf);
+				buf.Append(namePrefix);
+				buf.Append(", '");
+				buf.Append(Prop.Name);
+				buf.AppendLine("', {");
+
+				Status.Indent++;
+
+				if (Get != null)
+				{
+					Helper.PrintIndented("get: ", buf);
+					buf.Append(Get.ToJSExpr(true));
+					buf.AppendLine(Set != null ? "," : "");
+				}
+				if (Set != null)
+				{
+					Helper.PrintIndented("set: ", buf);
+					buf.AppendLine(Set.ToJSExpr(true));
+				}
+
+				Status.Indent--;
+
+				Helper.PrintIndentedLine("});", buf);
 			}
-
-			Helper.PrintIndented("Object.defineProperty(", buf);
-			buf.Append(namePrefix);
-			buf.Append(", '");
-			buf.Append(Prop.Name);
-			buf.AppendLine("', {");
-
-			Status.Indent++;
-
-			if (Get != null)
-			{
-				Helper.PrintIndented("get: ", buf);
-				buf.Append(Get.ToJSExpr(true));
-				buf.AppendLine(Set != null ? "," : "");
-			}
-			if (Set != null)
-			{
-				Helper.PrintIndented("set: ", buf);
-				buf.AppendLine(Set.ToJSExpr(true));
-			}
-
-			Status.Indent--;
-
-			Helper.PrintIndentedLine("});", buf);
 		}
 	}
 
