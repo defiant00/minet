@@ -52,13 +52,13 @@ JavaScript keywords or the shortened Minet keywords interchangeably.
 
 Assignment is the only way to create functions.
 ```
-	mult: fn(x, y)
-		ret x * y
+mult: fn(x, y)
+    ret x * y
 ```
 For consistency with the rest of Minet's assignment operators, object creation follows the pattern
-of {property names : values}
+of **{property names : values}**
 ```
-	var obj: {firstVal, secondVal: 1, 2}
+var obj: {firstVal, secondVal: 1, 2}
 ```
 The conditional operator **?:** in JavaScript is spelled out in Minet as an **if then else** expression.
 ```
@@ -113,7 +113,7 @@ MyProject.MyClass      ; Creates a class MyProject and a class MyClass within My
         alert('hi')
 
 MyProject              ; Adds a static property to class MyProject. The order in which these
-	SomeProp: 3        ; are defined, or even which files these are defined in, doesn't matter.
+    SomeProp: 3        ; are defined, or even which files these are defined in, doesn't matter.
 ```
 Within a class, properties that start with a **.** are instance properties, and those that do not are static.
 ```
