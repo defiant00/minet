@@ -72,6 +72,19 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class Conditional
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndentLine("if", indent, buf);
+			Condition.AppendPrint(indent + 1, buf);
+			Helper.PrintASTIndentLine("then", indent, buf);
+			True.AppendPrint(indent + 1, buf);
+			Helper.PrintASTIndentLine("else", indent, buf);
+			False.AppendPrint(indent + 1, buf);
+		}
+	}
+
 	public partial class Constructor
 	{
 		public void AppendPrint(int indent, StringBuilder buf)

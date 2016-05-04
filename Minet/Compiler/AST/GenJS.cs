@@ -275,6 +275,21 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class Conditional
+	{
+		public string ToJSExpr(bool expandIds)
+		{
+			var sb = new StringBuilder("(");
+			sb.Append(Condition.ToJSExpr(true));
+			sb.Append(" ? ");
+			sb.Append(True.ToJSExpr(true));
+			sb.Append(" : ");
+			sb.Append(False.ToJSExpr(true));
+			sb.Append(")");
+			return sb.ToString();
+		}
+	}
+
 	public partial class Constructor
 	{
 		public string ToJSExpr(bool expandIds)

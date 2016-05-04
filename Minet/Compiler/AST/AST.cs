@@ -80,6 +80,12 @@ namespace Minet.Compiler.AST
 		public Class(Position pos) : base(pos) { }
 	}
 
+	public partial class Conditional : AST, IExpression
+	{
+		public IExpression Condition, True, False;
+		public Conditional(Position pos) : base(pos) { }
+	}
+
 	public partial class Constructor : AST, IExpression
 	{
 		public IExpression Type;

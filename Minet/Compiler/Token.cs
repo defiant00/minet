@@ -136,8 +136,9 @@ namespace Minet.Compiler
 		public Position Pos;
 		public string Val;
 
-		public const string KeywordTo = "to";
 		public const string KeywordBy = "by";
+		public const string KeywordThen = "then";
+		public const string KeywordTo = "to";
 
 		public readonly static Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType>
 		{

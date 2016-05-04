@@ -320,6 +320,38 @@ namespace Minet.Compiler
 			return new ParseResult<IClassStatement>(ps, false);
 		}
 
+		private ParseResult<IExpression> parseConditionalExpr()
+		{
+			var start = next(); // eat if
+			var c = new Conditional(start.Pos);
+
+			var expr = parseExpr();
+			if (expr.Error) { return expr; }
+			c.Condition = expr.Result;
+
+			var res = accept(TokenType.Literal);
+			if (!res.Success || res[0].Val != Token.KeywordThen)
+			{
+				return error<IExpression>(true, "Invalid token in conditional expression, expected then, found: " + res.LastToken, res.LastToken.Pos);
+			}
+
+			expr = parseExpr();
+			if (expr.Error) { return expr; }
+			c.True = expr.Result;
+
+			res = accept(TokenType.Else);
+			if (!res.Success)
+			{
+				return error<IExpression>(true, "Invalid token in conditional expression, expected else, found: " + res.LastToken, res.LastToken.Pos);
+			}
+
+			expr = parseExpr();
+			if (expr.Error) { return expr; }
+			c.False = expr.Result;
+
+			return new ParseResult<IExpression>(c, false);
+		}
+
 		private ParseResult<Constructor> parseConstructor(IExpression lhs)
 		{
 			var fc = new Constructor(lhs.Pos) { Type = lhs };
@@ -853,6 +885,9 @@ namespace Minet.Compiler
 					break;
 				case TokenType.Function:
 					lhs = parseAnonFuncExpr().Result;
+					break;
+				case TokenType.If:
+					lhs = parseConditionalExpr().Result;
 					break;
 				case TokenType.Literal:
 					lhs = parseIdentifier<IExpression>().Result;

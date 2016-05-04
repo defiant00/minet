@@ -3,24 +3,7 @@
 use console, alert
 
 Proj
-	_Thing, ._Counter: 1, 50
-	Thing
-		set val
-			_Thing: val
-		get
-			ret _Thing
-
-	.Counter
-		get
-			ret _Counter
-		set val
-			_Counter: val
-
 	Main: fn()
-		console.log(Thing)
-		Thing++
-		console.log(Thing)
-		var p: Proj{}
-		console.log(p.Counter)
-		p.Counter++
-		console.log(p.Counter)
+		var x, y: 1, 2
+		var s: if x > 0 then if y > 0 then "aha" else "only x" else "not x"
+		alert(s)
