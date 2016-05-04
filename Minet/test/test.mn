@@ -3,8 +3,8 @@
 use console
 
 Proj
-	_v: 1
-	Val
+	._v: 1
+	.Val
 		get
 			ret _v
 		set v

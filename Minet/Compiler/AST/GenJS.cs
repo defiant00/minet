@@ -803,6 +803,8 @@ namespace Minet.Compiler.AST
 
 		public void AppendJS(StringBuilder cSigBuf, StringBuilder cThisBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
 		{
+			Status.CurrentFnStatic = Prop.Static;
+
 			var buf = sPropBuf;
 			string namePrefix = Status.Class;
 			if (!Prop.Static)
