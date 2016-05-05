@@ -84,12 +84,16 @@ namespace Minet.Compiler.AST
 
 		public void Build(StringBuilder buffer, StringBuilder initBuffer)
 		{
-			var consSigBuffer = new StringBuilder();        // Constructor signature
-			var consDefBuffer = new StringBuilder();        // Constructor defaults
-			var consCodeBuffer = new StringBuilder();       // Constructor code
-			var funcBuffer = new StringBuilder();           // Functions
-			var classBuffer = new StringBuilder();          // Classes
-			var staticBuffer = new StringBuilder();         // Static variables
+			var consSigBuffer = new StringBuilder();		// Constructor signature
+			var consDefBuffer = new StringBuilder();		// Constructor defaults
+			var consCodeBuffer = new StringBuilder();		// Constructor code
+			var instPropBuffer = new StringBuilder();       // Instance properties
+			var instFuncBuffer = new StringBuilder();       // Instance functions
+			var statVarBuffer = new StringBuilder();        // Static variables
+			var statPropBuffer = new StringBuilder();       // Static properties
+			var statFuncBuffer = new StringBuilder();       // Static functions
+			var classBuffer = new StringBuilder();			// Subclasses
+			var jsBlockBuffer = new StringBuilder();		// JavaScript blocks
 
 			string priorClass = Status.Class;
 			string priorClassChain = Status.ClassChain;
@@ -112,13 +116,13 @@ namespace Minet.Compiler.AST
 			BuildVarStmtList(true);
 
 			// Static statements
-			foreach (var st in Statements) { st.AppendJS(true, consSigBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticBuffer, initBuffer); }
+			foreach (var st in Statements) { st.AppendJS(true, consSigBuffer, consDefBuffer, consCodeBuffer, instPropBuffer, instFuncBuffer, statVarBuffer, statPropBuffer, statFuncBuffer, jsBlockBuffer, initBuffer); }
 
 			// Add instance variables
 			BuildVarStmtList(false);
 
 			// Instance statements
-			foreach (var st in Statements) { st.AppendJS(false, consSigBuffer, consDefBuffer, consCodeBuffer, funcBuffer, staticBuffer, initBuffer); }
+			foreach (var st in Statements) { st.AppendJS(false, consSigBuffer, consDefBuffer, consCodeBuffer, instPropBuffer, instFuncBuffer, statVarBuffer, statPropBuffer, statFuncBuffer, jsBlockBuffer, initBuffer); }
 
 			// Remove variables before building classes
 			Status.Variables.DecrementDepth();
@@ -143,9 +147,13 @@ namespace Minet.Compiler.AST
 			buffer.Append(consSigBuffer);
 			buffer.Append(consDefBuffer);
 			buffer.Append(consCodeBuffer);
-			buffer.Append(funcBuffer);
+			buffer.Append(instPropBuffer);
+			buffer.Append(instFuncBuffer);
+			buffer.Append(statVarBuffer);
+			buffer.Append(statPropBuffer);
+			buffer.Append(statFuncBuffer);
 			buffer.Append(classBuffer);
-			buffer.Append(staticBuffer);
+			buffer.Append(jsBlockBuffer);
 
 			Helper.PrintIndented("return ", Status.Indent + 1, buffer);
 			buffer.Append(Name);

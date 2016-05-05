@@ -666,7 +666,7 @@ namespace Minet.Compiler
 					return error<IStatement>(true, "Invalid token in if: " + res.LastToken, res.LastToken.Pos);
 				}
 
-				if (peek.Type.IsBooleanOp())    // with indented conditions
+				if (peek.Precedence() > -1)    // with indented conditions
 				{
 					var pos = cond.Result.Pos;
 					string tempName = Constants.InternalVarPrefix + "c" + Status.IfCounter;

@@ -34,7 +34,6 @@ namespace Minet.Compiler
 		Break,              // 'break'
 		True,               // 'true'
 		False,              // 'false'
-		bool_op_start,
 		Equal,              // '='
 		NotEqual,           // '!='
 		LessThan,           // '<'
@@ -45,12 +44,12 @@ namespace Minet.Compiler
 		Or,                 // 'or'
 		In,                 // 'in'
 		InstanceOf,         // 'instof' or 'instanceof'
-		bool_op_end,
 		BAnd,               // '&'
 		BOr,                // '|'
 		BXOr,               // '^'
 		BLeftShift,         // '<<'
 		BRightShift,        // '>>'
+		BZeroRightShift,    // '>>>'
 		Dot,                // '.'
 		Comma,              // ','
 		LeftParen,          // '('
@@ -67,6 +66,12 @@ namespace Minet.Compiler
 		MulAssign,          // '*:'
 		DivAssign,          // '/:'
 		ModAssign,          // '%:'
+		BAndAssign,         // '&:'
+		BOrAssign,          // '|:'
+		BXOrAssign,         // '^:'
+		BLSAssign,          // '<<:'
+		BRSAssign,          // '>>:'
+		BZRSAssign,         // '>>>:'
 		assign_end,
 		Mul,                // '*'
 		Div,                // '/'
@@ -88,11 +93,6 @@ namespace Minet.Compiler
 
 	public static class TokenHelper
 	{
-		public static bool IsKeyword(this TokenType type)
-		{
-			return type > TokenType.keyword_start && type < TokenType.keyword_end;
-		}
-
 		public static bool IsUnaryOp(this TokenType type)
 		{
 			return type > TokenType.unary_op_start && type < TokenType.unary_op_end;
@@ -101,11 +101,6 @@ namespace Minet.Compiler
 		public static bool IsAssign(this TokenType type)
 		{
 			return type > TokenType.assign_start && type < TokenType.assign_end;
-		}
-
-		public static bool IsBooleanOp(this TokenType type)
-		{
-			return type > TokenType.bool_op_start && type < TokenType.bool_op_end;
 		}
 
 		public static bool IsInBlock(this TokenType type)
@@ -121,7 +116,6 @@ namespace Minet.Compiler
 		public static bool IsPostOp(this TokenType type)
 		{
 			return type > TokenType.post_op_start && type < TokenType.post_op_end;
-
 		}
 
 		public static bool IsOpeningBracket(this TokenType type)
@@ -180,6 +174,7 @@ namespace Minet.Compiler
 			{"^",          TokenType.BXOr},
 			{"<<",         TokenType.BLeftShift},
 			{">>",         TokenType.BRightShift},
+			{">>>",        TokenType.BZeroRightShift},
 			{".",          TokenType.Dot},
 			{",",          TokenType.Comma},
 			{"(",          TokenType.LeftParen},
@@ -195,6 +190,12 @@ namespace Minet.Compiler
 			{"*:",         TokenType.MulAssign},
 			{"/:",         TokenType.DivAssign},
 			{"%:",         TokenType.ModAssign},
+			{"&:",         TokenType.BAndAssign},
+			{"|:",         TokenType.BOrAssign},
+			{"^:",         TokenType.BXOrAssign},
+			{"<<:",        TokenType.BLSAssign},
+			{">>:",        TokenType.BRSAssign},
+			{">>>:",       TokenType.BZRSAssign},
 			{"+",          TokenType.Add},
 			{"-",          TokenType.Sub},
 			{"*",          TokenType.Mul},
@@ -241,6 +242,7 @@ namespace Minet.Compiler
 				case TokenType.Mod:
 				case TokenType.BLeftShift:
 				case TokenType.BRightShift:
+				case TokenType.BZeroRightShift:
 				case TokenType.BAnd:
 					return 5;
 				case TokenType.Add:

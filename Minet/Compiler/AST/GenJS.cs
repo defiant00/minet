@@ -36,23 +36,36 @@ namespace Minet.Compiler.AST
 			string mulOp = "/* No Multi-Op */";
 			switch (Op)
 			{
-				case TokenType.Assign:
-					op = " = ";
-					break;
-				case TokenType.Unpack:
-					DoUnpack(buf, chain, expandIds);
-					return;
 				case TokenType.AddAssign:
 					op = " += ";
 					mulOp = " + ";
 					break;
-				case TokenType.SubAssign:
-					op = " -= ";
-					mulOp = " - ";
+				case TokenType.Assign:
+					op = " = ";
 					break;
-				case TokenType.MulAssign:
-					op = " *= ";
-					mulOp = " * ";
+				case TokenType.BAndAssign:
+					op = " &= ";
+					mulOp = " & ";
+					break;
+				case TokenType.BLSAssign:
+					op = " <<= ";
+					mulOp = " << ";
+					break;
+				case TokenType.BOrAssign:
+					op = " |= ";
+					mulOp = " | ";
+					break;
+				case TokenType.BRSAssign:
+					op = " >>= ";
+					mulOp = " >> ";
+					break;
+				case TokenType.BXOrAssign:
+					op = " ^= ";
+					mulOp = " ^ ";
+					break;
+				case TokenType.BZRSAssign:
+					op = " >>>= ";
+					mulOp = " >>> ";
 					break;
 				case TokenType.DivAssign:
 					op = " /= ";
@@ -62,6 +75,17 @@ namespace Minet.Compiler.AST
 					op = " %= ";
 					mulOp = " % ";
 					break;
+				case TokenType.MulAssign:
+					op = " *= ";
+					mulOp = " * ";
+					break;
+				case TokenType.SubAssign:
+					op = " -= ";
+					mulOp = " - ";
+					break;
+				case TokenType.Unpack:
+					DoUnpack(buf, chain, expandIds);
+					return;
 				default:
 					Status.Errors.Add(new ErrorMsg("Unknown assignment operator " + Op, Pos));
 					break;
@@ -164,35 +188,38 @@ namespace Minet.Compiler.AST
 			string op = "/* No Op */";
 			switch (Op)
 			{
-				case TokenType.Dot:
-					op = ".";
+				case TokenType.Add:
+					op = " + ";
 					break;
-				case TokenType.Mul:
-					op = " * ";
+				case TokenType.And:
+					op = " && ";
+					break;
+				case TokenType.BAnd:
+					op = " & ";
+					break;
+				case TokenType.BLeftShift:
+					op = " << ";
+					break;
+				case TokenType.BOr:
+					op = " | ";
+					break;
+				case TokenType.BRightShift:
+					op = " >> ";
+					break;
+				case TokenType.BXOr:
+					op = " ^ ";
+					break;
+				case TokenType.BZeroRightShift:
+					op = " >>> ";
 					break;
 				case TokenType.Div:
 					op = " / ";
 					break;
-				case TokenType.Mod:
-					op = " % ";
-					break;
-				case TokenType.Add:
-					op = " + ";
-					break;
-				case TokenType.Sub:
-					op = " - ";
+				case TokenType.Dot:
+					op = ".";
 					break;
 				case TokenType.Equal:
 					op = " === ";
-					break;
-				case TokenType.NotEqual:
-					op = " !== ";
-					break;
-				case TokenType.LessThan:
-					op = " < ";
-					break;
-				case TokenType.LtEqual:
-					op = " <= ";
 					break;
 				case TokenType.GreaterThan:
 					op = " > ";
@@ -200,32 +227,32 @@ namespace Minet.Compiler.AST
 				case TokenType.GtEqual:
 					op = " >= ";
 					break;
-				case TokenType.And:
-					op = " && ";
-					break;
-				case TokenType.Or:
-					op = " || ";
-					break;
-				case TokenType.BAnd:
-					op = " & ";
-					break;
-				case TokenType.BOr:
-					op = " | ";
-					break;
-				case TokenType.BXOr:
-					op = " ^ ";
-					break;
-				case TokenType.BLeftShift:
-					op = " << ";
-					break;
-				case TokenType.BRightShift:
-					op = " >> ";
-					break;
 				case TokenType.In:
 					op = " in ";
 					break;
 				case TokenType.InstanceOf:
 					op = " instanceof ";
+					break;
+				case TokenType.LessThan:
+					op = " < ";
+					break;
+				case TokenType.LtEqual:
+					op = " <= ";
+					break;
+				case TokenType.Mod:
+					op = " % ";
+					break;
+				case TokenType.Mul:
+					op = " * ";
+					break;
+				case TokenType.NotEqual:
+					op = " !== ";
+					break;
+				case TokenType.Or:
+					op = " || ";
+					break;
+				case TokenType.Sub:
+					op = " - ";
 					break;
 				default:
 					Status.Errors.Add(new ErrorMsg("Unknown binary operator " + Op, Pos));
@@ -321,7 +348,7 @@ namespace Minet.Compiler.AST
 			Helper.PrintIndentedLine("// Error: " + Val, buf);
 		}
 
-		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
+		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf, StringBuilder initBuf)
 		{ }
 	}
 
@@ -599,9 +626,9 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds) { Helper.PrintIndentedLine(Val, buf); }
 
-		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
+		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf, StringBuilder initBuf)
 		{
-			if (doStatic) { Helper.PrintIndentedLine(Val, funcBuf); }
+			if (doStatic) { Helper.PrintIndentedLine(Val, jsBuf); }
 		}
 	}
 
@@ -664,7 +691,7 @@ namespace Minet.Compiler.AST
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a property set.", Pos));
 		}
 
-		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
+		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf, StringBuilder initBuf)
 		{
 			if (Vals != null)
 			{
@@ -689,16 +716,16 @@ namespace Minet.Compiler.AST
 								}
 								else
 								{
-									var buf = sPropBuf;
+									var buf = sVarBuf;
 									if (fn != null)
 									{
 										if (p.Name == Token.KeywordMain) { Status.Main = Status.ChainClassName(p.Name); }
 										if (p.Name == Token.KeywordInit)
 										{
-											initBuffer.Append(Status.ChainClassName(p.Name));
-											initBuffer.AppendLine("();");
+											initBuf.Append(Status.ChainClassName(p.Name));
+											initBuf.AppendLine("();");
 										}
-										buf = funcBuf;
+										buf = sFuncBuf;
 									}
 									Helper.PrintIndented(Status.Class, buf);
 									buf.Append(".");
@@ -728,7 +755,7 @@ namespace Minet.Compiler.AST
 							}
 							else
 							{
-								var buf = funcBuf;
+								var buf = iFuncBuf;
 								if (fn == null)
 								{
 									Status.Indent++;
@@ -767,7 +794,7 @@ namespace Minet.Compiler.AST
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a property getter/setter.", Pos));
 		}
 
-		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder funcBuf, StringBuilder sPropBuf, StringBuilder initBuffer)
+		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf, StringBuilder initBuf)
 		{
 			if (doStatic == Prop.Static)
 			{
@@ -775,7 +802,7 @@ namespace Minet.Compiler.AST
 				string namePrefix = Status.Class;
 				if (!Prop.Static)
 				{
-					buf = funcBuf;
+					buf = iPropBuf;
 					namePrefix += ".prototype";
 				}
 
