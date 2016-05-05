@@ -40,10 +40,7 @@ namespace Minet.Compiler.AST
 		{
 			foreach (var c in Classes)
 			{
-				if (Name != c.Name)
-				{
-					Status.Variables.AddItem(c.Name, new Identifier(c.Pos) { Idents = { Name, c.Name } });
-				}
+				Status.Variables.AddItem(c.Name, new Identifier(c.Pos) { Idents = { Name, c.Name } });
 			}
 		}
 

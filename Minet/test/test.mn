@@ -3,9 +3,7 @@
 use console
 
 Proj
-	._v: 1
-	.Val
-		get
-			ret _v
-		set v
-			_v: v
+	.Proj: fn()
+		var x: 0
+	Test: fn()
+		var p: Proj{}
