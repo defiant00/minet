@@ -1,32 +1,12 @@
 ; Minet Test Project
 
-use console
+; null, undefined, Infinity, NaN
+
+use console, null, undefined
 
 Proj
-	._Inst: 1
-
-	.Inst
-		get
-			ret _Inst
-
-	Stat
-		get
-			ret _Stat
-
-	<js // JS Block
-	console.log('js');
-	js>
-
-	.Proj: fn()
-		console.log('cons')
-
-	.InstFn: fn()
-		Inst
-
-	StatFn: fn()
-		Stat
-
-	_Stat: 2
-
-Proj.Sub
-	.Val: 2
+	Main: fn()
+		if this.x = undefined
+			console.log('undefined')
+		else
+			console.log('defined')
