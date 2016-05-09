@@ -185,6 +185,19 @@ Proj
         alert('hello')            ; Without the use statement, both of these statements
         console.log('hello')      ; would return errors for use of undefined variables.
 ```
+The **use** statement can also be used to define extra allowed variable expansions.
+This allows you to define shorthand variable or function names that are expanded behind the scenes.
+The format is **name for expansion**.
+```
+use document
+    getById for document.getElementById
+
+Proj
+    Main: fn()
+        var myElem: getById("someElementId")
+```
+Please note that expansion and variable checking is done recursively, so without the first line of
+**use document** any uses of **getById** will fail with an error that **document** is not defined.
 
 ### Getters and Setters
 Getters and setters can be defined on class variables, both static and instance, and will be created

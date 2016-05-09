@@ -42,14 +42,6 @@ namespace Minet.Compiler.AST
 		}
 	}
 
-	public partial class Bool
-	{
-		public void AppendPrint(int indent, StringBuilder buf)
-		{
-			Helper.PrintASTIndentLine("bool " + Val, indent, buf);
-		}
-	}
-
 	public partial class Break
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
@@ -228,6 +220,14 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class LitExpr
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndentLine("literal expression " + Val, indent, buf);
+		}
+	}
+
 	public partial class Loop
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
@@ -378,7 +378,20 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndentLine("use " + string.Join(", ", Names), indent, buf);
+			Helper.PrintASTIndentLine("use " + string.Join(", ", Items), indent, buf);
+		}
+	}
+
+	public partial class UseItem
+	{
+		public override string ToString()
+		{
+			return Repl == null ? Name : Name + " for " + Repl;
+		}
+
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndentLine("use item " + ToString(), indent, buf);
 		}
 	}
 

@@ -275,11 +275,6 @@ namespace Minet.Compiler.AST
 		}
 	}
 
-	public partial class Bool
-	{
-		public string ToJSExpr(bool expandIds) { return Val ? "true" : "false"; }
-	}
-
 	public partial class Break
 	{
 		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
@@ -632,6 +627,30 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class LitExpr
+	{
+		public string ToJSExpr(bool expandIds)
+		{
+			switch (Val)
+			{
+				case TokenType.False:
+					return "false";
+				case TokenType.Infinity:
+					return "Infinity";
+				case TokenType.NaN:
+					return "NaN";
+				case TokenType.Null:
+					return "null";
+				case TokenType.True:
+					return "true";
+				case TokenType.Undefined:
+					return "undefined";
+			}
+			Status.Errors.Add(new ErrorMsg("Unknown literal expression " + Val, Pos));
+			return "/* Unknown literal expression " + Val + " */";
+		}
+	}
+
 	public partial class Loop
 	{
 		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
@@ -670,17 +689,26 @@ namespace Minet.Compiler.AST
 	{
 		public string ToJSExpr(bool expandIds)
 		{
-			string expr = Expr.ToJSExpr(expandIds);
+			if (Expr is Binary)
+			{
+				Status.Errors.Add(new ErrorMsg("Operator " + Op + " cannot be applied to a binary expression.", Pos));
+			}
+
+			var sb = new StringBuilder();
+			sb.Append(Expr.ToJSExpr(expandIds));
 			switch (Op)
 			{
 				case TokenType.Decrement:
-					return expr + "--";
+					sb.Append("--");
+					break;
 				case TokenType.Increment:
-					return expr + "++";
+					sb.Append("++");
+					break;
 				default:
 					Status.Errors.Add(new ErrorMsg("Unknown post operator " + Op, Pos));
 					return "/* ERROR: Unknown post operator " + Op + " */";
 			}
+			return sb.ToString();
 		}
 	}
 
@@ -943,29 +971,44 @@ namespace Minet.Compiler.AST
 	{
 		public string ToJSExpr(bool expandIds)
 		{
-			string expr = Expr.ToJSExpr(true);
+			var sb = new StringBuilder();
 			switch (Op)
 			{
 				case TokenType.Add:
-					return "+" + expr;
+					sb.Append("+");
+					break;
 				case TokenType.BNot:
-					return "~" + expr;
+					sb.Append("~");
+					break;
 				case TokenType.Decrement:
-					return "--" + expr;
+					sb.Append("--");
+					break;
 				case TokenType.Delete:
-					return "delete " + expr;
+					sb.Append("delete ");
+					break;
 				case TokenType.Increment:
-					return "++" + expr;
+					sb.Append("++");
+					break;
 				case TokenType.Not:
-					return "!" + expr;
+					sb.Append("!");
+					break;
 				case TokenType.Sub:
-					return "-" + expr;
+					sb.Append("-");
+					break;
 				case TokenType.TypeOf:
-					return "typeof " + expr;
+					sb.Append("typeof ");
+					break;
+				case TokenType.Void:
+					sb.Append("void ");
+					break;
 				default:
 					Status.Errors.Add(new ErrorMsg("Unknown unary operator " + Op, Pos));
 					return "/* ERROR: Unknown unary " + Op + " */";
 			}
+			if (Expr is Binary) { sb.Append("("); }
+			sb.Append(Expr.ToJSExpr(true));
+			if (Expr is Binary) { sb.Append(")"); }
+			return sb.ToString();
 		}
 	}
 
@@ -974,6 +1017,14 @@ namespace Minet.Compiler.AST
 		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a use.", Pos));
+		}
+	}
+
+	public partial class UseItem
+	{
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
+		{
+			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a use item.", Pos));
 		}
 	}
 

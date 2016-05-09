@@ -32,8 +32,14 @@ namespace Minet.Compiler
 		For,                // 'for'
 		Loop,               // 'loop'
 		Break,              // 'break'
+		lit_expr_start,
 		True,               // 'true'
 		False,              // 'false'
+		Null,               // 'null'
+		Undefined,          // 'undefined'
+		Infinity,           // 'Infinity'
+		NaN,                // 'NaN'
+		lit_expr_end,
 		Equal,              // '='
 		NotEqual,           // '!='
 		LessThan,           // '<'
@@ -83,6 +89,7 @@ namespace Minet.Compiler
 		BNot,               // '~'
 		TypeOf,             // 'typeof'
 		Delete,             // 'del' or 'delete'
+		Void,               // 'void'
 		post_op_start,
 		Increment,          // '++'
 		Decrement,          // '--'
@@ -101,6 +108,11 @@ namespace Minet.Compiler
 		public static bool IsAssign(this TokenType type)
 		{
 			return type > TokenType.assign_start && type < TokenType.assign_end;
+		}
+
+		public static bool IsLiteralExpr(this TokenType type)
+		{
+			return type > TokenType.lit_expr_start && type < TokenType.lit_expr_end;
 		}
 
 		public static bool IsInBlock(this TokenType type)
@@ -158,6 +170,10 @@ namespace Minet.Compiler
 			{"break",      TokenType.Break},
 			{"true",       TokenType.True},
 			{"false",      TokenType.False},
+			{"null",       TokenType.Null},
+			{"undefined",  TokenType.Undefined},
+			{"Infinity",   TokenType.Infinity},
+			{"NaN",        TokenType.NaN},
 			{"=",          TokenType.Equal},
 			{"!=",         TokenType.NotEqual},
 			{"<",          TokenType.LessThan},
@@ -206,6 +222,7 @@ namespace Minet.Compiler
 			{"typeof",     TokenType.TypeOf},
 			{"del",        TokenType.Delete},
 			{"delete",     TokenType.Delete},
+			{"void",       TokenType.Void},
 			{"++",         TokenType.Increment},
 			{"--",         TokenType.Decrement}
 		};

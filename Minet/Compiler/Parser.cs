@@ -218,13 +218,6 @@ namespace Minet.Compiler
 			}
 		}
 
-		private ParseResult<IExpression> parseBoolExpr()
-		{
-			var val = next();
-			var b = new Bool(val.Pos) { Val = (val.Type == TokenType.True) };
-			return new ParseResult<IExpression>(b, false);
-		}
-
 		private ParseResult<IExpression> parseBracketExpr()
 		{
 			var start = peek;
@@ -779,6 +772,13 @@ namespace Minet.Compiler
 			return new ParseResult<IStatement>(new JSBlock(res[0].Pos) { Val = res[0].Val }, false);
 		}
 
+		private ParseResult<IExpression> parseLitExpr()
+		{
+			var val = next();
+			var le = new LitExpr(val.Pos) { Val = val.Type };
+			return new ParseResult<IExpression>(le, false);
+		}
+
 		private ParseResult<IStatement> parseLoop(string label)
 		{
 			var res = accept(TokenType.Loop, TokenType.EOL, TokenType.Indent);
@@ -910,12 +910,9 @@ namespace Minet.Compiler
 				case TokenType.String:
 					lhs = parseStringExpr().Result;
 					break;
-				case TokenType.True:
-				case TokenType.False:
-					lhs = parseBoolExpr().Result;
-					break;
 				default:
-					if (peek.Type.IsUnaryOp()) { lhs = parseUnaryExpr().Result; }
+					if (peek.Type.IsLiteralExpr()) { lhs = parseLitExpr().Result; }
+					else if (peek.Type.IsUnaryOp()) { lhs = parseUnaryExpr().Result; }
 					break;
 			}
 
@@ -1154,7 +1151,7 @@ namespace Minet.Compiler
 		{
 			var start = next(); // eat use
 			var use = new Use(start.Pos);
-			use.Names.AddRange(parseVars());
+			use.Items.AddRange(parseUses());
 
 			var res = accept(TokenType.EOL);
 			if (!res.Success)
@@ -1166,7 +1163,7 @@ namespace Minet.Compiler
 			{
 				while (!peek.Type.IsDedentStop())
 				{
-					use.Names.AddRange(parseVars());
+					use.Items.AddRange(parseUses());
 					res = accept(TokenType.EOL);
 					if (!res.Success)
 					{
@@ -1181,6 +1178,25 @@ namespace Minet.Compiler
 			}
 
 			return new ParseResult<IStatement>(use, false);
+		}
+
+		private List<UseItem> parseUses()
+		{
+			var uses = new List<UseItem>();
+			while (peek.Type == TokenType.Literal)
+			{
+				var val = next();
+				var ui = new UseItem(val.Pos) { Name = val.Val };
+				uses.Add(ui);
+				if (accept(TokenType.For).Success)
+				{
+					var res = parseIdentifier<IStatement>();
+					if (res.Error) { break; }
+					ui.Repl = res.Result as Identifier;
+				}
+				if (!accept(TokenType.Comma).Success) { break; }
+			}
+			return uses;
 		}
 
 		private ParseResult<IStatement> parseVar()

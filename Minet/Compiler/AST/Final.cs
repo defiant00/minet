@@ -84,16 +84,16 @@ namespace Minet.Compiler.AST
 
 		public void Build(StringBuilder buffer, StringBuilder initBuffer)
 		{
-			var consSigBuffer = new StringBuilder();		// Constructor signature
-			var consDefBuffer = new StringBuilder();		// Constructor defaults
-			var consCodeBuffer = new StringBuilder();		// Constructor code
+			var consSigBuffer = new StringBuilder();        // Constructor signature
+			var consDefBuffer = new StringBuilder();        // Constructor defaults
+			var consCodeBuffer = new StringBuilder();       // Constructor code
 			var instPropBuffer = new StringBuilder();       // Instance properties
 			var instFuncBuffer = new StringBuilder();       // Instance functions
 			var statVarBuffer = new StringBuilder();        // Static variables
 			var statPropBuffer = new StringBuilder();       // Static properties
 			var statFuncBuffer = new StringBuilder();       // Static functions
-			var classBuffer = new StringBuilder();			// Subclasses
-			var jsBlockBuffer = new StringBuilder();		// JavaScript blocks
+			var classBuffer = new StringBuilder();          // Subclasses
+			var jsBlockBuffer = new StringBuilder();        // JavaScript blocks
 
 			string priorClass = Status.Class;
 			string priorClassChain = Status.ClassChain;
@@ -200,9 +200,10 @@ namespace Minet.Compiler.AST
 					else if (s is Use)
 					{
 						var use = s as Use;
-						foreach (var n in use.Names)
+						foreach (var i in use.Items)
 						{
-							Status.Variables.AddItem(n, use.Pos);
+							if (i.Repl != null) { Status.Variables.AddItem(i.Name, i.Repl); }
+							else { Status.Variables.AddItem(i.Name, i.Pos); }
 						}
 					}
 					else { Status.Errors.Add(new ErrorMsg("Unknown statement type " + s.GetType(), s.Pos)); }

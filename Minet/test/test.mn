@@ -1,12 +1,11 @@
 ; Minet Test Project
 
-; null, undefined, Infinity, NaN
-
-use console, null, undefined
+use console
+	log for console.log
 
 Proj
 	Main: fn()
-		if this.x = undefined
-			console.log('undefined')
-		else
-			console.log('defined')
+		var b: void 0
+		log(b)
+		b: void(1 + 2)
+		log(b)

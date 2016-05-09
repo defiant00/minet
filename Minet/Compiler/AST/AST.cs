@@ -61,12 +61,6 @@ namespace Minet.Compiler.AST
 		public Binary(Position pos) : base(pos) { }
 	}
 
-	public partial class Bool : AST, IExpression
-	{
-		public bool Val;
-		public Bool(Position pos) : base(pos) { }
-	}
-
 	public partial class Break : AST, IStatement
 	{
 		public string Label;
@@ -178,6 +172,12 @@ namespace Minet.Compiler.AST
 		public JSBlock(Position pos) : base(pos) { }
 	}
 
+	public partial class LitExpr : AST, IExpression
+	{
+		public TokenType Val;
+		public LitExpr(Position pos) : base(pos) { }
+	}
+
 	public partial class Loop : AST, IStatement
 	{
 		public string Label;
@@ -275,8 +275,15 @@ namespace Minet.Compiler.AST
 
 	public partial class Use : AST, IStatement
 	{
-		public List<string> Names = new List<string>();
+		public List<UseItem> Items = new List<UseItem>();
 		public Use(Position pos) : base(pos) { }
+	}
+
+	public partial class UseItem : AST, IStatement
+	{
+		public string Name;
+		public Identifier Repl;
+		public UseItem(Position pos) : base(pos) { }
 	}
 
 	public partial class VarSet : AST, IStatement
