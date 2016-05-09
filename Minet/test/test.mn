@@ -5,7 +5,4 @@ use console
 
 Proj
 	Main: fn()
-		var b: void 0
-		log(b)
-		b: void(1 + 2)
-		log(b)
+		var b: undef or -inf or inf

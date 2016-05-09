@@ -49,6 +49,8 @@ JavaScript keywords or the shortened Minet keywords interchangeably.
 - **delete** is **del**
 - **finally** is **fin**
 - **instanceof** is **instof**
+- **undefined** is **undef**
+- **Infinity** is **inf**
 
 Assignment is the only way to create functions.
 ```

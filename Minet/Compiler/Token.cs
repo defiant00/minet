@@ -36,8 +36,8 @@ namespace Minet.Compiler
 		True,               // 'true'
 		False,              // 'false'
 		Null,               // 'null'
-		Undefined,          // 'undefined'
-		Infinity,           // 'Infinity'
+		Undefined,          // 'undef' or 'undefined'
+		Infinity,           // 'inf' or 'Infinity'
 		NaN,                // 'NaN'
 		lit_expr_end,
 		Equal,              // '='
@@ -171,7 +171,9 @@ namespace Minet.Compiler
 			{"true",       TokenType.True},
 			{"false",      TokenType.False},
 			{"null",       TokenType.Null},
+			{"undef",      TokenType.Undefined},
 			{"undefined",  TokenType.Undefined},
+			{"inf",        TokenType.Infinity},
 			{"Infinity",   TokenType.Infinity},
 			{"NaN",        TokenType.NaN},
 			{"=",          TokenType.Equal},
