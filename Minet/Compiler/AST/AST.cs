@@ -12,6 +12,7 @@ namespace Minet.Compiler.AST
 	public interface IExpression : IGeneral
 	{
 		string ToJSExpr(bool expandIds);
+		bool IsValidStmt();
 	}
 
 	public interface IStatement : IGeneral
@@ -178,11 +179,10 @@ namespace Minet.Compiler.AST
 		public LitExpr(Position pos) : base(pos) { }
 	}
 
-	public partial class Loop : AST, IStatement
+	public partial class LitStmt : AST, IStatement
 	{
-		public string Label;
-		public List<IStatement> Statements = new List<IStatement>();
-		public Loop(Position pos) : base(pos) { }
+		public TokenType Val;
+		public LitStmt(Position pos) : base(pos) { }
 	}
 
 	public partial class Number : AST, IExpression
@@ -298,5 +298,13 @@ namespace Minet.Compiler.AST
 		public ExprList Vals;
 		public bool Unpack;
 		public VarSetLine(Position pos) : base(pos) { }
+	}
+
+	public partial class While : AST, IStatement
+	{
+		public string Label;
+		public IExpression Condition;
+		public List<IStatement> Statements = new List<IStatement>();
+		public While(Position pos) : base(pos) { }
 	}
 }

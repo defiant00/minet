@@ -47,6 +47,7 @@
     <Compile Include="Compiler\AST\Final.cs" />
     <Compile Include="Compiler\AST\GenJS.cs" />
     <Compile Include="Compiler\AST\Helper.cs" />
+    <Compile Include="Compiler\AST\Validation.cs" />
     <Compile Include="Compiler\BuildConfig.cs" />
     <Compile Include="Compiler\Compiler.cs" />
     <Compile Include="Compiler\Lexer.cs" />

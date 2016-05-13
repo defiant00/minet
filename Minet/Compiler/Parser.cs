@@ -540,14 +540,14 @@ namespace Minet.Compiler
 			return new ParseResult<IStatement>(f, false);
 		}
 
-		private ParseResult<IStatement> parseForOrLoop(string label)
+		private ParseResult<IStatement> parseForOrWhile(string label)
 		{
 			switch (peek.Type)
 			{
 				case TokenType.For:
 					return parseFor(label);
-				case TokenType.Loop:
-					return parseLoop(label);
+				case TokenType.While:
+					return parseWhile(label);
 				default:
 					return error<IStatement>(true, "Invalid token in for or loop:" + peek, peek.Pos);
 			}
@@ -567,8 +567,8 @@ namespace Minet.Compiler
 				case TokenType.Break:
 					return parseBreak();
 				case TokenType.For:
-				case TokenType.Loop:
-					return parseForOrLoop("");
+				case TokenType.While:
+					return parseForOrWhile("");
 				case TokenType.If:
 					return parseIf();
 				case TokenType.JSBlock:
@@ -582,16 +582,20 @@ namespace Minet.Compiler
 				case TokenType.Var:
 					return parseVar();
 				default:
-					var res = accept(TokenType.Literal);
-					if (res.Success)
+					if (peek.Type.IsLiteralStmt()) { return parseLitStmt(); }
+					else
 					{
-						if (peek.Type == TokenType.For || peek.Type == TokenType.Loop)
+						var res = accept(TokenType.Literal);
+						if (res.Success)
 						{
-							return parseForOrLoop(res[0].Val);
+							if (peek.Type == TokenType.For || peek.Type == TokenType.While)
+							{
+								return parseForOrWhile(res[0].Val);
+							}
+							else { backup(1); }
 						}
-						else { backup(1); }
+						return parseExprStmt();
 					}
-					return parseExprStmt();
 			}
 		}
 
@@ -767,7 +771,7 @@ namespace Minet.Compiler
 			var res = accept(TokenType.JSBlock, TokenType.EOL);
 			if (!res.Success)
 			{
-				return error<IStatement>(true, "Invalid token in Javascript block: " + res.LastToken, res.LastToken.Pos);
+				return error<IStatement>(true, "Invalid token in JavaScript block: " + res.LastToken, res.LastToken.Pos);
 			}
 			return new ParseResult<IStatement>(new JSBlock(res[0].Pos) { Val = res[0].Val }, false);
 		}
@@ -779,28 +783,16 @@ namespace Minet.Compiler
 			return new ParseResult<IExpression>(le, false);
 		}
 
-		private ParseResult<IStatement> parseLoop(string label)
+		private ParseResult<IStatement> parseLitStmt()
 		{
-			var res = accept(TokenType.Loop, TokenType.EOL, TokenType.Indent);
+			var val = next();
+			var res = accept(TokenType.EOL);
 			if (!res.Success)
 			{
-				return error<IStatement>(true, "Invalid token in loop: " + res.LastToken, res.LastToken.Pos);
+				return error<IStatement>(true, "Invalid token in literal statement: " + res.LastToken, res.LastToken.Pos);
 			}
-
-			var l = new Loop(res[0].Pos) { Label = label };
-
-			while (!peek.Type.IsDedentStop())
-			{
-				l.Statements.Add(parseFunctionStmt().Result);
-			}
-
-			res = accept(TokenType.Dedent, TokenType.EOL);
-			if (!res.Success)
-			{
-				l.Statements.Add(error<IStatement>(true, "Invalid token in loop: " + res.LastToken, res.LastToken.Pos).Result);
-			}
-
-			return new ParseResult<IStatement>(l, false);
+			var ls = new LitStmt(val.Pos) { Val = val.Type };
+			return new ParseResult<IStatement>(ls, false);
 		}
 
 		private ParseResult<ExprList> parseMLExprList(TokenType start, TokenType end)
@@ -1268,6 +1260,38 @@ namespace Minet.Compiler
 				if (!accept(TokenType.Comma).Success) { break; }
 			}
 			return vars;
+		}
+
+		private ParseResult<IStatement> parseWhile(string label)
+		{
+			var start = next(); // eat while
+
+			var cond = parseExpr();
+			if (cond.Error)
+			{
+				return new ParseResult<IStatement>(cond.Result as IStatement, true);
+			}
+
+			var res = accept(TokenType.EOL, TokenType.Indent);
+			if (!res.Success)
+			{
+				return error<IStatement>(true, "Invalid token in while: " + res.LastToken, res.LastToken.Pos);
+			}
+
+			var w = new While(start.Pos) { Label = label, Condition = cond.Result };
+
+			while (!peek.Type.IsDedentStop())
+			{
+				w.Statements.Add(parseFunctionStmt().Result);
+			}
+
+			res = accept(TokenType.Dedent, TokenType.EOL);
+			if (!res.Success)
+			{
+				w.Statements.Add(error<IStatement>(true, "Invalid token in while: " + res.LastToken, res.LastToken.Pos).Result);
+			}
+
+			return new ParseResult<IStatement>(w, false);
 		}
 	}
 

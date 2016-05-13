@@ -372,8 +372,15 @@ namespace Minet.Compiler.AST
 			{
 				foreach (var e in Expr.Expressions)
 				{
-					Helper.PrintIndented(Helper.DotName(chain, e.ToJSExpr(expandIds)), buf);
-					buf.AppendLine(";");
+					if (e.IsValidStmt())
+					{
+						Helper.PrintIndented(Helper.DotName(chain, e.ToJSExpr(expandIds)), buf);
+						buf.AppendLine(";");
+					}
+					else
+					{
+						Status.Errors.Add(new ErrorMsg(e.GetType().Name + " cannot be used as a statement.", e.Pos));
+					}
 				}
 			}
 		}
@@ -433,7 +440,7 @@ namespace Minet.Compiler.AST
 			string startStr = iterator ? (asc ? "0" : lengthVar) : From.ToJSExpr(true);
 			string compStr = iterator ? (asc ? lengthVar : "0") : To.ToJSExpr(true);
 
-			Helper.PrintIndented(string.IsNullOrEmpty(Label) ? "" : Label + ":", buf);
+			Helper.PrintIndented(string.IsNullOrEmpty(Label) ? "" : Label + ": ", buf);
 			buf.Append("for (var ");
 			buf.Append(var);
 			buf.Append(" = ");
@@ -651,20 +658,22 @@ namespace Minet.Compiler.AST
 		}
 	}
 
-	public partial class Loop
+	public partial class LitStmt
 	{
 		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
 		{
-			Helper.PrintIndented(string.IsNullOrEmpty(Label) ? "" : Label + ":", buf);
-			buf.AppendLine("while(true) {");
-
-			Status.Variables.IncrementDepth();
-			Status.Indent++;
-			foreach (var st in Statements) { st.AppendJSStmt(buf, "", true); }
-			Status.Indent--;
-			Status.Variables.DecrementDepth();
-
-			Helper.PrintIndentedLine("}", buf);
+			string sVal = null;
+			switch (Val)
+			{
+				case TokenType.Skip:
+					sVal = "continue;";
+					break;
+			}
+			if (sVal != null) { Helper.PrintIndentedLine(sVal, buf); }
+			else
+			{
+				Status.Errors.Add(new ErrorMsg("Unknown literal statement " + Val, Pos));
+			}
 		}
 	}
 
@@ -1113,6 +1122,25 @@ namespace Minet.Compiler.AST
 				buf.Append(string.Join(", ", Vars));
 				buf.AppendLine(";");
 			}
+		}
+	}
+
+	public partial class While
+	{
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
+		{
+			Helper.PrintIndented(string.IsNullOrEmpty(Label) ? "" : Label + ": ", buf);
+			buf.Append("while (");
+			buf.Append(Condition.ToJSExpr(true));
+			buf.AppendLine(") {");
+
+			Status.Variables.IncrementDepth();
+			Status.Indent++;
+			foreach (var st in Statements) { st.AppendJSStmt(buf, "", true); }
+			Status.Indent--;
+			Status.Variables.DecrementDepth();
+
+			Helper.PrintIndentedLine("}", buf);
 		}
 	}
 }

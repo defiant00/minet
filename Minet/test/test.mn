@@ -5,4 +5,14 @@ use console
 
 Proj
 	Main: fn()
-		var b: undef or -inf or inf
+		var x: 3
+		x++
+		x--
+		++x
+		--x
+		del x
+		loop while true
+			log('hi')
+			break loop
+		thing for i in x
+			x++

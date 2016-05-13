@@ -30,7 +30,7 @@ namespace Minet.Compiler
 		Throw,              // 'throw'
 		Finally,            // 'fin' or 'finally'
 		For,                // 'for'
-		Loop,               // 'loop'
+		While,              // 'while'
 		Break,              // 'break'
 		lit_expr_start,
 		True,               // 'true'
@@ -40,6 +40,9 @@ namespace Minet.Compiler
 		Infinity,           // 'inf' or 'Infinity'
 		NaN,                // 'NaN'
 		lit_expr_end,
+		lit_stmt_start,
+		Skip,               // 'skip'
+		lit_stmt_end,
 		Equal,              // '='
 		NotEqual,           // '!='
 		LessThan,           // '<'
@@ -115,6 +118,11 @@ namespace Minet.Compiler
 			return type > TokenType.lit_expr_start && type < TokenType.lit_expr_end;
 		}
 
+		public static bool IsLiteralStmt(this TokenType type)
+		{
+			return type > TokenType.lit_stmt_start && type < TokenType.lit_stmt_end;
+		}
+
 		public static bool IsInBlock(this TokenType type)
 		{
 			return type == TokenType.Comma || type == TokenType.RightParen;
@@ -166,7 +174,7 @@ namespace Minet.Compiler
 			{"fin",        TokenType.Finally},
 			{"finally",    TokenType.Finally},
 			{"for",        TokenType.For},
-			{"loop",       TokenType.Loop},
+			{"while",      TokenType.While},
 			{"break",      TokenType.Break},
 			{"true",       TokenType.True},
 			{"false",      TokenType.False},
@@ -176,6 +184,7 @@ namespace Minet.Compiler
 			{"inf",        TokenType.Infinity},
 			{"Infinity",   TokenType.Infinity},
 			{"NaN",        TokenType.NaN},
+			{"skip",       TokenType.Skip},
 			{"=",          TokenType.Equal},
 			{"!=",         TokenType.NotEqual},
 			{"<",          TokenType.LessThan},

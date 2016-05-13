@@ -37,6 +37,8 @@ There is currently no equivalent to JavaScript's **==** operator.
 
 The words **and** and **or** are used instead of **&&** and **||** respectively.
 
+The word **skip** is used instead of **continue**.
+
 Regular expressions are started with **//** instead of a single **/**, but are otherwise declared
 and used the same as in JavaScript. This is to prevent ambiguity with the **/** operator.
 ```
@@ -358,31 +360,26 @@ used to then assign **object[counter]** to **i**.
 for i in myItems
     alert('hi ' + i)
 ```
-Produces:
-```javascript
-for (var _i0 = 0; _i0 < myItems.length; _i0++) {
-    var i = myItems[_i0];
-    alert('hi ' + i);
-}
-```
-Minet also has a more general looping construct, named **loop**, that is a substitute for
-JavaScript's **while** and **do/while** loops. There are no arguments, it is merely specified
-by the keyword **loop** with the statements to be looped indented starting on the next line.
+Minet's other looping construct is the **while** loop, which takes a condition. Minet does not
+have a direct analog to the **do/while** loop, but it can be easily emulated with a **while true**
+and **break** statements.
 
-The **break** statement works the same as in JavaScript, and is used to break a **loop**.
+The **break** statement works the same as in JavaScript, and is used to break a loop.
 ```
-loop
+while true
     x: doSomeLogic()
     if x > 7
         break
 ```
-Both **for** and **loop** can be preceded by an identifier that serves as the loop's label. When
+Both **for** and **while** can be preceded by an identifier that serves as the loop's label. When
 using **break**, you can optionally include the label of the loop you want to break out of if it
 is not the innermost containing loop.
 ```
-myLoop loop
-    inner loop
+myLoop while x < 7
+    inner while true
         x: doSomething()
         if x < 0
             break myLoop
 ```
+To avoid excessive nesting, Minet's equivalent of the **continue** command is the **skip** statement.
+This skips forward to the next step of the loop.

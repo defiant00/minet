@@ -228,12 +228,11 @@ namespace Minet.Compiler.AST
 		}
 	}
 
-	public partial class Loop
+	public partial class LitStmt
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
-			Helper.PrintASTIndentLine(string.IsNullOrEmpty(Label) ? "loop" : Label + ": loop", indent, buf);
-			foreach (var s in Statements) { s.AppendPrint(indent + 1, buf); }
+			Helper.PrintASTIndentLine("literal statement " + Val, indent, buf);
 		}
 	}
 
@@ -410,6 +409,16 @@ namespace Minet.Compiler.AST
 		{
 			Helper.PrintASTIndentLine(string.Join(", ", Vars), indent, buf);
 			if (Vals != null) { Vals.AppendPrint(indent + 1, buf); }
+		}
+	}
+
+	public partial class While
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndentLine(string.IsNullOrEmpty(Label) ? "while" : Label + ": while", indent, buf);
+			Condition.AppendPrint(indent + 2, buf);
+			foreach (var s in Statements) { s.AppendPrint(indent + 1, buf); }
 		}
 	}
 }
