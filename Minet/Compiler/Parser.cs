@@ -352,6 +352,20 @@ namespace Minet.Compiler
 			return new ParseResult<Constructor>(fc, false);
 		}
 
+		private ParseResult<IStatement> parseContinue()
+		{
+			var start = next(); // eat cont
+			var c = new Continue(start.Pos);
+			var res = accept(TokenType.Literal);
+			if (res.Success) { c.Label = res[0].Val; }
+			res = accept(TokenType.EOL);
+			if (!res.Success)
+			{
+				return error<IStatement>(true, "Invalid token in continue: " + res.LastToken, res.LastToken.Pos);
+			}
+			return new ParseResult<IStatement>(c, false);
+		}
+
 		private ParseResult<IExpression> parseCurlyExpr()
 		{
 			var start = next(); // eat {
@@ -566,6 +580,8 @@ namespace Minet.Compiler
 			{
 				case TokenType.Break:
 					return parseBreak();
+				case TokenType.Continue:
+					return parseContinue();
 				case TokenType.For:
 				case TokenType.While:
 					return parseForOrWhile("");
@@ -582,20 +598,16 @@ namespace Minet.Compiler
 				case TokenType.Var:
 					return parseVar();
 				default:
-					if (peek.Type.IsLiteralStmt()) { return parseLitStmt(); }
-					else
+					var res = accept(TokenType.Literal);
+					if (res.Success)
 					{
-						var res = accept(TokenType.Literal);
-						if (res.Success)
+						if (peek.Type == TokenType.For || peek.Type == TokenType.While)
 						{
-							if (peek.Type == TokenType.For || peek.Type == TokenType.While)
-							{
-								return parseForOrWhile(res[0].Val);
-							}
-							else { backup(1); }
+							return parseForOrWhile(res[0].Val);
 						}
-						return parseExprStmt();
+						else { backup(1); }
 					}
+					return parseExprStmt();
 			}
 		}
 
@@ -781,18 +793,6 @@ namespace Minet.Compiler
 			var val = next();
 			var le = new LitExpr(val.Pos) { Val = val.Type };
 			return new ParseResult<IExpression>(le, false);
-		}
-
-		private ParseResult<IStatement> parseLitStmt()
-		{
-			var val = next();
-			var res = accept(TokenType.EOL);
-			if (!res.Success)
-			{
-				return error<IStatement>(true, "Invalid token in literal statement: " + res.LastToken, res.LastToken.Pos);
-			}
-			var ls = new LitStmt(val.Pos) { Val = val.Type };
-			return new ParseResult<IStatement>(ls, false);
 		}
 
 		private ParseResult<ExprList> parseMLExprList(TokenType start, TokenType end)

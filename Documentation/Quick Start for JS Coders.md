@@ -37,8 +37,6 @@ There is currently no equivalent to JavaScript's **==** operator.
 
 The words **and** and **or** are used instead of **&&** and **||** respectively.
 
-The word **skip** is used instead of **continue**.
-
 Regular expressions are started with **//** instead of a single **/**, but are otherwise declared
 and used the same as in JavaScript. This is to prevent ambiguity with the **/** operator.
 ```
@@ -50,6 +48,7 @@ JavaScript keywords or the shortened Minet keywords interchangeably.
 - **return** is **ret**
 - **delete** is **del**
 - **finally** is **fin**
+- **continue** is **cont**
 - **instanceof** is **instof**
 - **undefined** is **undef**
 - **Infinity** is **inf**
@@ -381,5 +380,3 @@ myLoop while x < 7
         if x < 0
             break myLoop
 ```
-To avoid excessive nesting, Minet's equivalent of the **continue** command is the **skip** statement.
-This skips forward to the next step of the loop.

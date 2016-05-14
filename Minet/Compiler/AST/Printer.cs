@@ -87,6 +87,14 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class Continue
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndentLine(string.IsNullOrEmpty(Label) ? "continue" : "continue " + Label, indent, buf);
+		}
+	}
+
 	public partial class Else
 	{
 		public void AppendPrint(int indent, StringBuilder buf)
@@ -225,14 +233,6 @@ namespace Minet.Compiler.AST
 		public void AppendPrint(int indent, StringBuilder buf)
 		{
 			Helper.PrintASTIndentLine("literal expression " + Val, indent, buf);
-		}
-	}
-
-	public partial class LitStmt
-	{
-		public void AppendPrint(int indent, StringBuilder buf)
-		{
-			Helper.PrintASTIndentLine("literal statement " + Val, indent, buf);
 		}
 	}
 

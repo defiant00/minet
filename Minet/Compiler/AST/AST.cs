@@ -88,6 +88,12 @@ namespace Minet.Compiler.AST
 		public Constructor(Position pos) : base(pos) { }
 	}
 
+	public partial class Continue : AST, IStatement
+	{
+		public string Label;
+		public Continue(Position pos) : base(pos) { }
+	}
+
 	public partial class Else : AST, IExpression
 	{
 		public Else(Position pos) : base(pos) { }
@@ -177,12 +183,6 @@ namespace Minet.Compiler.AST
 	{
 		public TokenType Val;
 		public LitExpr(Position pos) : base(pos) { }
-	}
-
-	public partial class LitStmt : AST, IStatement
-	{
-		public TokenType Val;
-		public LitStmt(Position pos) : base(pos) { }
 	}
 
 	public partial class Number : AST, IExpression

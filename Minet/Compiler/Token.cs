@@ -16,7 +16,6 @@ namespace Minet.Compiler
 		Number,             // a literal number
 		Regex,              // a literal regular expression
 		Literal,            // a literal
-		keyword_start,
 		Use,                // 'use'
 		If,                 // 'if'
 		Else,               // 'else'
@@ -32,6 +31,7 @@ namespace Minet.Compiler
 		For,                // 'for'
 		While,              // 'while'
 		Break,              // 'break'
+		Continue,           // 'cont' or 'continue'
 		lit_expr_start,
 		True,               // 'true'
 		False,              // 'false'
@@ -40,9 +40,6 @@ namespace Minet.Compiler
 		Infinity,           // 'inf' or 'Infinity'
 		NaN,                // 'NaN'
 		lit_expr_end,
-		lit_stmt_start,
-		Skip,               // 'skip'
-		lit_stmt_end,
 		Equal,              // '='
 		NotEqual,           // '!='
 		LessThan,           // '<'
@@ -97,8 +94,7 @@ namespace Minet.Compiler
 		Increment,          // '++'
 		Decrement,          // '--'
 		post_op_end,
-		unary_op_end,
-		keyword_end
+		unary_op_end
 	}
 
 	public static class TokenHelper
@@ -116,11 +112,6 @@ namespace Minet.Compiler
 		public static bool IsLiteralExpr(this TokenType type)
 		{
 			return type > TokenType.lit_expr_start && type < TokenType.lit_expr_end;
-		}
-
-		public static bool IsLiteralStmt(this TokenType type)
-		{
-			return type > TokenType.lit_stmt_start && type < TokenType.lit_stmt_end;
 		}
 
 		public static bool IsInBlock(this TokenType type)
@@ -176,6 +167,8 @@ namespace Minet.Compiler
 			{"for",        TokenType.For},
 			{"while",      TokenType.While},
 			{"break",      TokenType.Break},
+			{"cont",       TokenType.Continue},
+			{"continue",   TokenType.Continue},
 			{"true",       TokenType.True},
 			{"false",      TokenType.False},
 			{"null",       TokenType.Null},
@@ -184,7 +177,6 @@ namespace Minet.Compiler
 			{"inf",        TokenType.Infinity},
 			{"Infinity",   TokenType.Infinity},
 			{"NaN",        TokenType.NaN},
-			{"skip",       TokenType.Skip},
 			{"=",          TokenType.Equal},
 			{"!=",         TokenType.NotEqual},
 			{"<",          TokenType.LessThan},

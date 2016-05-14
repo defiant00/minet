@@ -325,6 +325,20 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class Continue
+	{
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
+		{
+			Helper.PrintIndented("continue", buf);
+			if (!string.IsNullOrEmpty(Label))
+			{
+				buf.Append(" ");
+				buf.Append(Label);
+			}
+			buf.AppendLine(";");
+		}
+	}
+
 	public partial class Else
 	{
 		public string ToJSExpr(bool expandIds)
@@ -655,25 +669,6 @@ namespace Minet.Compiler.AST
 			}
 			Status.Errors.Add(new ErrorMsg("Unknown literal expression " + Val, Pos));
 			return "/* Unknown literal expression " + Val + " */";
-		}
-	}
-
-	public partial class LitStmt
-	{
-		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
-		{
-			string sVal = null;
-			switch (Val)
-			{
-				case TokenType.Skip:
-					sVal = "continue;";
-					break;
-			}
-			if (sVal != null) { Helper.PrintIndentedLine(sVal, buf); }
-			else
-			{
-				Status.Errors.Add(new ErrorMsg("Unknown literal statement " + Val, Pos));
-			}
 		}
 	}
 

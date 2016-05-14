@@ -5,14 +5,8 @@ use console
 
 Proj
 	Main: fn()
-		var x: 3
-		x++
-		x--
-		++x
-		--x
-		del x
-		loop while true
-			log('hi')
-			break loop
-		thing for i in x
-			x++
+		o for i in 0 to 5
+			for j in 0 to 3
+				if j = 1
+					cont o
+				log(i + ", " + j)
