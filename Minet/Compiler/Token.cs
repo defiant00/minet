@@ -19,8 +19,6 @@ namespace Minet.Compiler
 		Use,                // 'use'
 		If,                 // 'if'
 		Else,               // 'else'
-		Get,                // 'get'
-		Set,                // 'set'
 		Function,           // 'fn' or 'function'
 		Var,                // 'var'
 		Return,             // 'ret' or 'return'
@@ -142,8 +140,10 @@ namespace Minet.Compiler
 		public string Val;
 
 		public const string KeywordBy = "by";
+		public const string KeywordGet = "get";
 		public const string KeywordInit = "Init";
 		public const string KeywordMain = "Main";
+		public const string KeywordSet = "set";
 		public const string KeywordThen = "then";
 		public const string KeywordTo = "to";
 
@@ -152,8 +152,6 @@ namespace Minet.Compiler
 			{"use",        TokenType.Use},
 			{"if",         TokenType.If},
 			{"else",       TokenType.Else},
-			{"get",        TokenType.Get},
-			{"set",        TokenType.Set},
 			{"fn",         TokenType.Function},
 			{"function",   TokenType.Function},
 			{"var",        TokenType.Var},

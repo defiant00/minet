@@ -947,11 +947,11 @@ namespace Minet.Compiler
 			while (!peek.Type.IsDedentStop())
 			{
 				FunctionDef fn = null;
-				if (peek.Type == TokenType.Get)
+				if (peek.Type == TokenType.Literal && peek.Val == Token.KeywordGet)
 				{
 					if (p.Get == null)
 					{
-						res = accept(TokenType.Get, TokenType.EOL, TokenType.Indent);
+						res = accept(TokenType.Literal, TokenType.EOL, TokenType.Indent);
 						if (res.Success)
 						{
 							p.Get = new FunctionDef(peek.Pos);
@@ -967,11 +967,11 @@ namespace Minet.Compiler
 						return error<IClassStatement>(true, "Get already defined for " + name, peek.Pos);
 					}
 				}
-				else if (peek.Type == TokenType.Set)
+				else if (peek.Type == TokenType.Literal && peek.Val == Token.KeywordSet)
 				{
 					if (p.Set == null)
 					{
-						res = accept(TokenType.Set, TokenType.Literal, TokenType.EOL, TokenType.Indent);
+						res = accept(TokenType.Literal, TokenType.Literal, TokenType.EOL, TokenType.Indent);
 						if (res.Success)
 						{
 							p.Set = new FunctionDef(peek.Pos) { Params = { res[1].Val } };
