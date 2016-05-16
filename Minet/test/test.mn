@@ -1,12 +1,9 @@
 ; Minet Test Project
 
-use console
+use console, GFW, Name
 	log for console.log
 
 Proj
 	Main: fn()
-		o for i in 0 to 5
-			for j in 0 to 3
-				if j = 1
-					cont o
-				log(i + ", " + j)
+		//test/.eval()
+		GFW.Storage.Instance.transaction([Name], 'readwrite').objectStore(Name)['delete']()

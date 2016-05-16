@@ -12,7 +12,10 @@
 
 	public partial class Binary
 	{
-		public bool IsValidStmt() { return false; }
+		public bool IsValidStmt()
+		{
+			return Op == TokenType.Dot ? Right.IsValidStmt() : false;
+		}
 	}
 
 	public partial class Conditional
