@@ -22,7 +22,7 @@ namespace Minet.Compiler.AST
 
 	public interface IClassStatement : IStatement
 	{
-		void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf, StringBuilder initBuf);
+		void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf);
 	}
 
 	public class AST

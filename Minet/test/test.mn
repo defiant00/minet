@@ -1,9 +1,14 @@
 ; Minet Test Project
 
-use console, GFW, Name
+use console
 	log for console.log
 
-Proj
+First
 	Main: fn()
-		//test/.eval()
-		GFW.Storage.Instance.transaction([Name], 'readwrite').objectStore(Name)['delete']()
+		ret
+	Init: fn()
+		ret
+
+Sec
+	Init: fn()
+		ret

@@ -8,6 +8,7 @@ namespace Minet.Compiler
 	{
 		public static List<ErrorMsg> Errors = new List<ErrorMsg>();
 		public static string Main;
+		public static List<string> Inits = new List<string>();
 		public static string Class = string.Empty;
 		public static string ClassChain = string.Empty;
 

@@ -82,7 +82,7 @@ namespace Minet.Compiler.AST
 			}
 		}
 
-		public void Build(StringBuilder buffer, StringBuilder initBuffer)
+		public void Build(StringBuilder buffer)
 		{
 			var consSigBuffer = new StringBuilder();        // Constructor signature
 			var consDefBuffer = new StringBuilder();        // Constructor defaults
@@ -116,18 +116,18 @@ namespace Minet.Compiler.AST
 			BuildVarStmtList(true);
 
 			// Static statements
-			foreach (var st in Statements) { st.AppendJS(true, consSigBuffer, consDefBuffer, consCodeBuffer, instPropBuffer, instFuncBuffer, statVarBuffer, statPropBuffer, statFuncBuffer, jsBlockBuffer, initBuffer); }
+			foreach (var st in Statements) { st.AppendJS(true, consSigBuffer, consDefBuffer, consCodeBuffer, instPropBuffer, instFuncBuffer, statVarBuffer, statPropBuffer, statFuncBuffer, jsBlockBuffer); }
 
 			// Add instance variables
 			BuildVarStmtList(false);
 
 			// Instance statements
-			foreach (var st in Statements) { st.AppendJS(false, consSigBuffer, consDefBuffer, consCodeBuffer, instPropBuffer, instFuncBuffer, statVarBuffer, statPropBuffer, statFuncBuffer, jsBlockBuffer, initBuffer); }
+			foreach (var st in Statements) { st.AppendJS(false, consSigBuffer, consDefBuffer, consCodeBuffer, instPropBuffer, instFuncBuffer, statVarBuffer, statPropBuffer, statFuncBuffer, jsBlockBuffer); }
 
 			// Remove variables before building classes
 			Status.Variables.DecrementDepth();
 
-			foreach (var c in Classes) { c.Build(classBuffer, initBuffer); }
+			foreach (var c in Classes) { c.Build(classBuffer); }
 
 			// Remove classes
 			Status.Variables.DecrementDepth();
@@ -169,7 +169,6 @@ namespace Minet.Compiler.AST
 	{
 		public List<JSBlock> JSBlocks = new List<JSBlock>();
 		public StringBuilder Buffer = new StringBuilder();
-		public StringBuilder InitBuffer = new StringBuilder();
 
 		public F_Project(List<File> files)
 		{
@@ -223,14 +222,7 @@ namespace Minet.Compiler.AST
 			{
 				Buffer.AppendLine();
 				Buffer.AppendLine("// Classes");
-				foreach (var c in Classes) { c.Build(Buffer, InitBuffer); }
-			}
-
-			if (InitBuffer.Length > 0)
-			{
-				Buffer.AppendLine();
-				Buffer.AppendLine("// Call Init");
-				Buffer.Append(InitBuffer);
+				foreach (var c in Classes) { c.Build(Buffer); }
 			}
 
 			if (JSBlocks.Count > 0)
@@ -240,13 +232,21 @@ namespace Minet.Compiler.AST
 				foreach (var b in JSBlocks) { Buffer.AppendLine(b.Val); }
 			}
 
-			if (!string.IsNullOrEmpty(Status.Main))
+			if (Status.Inits.Count > 0 || !string.IsNullOrEmpty(Status.Main))
 			{
 				Buffer.AppendLine();
-				Buffer.AppendLine("// Run Main");
+				Buffer.AppendLine("// Call Init and Main");
 				Buffer.AppendLine("window.onload = function() {");
-				Helper.PrintIndented(Status.Main, 1, Buffer);
-				Buffer.AppendLine("();");
+				foreach(var i in Status.Inits)
+				{
+					Helper.PrintIndented(i, 1, Buffer);
+					Buffer.AppendLine("();");
+				}
+				if (!string.IsNullOrEmpty(Status.Main))
+				{
+					Helper.PrintIndented(Status.Main, 1, Buffer);
+					Buffer.AppendLine("();");
+				}
 				Buffer.AppendLine("};");
 			}
 

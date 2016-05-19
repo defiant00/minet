@@ -357,7 +357,7 @@ namespace Minet.Compiler.AST
 			Helper.PrintIndentedLine("// Error: " + Val, buf);
 		}
 
-		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf, StringBuilder initBuf)
+		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf)
 		{ }
 	}
 
@@ -642,7 +642,7 @@ namespace Minet.Compiler.AST
 	{
 		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds) { Helper.PrintIndentedLine(Val, buf); }
 
-		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf, StringBuilder initBuf)
+		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf)
 		{
 			if (doStatic) { Helper.PrintIndentedLine(Val, jsBuf); }
 		}
@@ -723,7 +723,7 @@ namespace Minet.Compiler.AST
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a property set.", Pos));
 		}
 
-		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf, StringBuilder initBuf)
+		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf)
 		{
 			if (Vals != null)
 			{
@@ -751,11 +751,17 @@ namespace Minet.Compiler.AST
 									var buf = sVarBuf;
 									if (fn != null)
 									{
-										if (p.Name == Token.KeywordMain) { Status.Main = Status.ChainClassName(p.Name); }
+										if (p.Name == Token.KeywordMain)
+										{
+											if (!string.IsNullOrEmpty(Status.Main))
+											{
+												Status.Errors.Add(new ErrorMsg("You can only have a single Main function.", Pos));
+											}
+											Status.Main = Status.ChainClassName(p.Name);
+										}
 										if (p.Name == Token.KeywordInit)
 										{
-											initBuf.Append(Status.ChainClassName(p.Name));
-											initBuf.AppendLine("();");
+											Status.Inits.Add(Status.ChainClassName(p.Name));
 										}
 										buf = sFuncBuf;
 									}
@@ -826,7 +832,7 @@ namespace Minet.Compiler.AST
 			Status.Errors.Add(new ErrorMsg("Cannot directly generate JS for a property getter/setter.", Pos));
 		}
 
-		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf, StringBuilder initBuf)
+		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf)
 		{
 			if (doStatic == Prop.Static)
 			{
