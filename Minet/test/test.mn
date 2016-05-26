@@ -4,11 +4,17 @@ use console
 	log for console.log
 
 First
-	Main: fn()
+	.inst, stat: 1, 2
+	.instP
+		get
+			ret 0
+	statP
+		get
+			ret 0
+	.instF: fn()
 		ret
-	Init: fn()
+	statF: fn()
 		ret
 
-Sec
-	Init: fn()
-		ret
+First.Sub
+	.one, .two: 1, 2

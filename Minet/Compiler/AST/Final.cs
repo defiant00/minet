@@ -87,12 +87,12 @@ namespace Minet.Compiler.AST
 			var consSigBuffer = new StringBuilder();        // Constructor signature
 			var consDefBuffer = new StringBuilder();        // Constructor defaults
 			var consCodeBuffer = new StringBuilder();       // Constructor code
+			var classBuffer = new StringBuilder();          // Subclasses
 			var instPropBuffer = new StringBuilder();       // Instance properties
 			var instFuncBuffer = new StringBuilder();       // Instance functions
 			var statVarBuffer = new StringBuilder();        // Static variables
 			var statPropBuffer = new StringBuilder();       // Static properties
 			var statFuncBuffer = new StringBuilder();       // Static functions
-			var classBuffer = new StringBuilder();          // Subclasses
 			var jsBlockBuffer = new StringBuilder();        // JavaScript blocks
 
 			string priorClass = Status.Class;
@@ -144,20 +144,33 @@ namespace Minet.Compiler.AST
 			buffer.Append(Name);
 			buffer.AppendLine(" = (function() {");
 
+			Status.Indent++;
+
+			Helper.PrintIndentedLine("// Constructor", buffer);
 			buffer.Append(consSigBuffer);
 			buffer.Append(consDefBuffer);
 			buffer.Append(consCodeBuffer);
-			buffer.Append(instPropBuffer);
-			buffer.Append(instFuncBuffer);
-			buffer.Append(statVarBuffer);
-			buffer.Append(statPropBuffer);
-			buffer.Append(statFuncBuffer);
+			if (classBuffer.Length > 0) { Helper.PrintIndentedLine("// Subclasses", buffer); }
 			buffer.Append(classBuffer);
+			if (instPropBuffer.Length > 0) { Helper.PrintIndentedLine("// Instance properties", buffer); }
+			buffer.Append(instPropBuffer);
+			if (instFuncBuffer.Length > 0) { Helper.PrintIndentedLine("// Instance functions", buffer); }
+			buffer.Append(instFuncBuffer);
+			if (statVarBuffer.Length > 0) { Helper.PrintIndentedLine("// Static variables", buffer); }
+			buffer.Append(statVarBuffer);
+			if (statPropBuffer.Length > 0) { Helper.PrintIndentedLine("// Static properties", buffer); }
+			buffer.Append(statPropBuffer);
+			if (statFuncBuffer.Length > 0) { Helper.PrintIndentedLine("// Static functions", buffer); }
+			buffer.Append(statFuncBuffer);
+			if (jsBlockBuffer.Length > 0) { Helper.PrintIndentedLine("// JavaScript blocks", buffer); }
 			buffer.Append(jsBlockBuffer);
 
-			Helper.PrintIndented("return ", Status.Indent + 1, buffer);
+			Helper.PrintIndented("return ", buffer);
 			buffer.Append(Name);
 			buffer.AppendLine(";");
+
+			Status.Indent--;
+
 			Helper.PrintIndentedLine("})();", buffer);
 
 			Status.Class = priorClass;
