@@ -99,6 +99,13 @@ namespace Minet.Compiler.AST
 		public Else(Position pos) : base(pos) { }
 	}
 
+	public partial class Enum : AST, IClassStatement
+	{
+		public IExpression Start, Step;
+		public List<string> Names = new List<string>();
+		public Enum(Position pos) : base(pos) { }
+	}
+
 	public partial class Error : AST, IExpression, IClassStatement
 	{
 		public string Val;

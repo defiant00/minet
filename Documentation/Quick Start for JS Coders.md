@@ -9,10 +9,11 @@ it is likely because its usage is the same as in JavaScript.
 3. [Classes](#classes)
 4. [Variables](#variables)
 5. [Getters and Setters](#getters-and-setters)
-6. [Assignment](#assignment)
-7. [Chains](#chains)
-8. [If](#if)
-9. [Loops](#loops)
+6. [Enumerations](#enumerations)
+7. [Assignment](#assignment)
+8. [Chains](#chains)
+9. [If](#if)
+10. [Loops](#loops)
 
 ### Basics
 Semicolons do not end lines; they do, however, start a single-line comment.
@@ -217,6 +218,30 @@ MyClass
             ret _Val
         set v
             _Val: v
+```
+
+### Enumerations
+Minet allows for easy enumeration creation, creating multiple static variables behind the scenes.
+```
+Project.MyEnum
+    enum
+        First, Second
+        Third, Fourth, Fifth
+```
+Enumeration values start at **0** by default. You can specify a starting value after the **enum** keyword if
+necessary.
+```
+SomeEnum
+    enum 100
+        Hundred, HundredAndOne
+```
+You can also specify a step using the **by** keyword. Both the starting value and step are optional, and can
+be used together or independent of each other.
+```
+SomeEnum
+    enum 100 by 10
+        Hundred, HundredTen
+        HundredTwenty
 ```
 
 ### Assignment

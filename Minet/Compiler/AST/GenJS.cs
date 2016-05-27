@@ -348,6 +348,51 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class Enum
+	{
+		public void AppendJSStmt(StringBuilder buf, string chain, bool expandIds)
+		{
+			Status.Errors.Add(new ErrorMsg("Enum cannot be used as a normal statement.", Pos));
+		}
+
+		public void AppendJS(bool doStatic, StringBuilder cSigBuf, StringBuilder cDefBuf, StringBuilder cCodeBuf, StringBuilder iPropBuf, StringBuilder iFuncBuf, StringBuilder sVarBuf, StringBuilder sPropBuf, StringBuilder sFuncBuf, StringBuilder jsBuf)
+		{
+			if (doStatic)
+			{
+				int val = 0;
+				int step = 1;
+				if (Start != null)
+				{
+					string sVal = Start.ToJSExpr(true);
+					bool success = int.TryParse(sVal, out val);
+					if (!success)
+					{
+						Status.Errors.Add(new ErrorMsg(sVal + " is not a valid enum start value.", Pos));
+					}
+				}
+				if (Step != null)
+				{
+					string sVal = Step.ToJSExpr(true);
+					bool success = int.TryParse(sVal, out step);
+					if (!success)
+					{
+						Status.Errors.Add(new ErrorMsg(sVal + " is not a valid enum step value.", Pos));
+					}
+				}
+				foreach (string n in Names)
+				{
+					Helper.PrintIndented(Status.Class, sVarBuf);
+					sVarBuf.Append(".");
+					sVarBuf.Append(n);
+					sVarBuf.Append(" = ");
+					sVarBuf.Append(val);
+					sVarBuf.AppendLine(";");
+					val += step;
+				}
+			}
+		}
+	}
+
 	public partial class Error
 	{
 		public string ToJSExpr(bool expandIds) { return "/* Error: " + Val + " */"; }

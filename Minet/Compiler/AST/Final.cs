@@ -79,6 +79,17 @@ namespace Minet.Compiler.AST
 						}
 					}
 				}
+				else if (s is Enum && doStatic)
+				{
+					var e = s as Enum;
+					foreach (var n in e.Names)
+					{
+						if (n != Name)
+						{
+							Status.Variables.AddItem(n, new Identifier(e.Pos) { Idents = { Name, n } });
+						}
+					}
+				}
 			}
 		}
 
@@ -250,7 +261,7 @@ namespace Minet.Compiler.AST
 				Buffer.AppendLine();
 				Buffer.AppendLine("// Call Init and Main");
 				Buffer.AppendLine("window.onload = function() {");
-				foreach(var i in Status.Inits)
+				foreach (var i in Status.Inits)
 				{
 					Helper.PrintIndented(i, 1, Buffer);
 					Buffer.AppendLine("();");

@@ -103,6 +103,19 @@ namespace Minet.Compiler.AST
 		}
 	}
 
+	public partial class Enum
+	{
+		public void AppendPrint(int indent, StringBuilder buf)
+		{
+			Helper.PrintASTIndent(indent, buf);
+			buf.Append("enum");
+			if (Start != null) { buf.Append(" " + Start); }
+			if (Step != null) { buf.Append(" by " + Step); }
+			buf.AppendLine();
+			Helper.PrintASTIndentLine(string.Join(", ", Names), indent + 1, buf);
+		}
+	}
+
 	public partial class Error
 	{
 		public void AppendPrint(int indent, StringBuilder buf)

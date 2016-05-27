@@ -273,10 +273,13 @@ namespace Minet.Compiler
 
 		private ParseResult<IClassStatement> parseClassStmt()
 		{
-			if (peek.Type == TokenType.JSBlock)
+			switch (peek.Type)
 			{
-				var js = parseJSBlock();
-				return new ParseResult<IClassStatement>(js.Result as IClassStatement, js.Error);
+				case TokenType.Enum:
+					return parseEnum();
+				case TokenType.JSBlock:
+					var js = parseJSBlock();
+					return new ParseResult<IClassStatement>(js.Result as IClassStatement, js.Error);
 			}
 
 			var ps = new PropertySet(peek.Pos);
@@ -413,6 +416,54 @@ namespace Minet.Compiler
 		private ParseResult<Else> parseElse()
 		{
 			return new ParseResult<Else>(new Else(next().Pos), false);
+		}
+
+		private ParseResult<IClassStatement> parseEnum()
+		{
+			var start = next();     // eat enum
+
+			var en = new AST.Enum(start.Pos);
+
+			if (peek.Type != TokenType.EOL && !nextIsLit(Token.KeywordBy))
+			{
+				var st = parseExpr();
+				if (!st.Error) { en.Start = st.Result; }
+			}
+
+			if (nextIsLit(Token.KeywordBy))
+			{
+				next(); // eat by
+				var by = parseExpr();
+				if (by.Error)
+				{
+					return new ParseResult<IClassStatement>(by.Result as IClassStatement, true);
+				}
+				en.Step = by.Result;
+			}
+
+			var res = accept(TokenType.EOL, TokenType.Indent);
+			if (!res.Success)
+			{
+				return error<IClassStatement>(true, "Invalid token in enum: " + res.LastToken, res.LastToken.Pos);
+			}
+
+			while (!peek.Type.IsDedentStop())
+			{
+				en.Names.AddRange(parseVars());
+				res = accept(TokenType.EOL);
+				if (!res.Success)
+				{
+					return error<IClassStatement>(true, "Invalid token in enum: " + res.LastToken, res.LastToken.Pos);
+				}
+			}
+
+			res = accept(TokenType.Dedent, TokenType.EOL);
+			if (!res.Success)
+			{
+				return error<IClassStatement>(true, "Invalid token in enum: " + res.LastToken, res.LastToken.Pos);
+			}
+
+			return new ParseResult<IClassStatement>(en, false);
 		}
 
 		private ParseResult<IExpression> parseExpr()

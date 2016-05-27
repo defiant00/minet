@@ -3,18 +3,21 @@
 use console
 	log for console.log
 
-First
-	.inst, stat: 1, 2
-	.instP
-		get
-			ret 0
-	statP
-		get
-			ret 0
-	.instF: fn()
-		ret
-	statF: fn()
-		ret
+EnumTest
+	enum
+		First, Second
+	enum 10
+		Ten, Eleven
+	enum 100 by 10
+		Hund, HundTen
+		HundTwenty
+		HundThirty
+	enum by 1000
+		Zero, OneThou, TwoThou
+	enum by -1
+		Zero_, Neg1
+	enum -10
+		NegTen, NegNine
 
-First.Sub
-	.one, .two: 1, 2
+	test: fn()
+		var x: NegTen

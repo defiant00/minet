@@ -21,6 +21,7 @@ namespace Minet.Compiler
 		Else,               // 'else'
 		Function,           // 'fn' or 'function'
 		Var,                // 'var'
+		Enum,				// 'enum'
 		Return,             // 'ret' or 'return'
 		Try,                // 'try'
 		Catch,              // 'catch'
@@ -155,6 +156,7 @@ namespace Minet.Compiler
 			{"fn",         TokenType.Function},
 			{"function",   TokenType.Function},
 			{"var",        TokenType.Var},
+			{"enum",       TokenType.Enum},
 			{"ret",        TokenType.Return},
 			{"return",     TokenType.Return},
 			{"try",        TokenType.Try},
