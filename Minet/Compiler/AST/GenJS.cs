@@ -92,28 +92,21 @@ namespace Minet.Compiler.AST
 			}
 			if (Left.Expressions.Count == 1 && Right.Expressions.Count == 1)
 			{
-				var l = Left.Expressions[0];
-				var r = Right.Expressions[0];
-				Helper.PrintIndented(Helper.DotName(chain, l.ToJSExpr(expandIds)), buf);
+				Helper.PrintIndented(Helper.DotName(chain, Left.Expressions[0].ToJSExpr(expandIds)), buf);
 				buf.Append(op);
-				buf.Append(r.ToJSExpr(true));
+				buf.Append(Right.Expressions[0].ToJSExpr(true));
 				buf.AppendLine(";");
 			}
 			else if (Right.Expressions.Count == 1)
 			{
-				var r = Right.Expressions[0];
-				Helper.PrintIndented("var ", buf);
-				buf.Append(Constants.InternalVarPrefix);
-				buf.Append("t = ");
-				buf.Append(r.ToJSExpr(true));
-				buf.AppendLine(";");
+				string val = Right.Expressions[0].ToJSExpr(true);
 				for (int i = 0; i < Left.Expressions.Count; i++)
 				{
 					var l = Left.Expressions[i];
 					Helper.PrintIndented(Helper.DotName(chain, l.ToJSExpr(expandIds)), buf);
 					buf.Append(op);
-					buf.Append(Constants.InternalVarPrefix);
-					buf.AppendLine("t;");
+					buf.Append(val);
+					buf.AppendLine(";");
 				}
 			}
 			else if (Left.Expressions.Count == Right.Expressions.Count)
@@ -1141,18 +1134,13 @@ namespace Minet.Compiler.AST
 				}
 				else if (Vals.Expressions.Count == 1)
 				{
-					Helper.PrintIndented("var ", buf);
-					buf.Append(Constants.InternalVarPrefix);
-					buf.Append("t = ");
-					buf.Append(Vals.Expressions[0].ToJSExpr(true));
-					buf.AppendLine(";");
+					string val = Vals.Expressions[0].ToJSExpr(true);
 					Helper.PrintIndented("var ", buf);
 					for (int i = 0; i < Vars.Count; i++)
 					{
 						buf.Append(Vars[i]);
 						buf.Append(" = ");
-						buf.Append(Constants.InternalVarPrefix);
-						buf.Append("t");
+						buf.Append(val);
 						if (i + 1 < Vars.Count) { buf.Append(", "); }
 					}
 					buf.AppendLine(";");

@@ -81,7 +81,7 @@ Most statements and expressions must be on a single line.
 Those contained in **()**, **{}** or **[]** can be spread across multiple lines, if formatted properly.
 ```
 ; The opening bracket ends the line.
-; The values are indented over.
+; The values are indented.
 ; The closing bracket is on the next line and dedented.
 array: [
     1, 2, 3,
@@ -251,9 +251,14 @@ into temporary variables, and then all are assigned.
 a, b: 1, 2    ; Assigns 1 to a and 2 to b.
 x, y: y, x    ; Since all values are evaluated before assignment, this successfully swaps x and y.
 ```
-Many-to-one assignment is also accepted, with the value calculated once and then assigned to all variables.
+Many-to-one assignment is also accepted. Please note that the code generated evaluates the right-hand side once
+per variable. If only a single evaluation is necessary, the result should first be assigned to a temporary
+variable.
 ```
-a, b, c: calculate()    ; calculate() is called once and then the value is assigned to a, b and c.
+a, b, c: calculate()    ; calculate() is called once for each of a, b and c.
+
+var _t: calculate()     ; If you only want calculate() called once, store it in a temporary variable first.
+a, b, c: _t
 ```
 Both many-to-many and many-to-one operations are also supported through the shorthand
 operators **+:, -:, *:, /:** and **%:**
@@ -266,10 +271,10 @@ first, second, third :: array
 ```
 Generates:
 ```javascript
-var _t = array;
-first = _t[0];
-second = _t[1];
-third = _t[2];
+var __t = array;
+first = __t[0];
+second = __t[1];
+third = __t[2];
 ```
 The unpack operator along with array creation using **[]** is an easy way in Minet to return multiple values.
 ```

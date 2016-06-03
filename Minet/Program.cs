@@ -7,7 +7,7 @@ namespace Minet
 {
 	public class Constants
 	{
-		public const string Program = "Minet Compiler 1.0 RC8";
+		public const string Program = "Minet Compiler 1.0 RC9";
 		public const string InternalVarPrefix = "__";
 	}
 
