@@ -25,7 +25,7 @@
 
 	public partial class Constructor
 	{
-		public bool IsValidStmt() { return true; }
+		public bool IsValidStmt() { return false; }
 	}
 
 	public partial class Else

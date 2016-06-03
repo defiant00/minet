@@ -13,4 +13,3 @@ Test
 		x, y: y, x
 		x, y :: "hello"
 		var c, d :: "hi"
-		Test{}
