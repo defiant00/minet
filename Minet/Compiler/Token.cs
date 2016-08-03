@@ -39,12 +39,14 @@ namespace Minet.Compiler
 		Infinity,           // 'inf' or 'Infinity'
 		NaN,                // 'NaN'
 		lit_expr_end,
+		comp_op_start,
 		Equal,              // '='
 		NotEqual,           // '!='
 		LessThan,           // '<'
 		GreaterThan,        // '>'
 		LtEqual,            // '<='
 		GtEqual,            // '>='
+		comp_op_end,
 		And,                // 'and'
 		Or,                 // 'or'
 		In,                 // 'in'
@@ -131,6 +133,11 @@ namespace Minet.Compiler
 		public static bool IsOpeningBracket(this TokenType type)
 		{
 			return type == TokenType.LeftBracket || type == TokenType.LeftCurly || type == TokenType.LeftParen;
+		}
+
+		public static bool IsComparisonOp(this TokenType type)
+		{
+			return type > TokenType.comp_op_start && type < TokenType.comp_op_end;
 		}
 	}
 

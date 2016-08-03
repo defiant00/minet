@@ -13,7 +13,8 @@ it is likely because its usage is the same as in JavaScript.
 7. [Assignment](#assignment)
 8. [Chains](#chains)
 9. [If](#if)
-10. [Loops](#loops)
+10. [Comparisons](#comparisons)
+11. [Loops](#loops)
 
 ### Basics
 Semicolons do not end lines; they do, however, start a single-line comment.
@@ -347,6 +348,33 @@ val: if x < 3 then "small" else "large"
 Generates:
 ```javascript
 val = (x < 3 ? "small" : "large");
+```
+
+### Comparisons
+Minet also supports multiple comparisons on a single line like Python. For example, these two are equivalent:
+```
+if x < y and y < z and z < 10
+    alert('in order and all < 10')
+
+if x < y < z < 10
+    alert('in order and all < 10')
+```
+If you want to compare the results of multiple comparisons, you may need to use parentheses. For example:
+```
+if x < y = y < z
+```
+Will generate:
+```javascript
+if (((x < y) && (y === y)) && (y < z))
+```
+Where the intended behavior was likely to return true when both **x < y** and **y < z** are the same. To get
+this outcome you need to add parentheses like so:
+```
+if (x < y) = (y < z)
+```
+Which will result in the desired:
+```javascript
+if ((x < y) === (y < z))
 ```
 
 ### Loops

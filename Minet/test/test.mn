@@ -4,13 +4,11 @@ use console
 	log for console.log
 
 Test
-	a, b, .x, .y: 1
-
 	Func: fn()
-		var x, y: 0
-		x, y: 1
-		x, y +: 1
-		x, y: y, x
-		x, y :: "hello"
-		var c, d :: "hi"
-		Test{}
+		var x, y, z: 1, 2, 3
+		if (x < y) = (y < z)
+			log('ha')
+		if x < y < z < 10
+			log('ordered')
+		if x = y = z
+			log('huh')
