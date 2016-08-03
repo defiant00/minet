@@ -263,7 +263,7 @@ namespace Minet.Compiler
 				case TokenType.Dot:
 				case TokenType.In:
 				case TokenType.InstanceOf:
-					return 6;
+					return 7;
 				case TokenType.Mul:
 				case TokenType.Div:
 				case TokenType.Mod:
@@ -271,18 +271,19 @@ namespace Minet.Compiler
 				case TokenType.BRightShift:
 				case TokenType.BZeroRightShift:
 				case TokenType.BAnd:
-					return 5;
+					return 6;
 				case TokenType.Add:
 				case TokenType.Sub:
 				case TokenType.BOr:
 				case TokenType.BXOr:
-					return 4;
-				case TokenType.Equal:
-				case TokenType.NotEqual:
+					return 5;
 				case TokenType.LessThan:
 				case TokenType.LtEqual:
 				case TokenType.GreaterThan:
 				case TokenType.GtEqual:
+					return 4;
+				case TokenType.Equal:
+				case TokenType.NotEqual:
 					return 3;
 				case TokenType.And:
 					return 2;

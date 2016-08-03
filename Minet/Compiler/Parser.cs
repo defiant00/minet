@@ -189,6 +189,7 @@ namespace Minet.Compiler
 		private ParseResult<IExpression> parseBinopRHS(int exprPrec, IExpression lhs)
 		{
 			IExpression comp = null;
+			int prevPrec = 0;
 			while (true)
 			{
 				int tokPrec = peek.Precedence();
@@ -216,7 +217,7 @@ namespace Minet.Compiler
 
 				// Merge LHS/RHS.
 				var lb = comp as Binary;
-				if (lb != null && lb.Op.IsComparisonOp() && op.Type.IsComparisonOp())
+				if (prevPrec == tokPrec && lb != null && lb.Op.IsComparisonOp() && op.Type.IsComparisonOp())
 				{
 					comp = new Binary(lhs.Pos) { Op = op.Type, Left = lb.Right, Right = rhs.Result };
 					lhs = new Binary(lhs.Pos) { Op = TokenType.And, Left = lhs, Right = comp };
@@ -226,6 +227,8 @@ namespace Minet.Compiler
 					lhs = new Binary(lhs.Pos) { Op = op.Type, Left = lhs, Right = rhs.Result };
 					comp = lhs;
 				}
+
+				prevPrec = tokPrec;
 			}
 		}
 

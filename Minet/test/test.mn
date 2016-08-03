@@ -6,9 +6,7 @@ use console
 Test
 	Func: fn()
 		var x, y, z: 1, 2, 3
-		if (x < y) = (y < z)
-			log('ha')
-		if x < y < z < 10
-			log('ordered')
-		if x = y = z
-			log('huh')
+		var b: x < y < z < 10
+		b: x < y = y < z = z > x > 12
+		b: x < y = y < z
+		b: 0 != x = y = z
